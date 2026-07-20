@@ -2,8 +2,7 @@
 
 设计原则（2026-07-20 简化）:
 - 检索层（向量 + BM25 hybrid + cross-encoder rerank）已验证足够强
-  （eval: R@3=0.98 / R@10=1.00 / MRR=0.87），无需在前面再加
-  grade / decide / rewrite / web_search 等判断层，那些只会增加延迟。
+  （eval: R@3=0.98 / R@10=1.00 / MRR=0.87），直接进入生成即可。
 - 链路压缩为两步：retrieve_with_rerank(top-k) -> generate。
 - 检索为空（或没有相关 chunk）时，不接 web search，直接让生成模型
   基于自身知识自由回答。

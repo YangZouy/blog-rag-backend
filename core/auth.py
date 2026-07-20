@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
-from datetime import date
 
 from fastapi import HTTPException, Request, status
 
@@ -15,8 +14,6 @@ from core.config import get_settings
 
 # 全局内存字典 key是IP，value是时间戳
 _rate: defaultdict[str, list[float]] = defaultdict(list)
-# web-search spend tracker (CNY) keyed by UTC day
-_web_spend: dict[str, float] = {}
 
 """
 模型api_key鉴权
@@ -52,20 +49,3 @@ async def rate_limit(request: Request) -> None:
             status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="rate limited"
         )
     _rate[ip].append(now)
-
-
-def web_budget_ok() -> bool:
-    """当今日的网络搜索花费超过每日预算时返回 False。"""
-    s = get_settings()
-    if not s.WEB_SEARCH_ENABLED:
-        return False
-    # 将每日预算设定为0或者负数，表示不限制预算，允许无限制地联网搜索
-    if s.DAILY_WEB_BUDGET <= 0:
-        return True
-    today = str(date.today())
-    return _web_spend.get(today, 0.0) < s.DAILY_WEB_BUDGET
-
-
-def add_web_spend(amount: float) -> None:
-    today = str(date.today())
-    _web_spend[today] = _web_spend.get(today, 0.0) + amount

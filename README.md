@@ -5,8 +5,6 @@
 - 后端：FastAPI，可部署为 Vercel serverless 函数
 - 向量库：Qdrant Cloud 免费层
 - 生成：DeepSeek-chat ｜ Embedding：智谱 embedding-3（2048 维）
-- 相关性打分 / 查询改写：智谱 glm-4-flash（最便宜档）
-- 联网搜索：博查 BoCha，**默认开启**（站内无结果时兜底）
 - 前端：右下角悬浮 AI 聊天窗 + 旧字符搜索兜底
 
 > 架构设计见 `D:\wiki\博客RAG检索功能-架构分析v2-20260711.md`
@@ -91,10 +89,7 @@ vercel地址：https://blog-rag-backend.vercel.app
 | `EMBED_BATCH_SIZE` / `QDRANT_UPSERT_BATCH_SIZE` / `QDRANT_WRITE_TIMEOUT` | 入库批处理与写超时 | 64 / 32 / 120 |
 | `QDRANT_READ_TIMEOUT` / `QDRANT_WARMUP_ENABLED` | 查询超时 / 启动时预热查询连接 | 3 / 开 |
 | `GEN_MODEL` / `GEN_BASE_URL` / `DEEPSEEK_API_KEY` | 生成 | deepseek-chat |
-| `GRADE_MODEL` / `GRADE_BASE_URL` / `GRADE_API_KEY` | 打分/改写 | glm-4-flash（回退 ZHIPU） |
-| `RETRIEVAL_CANDIDATE_K` / `GRADE_CANDIDATE_K` / `GRADE_MAX_CONCURRENCY` / `GRADE_SKIP_SCORE` / `SCORE_RELEVANCE_THRESHOLD` | 检索与并行评分调优 | 8 / 4 / 4 / 0.50 / 0.50 |
-| `WEB_SEARCH_ENABLED` / `BOCHA_API_KEY` / `DAILY_WEB_BUDGET` | 联网 | 开 / 博查 / ¥1 |
-| `WEB_SEARCH_MAX_PER_QUERY` | 单次请求允许的联网次数 | 1 |
+| `RETRIEVAL_CANDIDATE_K` | hybrid 检索与 rerank 的候选池大小 | 8 |
 | `API_KEY` / `ALLOWED_ORIGINS` / `RATE_LIMIT_PER_MIN` / `CACHE_TTL` | 加固 | 关 / * / 10 / 600 |
 
 ## 6. 测试
@@ -124,7 +119,7 @@ $env:RUN_INTEGRATION = "1"
 - **Embedding 维度**：换 embedding 模型必须同步改 `EMBED_DIM`，否则建库/检索失败。
 - **PDF 无文本层**：需 OCR 才能检索，当前仅标记 `ocr` 占位。
 - **缓存**：serverless 下为进程内缓存，多实例不共享；生产可换 Redis/KV。
-- **外部依赖降级**：Qdrant、模型服务或博查不可用时，接口返回 `fallback: true`；前端应保留本地搜索兜底。
+- **外部依赖降级**：Qdrant 或模型服务不可用时，接口返回 `fallback: true`；前端应保留本地搜索兜底。
 - **性能数据**：性能脚本不走 HTTP 缓存且会调用真实服务；比较前后结果时请保持模型、数据集、区域和查询不变。
 
 查询主链路深拆
