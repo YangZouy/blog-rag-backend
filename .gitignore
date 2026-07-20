@@ -1,0 +1,10 @@
+.vercel
+.env*
+!.env.example
+
+# 本地工具 / 依赖 / 构建产物（含曾泄露密钥的 codex 日志）
+.codex/
+.venv/
+__pycache__/
+*.pyc
+.workbuddy/

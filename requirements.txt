@@ -1,0 +1,30 @@
+# Web framework
+fastapi>=0.110
+uvicorn[standard]>=0.29
+
+# LLM / RAG
+langchain>=0.2
+langchain-text-splitters>=0.3
+langchain-openai>=0.1
+langgraph>=0.2
+qdrant-client>=1.9
+tiktoken>=0.6
+
+# Config & models
+pydantic>=2.6
+pydantic-settings>=2.2
+python-dotenv>=1.0
+
+# Ingestion
+python-frontmatter>=1.0
+pypinyin>=0.50
+pymupdf>=1.24
+pdfplumber>=0.11
+requests>=2.31
+rank-bm25>=0.2.2
+jieba>=0.42.1
+sentence-transformers>=3.0
+
+# Tests
+pytest>=8.0
+httpx>=0.27

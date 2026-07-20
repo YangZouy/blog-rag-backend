@@ -1,0 +1,2261 @@
+{
+  "tag": "prod_baseline_v2",
+  "timestamp": "20260718_234502",
+  "elapsed_sec": 47.3,
+  "config": {
+    "model": "embedding-3",
+    "dim": 2048,
+    "collection": "blog_chunks",
+    "candidate_pool": 50,
+    "retrieve": "prod"
+  },
+  "n_queries": 49,
+  "overall": {
+    "recall@3": 0.7347,
+    "recall@5": 0.7551,
+    "recall@10": 0.7959,
+    "recall@12": 0.7959,
+    "recall@50": 0.8163,
+    "MRR": 0.6739
+  },
+  "by_type": {
+    "concept": {
+      "n": 22,
+      "recall@10": 0.773,
+      "recall@50": 0.818,
+      "MRR": 0.646
+    },
+    "howto": {
+      "n": 10,
+      "recall@10": 0.9,
+      "recall@50": 0.9,
+      "MRR": 0.698
+    },
+    "personal": {
+      "n": 3,
+      "recall@10": 1.0,
+      "recall@50": 1.0,
+      "MRR": 0.778
+    },
+    "term": {
+      "n": 14,
+      "recall@10": 0.714,
+      "recall@50": 0.714,
+      "MRR": 0.679
+    }
+  },
+  "by_category": {
+    "AI与RAG": {
+      "n": 9,
+      "recall@10": 0.667,
+      "recall@50": 0.778,
+      "MRR": 0.579
+    },
+    "PDF探针": {
+      "n": 3,
+      "recall@10": 0.0,
+      "recall@50": 0.0,
+      "MRR": 0.0
+    },
+    "个人-关于我": {
+      "n": 2,
+      "recall@10": 1.0,
+      "recall@50": 1.0,
+      "MRR": 1.0
+    },
+    "前端开发": {
+      "n": 14,
+      "recall@10": 0.786,
+      "recall@50": 0.786,
+      "MRR": 0.546
+    },
+    "后端与数据库": {
+      "n": 4,
+      "recall@10": 0.75,
+      "recall@50": 0.75,
+      "MRR": 0.75
+    },
+    "工程与运维": {
+      "n": 6,
+      "recall@10": 1.0,
+      "recall@50": 1.0,
+      "MRR": 0.806
+    },
+    "算法与数据结构": {
+      "n": 3,
+      "recall@10": 1.0,
+      "recall@50": 1.0,
+      "MRR": 1.0
+    },
+    "随笔·生活": {
+      "n": 4,
+      "recall@10": 1.0,
+      "recall@50": 1.0,
+      "MRR": 0.833
+    },
+    "项目实战": {
+      "n": 4,
+      "recall@10": 1.0,
+      "recall@50": 1.0,
+      "MRR": 1.0
+    }
+  },
+  "separation": {
+    "mean_delta": 0.0167,
+    "n_with_rel": 40,
+    "classes": {
+      "A_??": 8,
+      "B_?rerank": 2,
+      "??top1": 30,
+      "C_???": 9
+    }
+  },
+  "per_query": [
+    {
+      "id": 1,
+      "query": "什么是闭包",
+      "type": "concept",
+      "category": "前端开发",
+      "expected": [
+        "_posts/js深入-ife-baidu-com",
+        "_posts/js补充",
+        "_posts/第10章-函数"
+      ],
+      "first_rank": 3,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 0.3333333333333333,
+      "top1_cos": 0.6141,
+      "rel_cos": 0.5834,
+      "delta": 0.0307,
+      "class": "A_??",
+      "top5": [
+        [
+          "红宝书笔记1-2章",
+          0.6141
+        ],
+        [
+          "_posts/博客优化二",
+          0.594
+        ],
+        [
+          "_posts/第10章-函数",
+          0.5834
+        ],
+        [
+          "_posts/react学习",
+          0.582
+        ],
+        [
+          "_posts/一文多发产品调研",
+          0.5783
+        ]
+      ]
+    },
+    {
+      "id": 2,
+      "query": "JavaScript 原型链是什么",
+      "type": "concept",
+      "category": "前端开发",
+      "expected": [
+        "_posts/第4章 变量、作用域与内存",
+        "_posts/第8章-对象、类与面向对象编程"
+      ],
+      "first_rank": 9,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 0.1111111111111111,
+      "top1_cos": 0.5859,
+      "rel_cos": 0.5458,
+      "delta": 0.0402,
+      "class": "A_??",
+      "top5": [
+        [
+          "_posts/一文多发助手2.0产品设计",
+          0.5859
+        ],
+        [
+          "dom&bom-day1",
+          0.5823
+        ],
+        [
+          "_posts/第5章 基本引用类型",
+          0.5766
+        ],
+        [
+          "_posts/第15章-DOM扩展",
+          0.5708
+        ],
+        [
+          "_posts/react学习",
+          0.5653
+        ]
+      ]
+    },
+    {
+      "id": 3,
+      "query": "事件冒泡和事件捕获的区别",
+      "type": "concept",
+      "category": "前端开发",
+      "expected": [
+        "_posts/前端巩固",
+        "_posts/深入理解现代浏览器",
+        "_posts/第17章-事件"
+      ],
+      "first_rank": 5,
+      "recall": {
+        "3": 0.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 0.2,
+      "top1_cos": 0.721,
+      "rel_cos": 0.6,
+      "delta": 0.121,
+      "class": "B_?rerank",
+      "top5": [
+        [
+          "dom&bom-day2",
+          0.721
+        ],
+        [
+          "dom&bom-day1",
+          0.61
+        ],
+        [
+          "dom&bom-day3",
+          0.6078
+        ],
+        [
+          "红宝书笔记1-2章",
+          0.6044
+        ],
+        [
+          "_posts/第17章-事件",
+          0.6
+        ]
+      ]
+    },
+    {
+      "id": 4,
+      "query": "Promise 的原理和手写实现",
+      "type": "concept",
+      "category": "前端开发",
+      "expected": [
+        "_posts/Promise理论及手写"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.7103,
+      "rel_cos": 0.7103,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/Promise理论及手写",
+          0.7103
+        ],
+        [
+          "_posts/Vue-js设计与实现",
+          0.5621
+        ],
+        [
+          "_posts/react脚手架配置代理总结",
+          0.5274
+        ],
+        [
+          "_posts/前端巩固",
+          0.5093
+        ],
+        [
+          "projects/ai-content-distribution",
+          0.5019
+        ]
+      ]
+    },
+    {
+      "id": 5,
+      "query": "React 的 diff 算法和虚拟 DOM",
+      "type": "concept",
+      "category": "前端开发",
+      "expected": [
+        "_posts/react学习"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6412,
+      "rel_cos": 0.6412,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/react学习",
+          0.6412
+        ],
+        [
+          "dom&bom-day1",
+          0.6303
+        ],
+        [
+          "dom&bom-day2",
+          0.6286
+        ],
+        [
+          "_posts/linux命令",
+          0.6183
+        ],
+        [
+          "_posts/react学习二",
+          0.5672
+        ]
+      ]
+    },
+    {
+      "id": 6,
+      "query": "浏览器的渲染过程",
+      "type": "concept",
+      "category": "前端开发",
+      "expected": [
+        "_posts/深入理解现代浏览器"
+      ],
+      "first_rank": 2,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 0.5,
+      "top1_cos": 0.6265,
+      "rel_cos": 0.62,
+      "delta": 0.0065,
+      "class": "A_??",
+      "top5": [
+        [
+          "红宝书笔记1-2章",
+          0.6265
+        ],
+        [
+          "_posts/深入理解现代浏览器",
+          0.62
+        ],
+        [
+          "_posts/网络部分复习",
+          0.6159
+        ],
+        [
+          "_posts/前端巩固",
+          0.5965
+        ],
+        [
+          "_posts/Prompt工程完全指南",
+          0.5891
+        ]
+      ]
+    },
+    {
+      "id": 7,
+      "query": "执行上下文和作用域链",
+      "type": "concept",
+      "category": "前端开发",
+      "expected": [
+        "_posts/第4章 变量、作用域与内存"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6505,
+      "rel_cos": 0.6505,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/第4章 变量、作用域与内存",
+          0.6505
+        ],
+        [
+          "dom&bom-day6",
+          0.6347
+        ],
+        [
+          "dom&bom-day1",
+          0.6036
+        ],
+        [
+          "_posts/一文多发产品调研",
+          0.5976
+        ],
+        [
+          "_posts/第10章-函数",
+          0.5925
+        ]
+      ]
+    },
+    {
+      "id": 8,
+      "query": "迭代器和生成器是什么",
+      "type": "concept",
+      "category": "前端开发",
+      "expected": [
+        "_posts/第7章 迭代器与生成器"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6371,
+      "rel_cos": 0.6371,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/第7章 迭代器与生成器",
+          0.6371
+        ],
+        [
+          "_posts/RAG 检索增强生成技术详解",
+          0.5582
+        ],
+        [
+          "_posts/AI-for-Everyone：从基础概念到社会影响的全面解析",
+          0.5474
+        ],
+        [
+          "_posts/前端巩固",
+          0.5439
+        ],
+        [
+          "_posts/react学习",
+          0.5379
+        ]
+      ]
+    },
+    {
+      "id": 9,
+      "query": "webpack",
+      "type": "term",
+      "category": "前端开发",
+      "expected": [
+        "_posts/webpack5"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.5832,
+      "rel_cos": 0.5832,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/webpack5",
+          0.5832
+        ],
+        [
+          "dom&bom-day5",
+          0.544
+        ],
+        [
+          "_posts/博客优化二",
+          0.4918
+        ],
+        [
+          "_posts/健身第一课：背部训练指南",
+          0.4908
+        ],
+        [
+          "_posts/Vue-js设计与实现",
+          0.486
+        ]
+      ]
+    },
+    {
+      "id": 10,
+      "query": "TypeScript",
+      "type": "term",
+      "category": "前端开发",
+      "expected": [
+        "_posts/typescript-李立超老师"
+      ],
+      "first_rank": null,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "12": 0.0,
+        "50": 0.0
+      },
+      "rr": 0.0,
+      "top1_cos": 0.5197,
+      "rel_cos": null,
+      "delta": null,
+      "class": "C_???",
+      "top5": [
+        [
+          "红宝书笔记1-2章",
+          0.5197
+        ],
+        [
+          "dom&bom-day5",
+          0.5161
+        ],
+        [
+          "_posts/huggingface-transformers库的使用",
+          0.485
+        ],
+        [
+          "_posts/linux命令",
+          0.4806
+        ],
+        [
+          "_posts/健身第一课：背部训练指南",
+          0.4778
+        ]
+      ]
+    },
+    {
+      "id": 11,
+      "query": "BOM 是什么",
+      "type": "concept",
+      "category": "前端开发",
+      "expected": [
+        "_posts/第12章-BOM"
+      ],
+      "first_rank": null,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "12": 0.0,
+        "50": 0.0
+      },
+      "rr": 0.0,
+      "top1_cos": 0.5714,
+      "rel_cos": null,
+      "delta": null,
+      "class": "C_???",
+      "top5": [
+        [
+          "_posts/linux命令",
+          0.5714
+        ],
+        [
+          "_posts/面经",
+          0.5684
+        ],
+        [
+          "_posts/react学习",
+          0.5615
+        ],
+        [
+          "_posts/全面肩部训练指南：提升肩部力量与形态",
+          0.557
+        ],
+        [
+          "_posts/博客优化二",
+          0.5546
+        ]
+      ]
+    },
+    {
+      "id": 12,
+      "query": "react 脚手架怎么配置代理",
+      "type": "howto",
+      "category": "前端开发",
+      "expected": [
+        "_posts/react脚手架配置代理总结"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.7613,
+      "rel_cos": 0.7613,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/react脚手架配置代理总结",
+          0.7613
+        ],
+        [
+          "_posts/react学习",
+          0.6706
+        ],
+        [
+          "_posts/Promise理论及手写",
+          0.5865
+        ],
+        [
+          "_posts/typescript-李立超老师",
+          0.566
+        ],
+        [
+          "_posts/一文多发助手2.0产品设计",
+          0.5532
+        ]
+      ]
+    },
+    {
+      "id": 13,
+      "query": "localStorage 和 sessionStorage 怎么用",
+      "type": "howto",
+      "category": "前端开发",
+      "expected": [
+        "_posts/第25章-客户端存储"
+      ],
+      "first_rank": null,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "12": 0.0,
+        "50": 0.0
+      },
+      "rr": 0.0,
+      "top1_cos": 0.5911,
+      "rel_cos": null,
+      "delta": null,
+      "class": "C_???",
+      "top5": [
+        [
+          "_posts/react学习二",
+          0.5911
+        ],
+        [
+          "_posts/第4章 变量、作用域与内存",
+          0.5893
+        ],
+        [
+          "dom&bom-day5",
+          0.5819
+        ],
+        [
+          "_posts/react学习",
+          0.5614
+        ],
+        [
+          "_posts/面经",
+          0.5587
+        ]
+      ]
+    },
+    {
+      "id": 14,
+      "query": "前端面试题",
+      "type": "term",
+      "category": "前端开发",
+      "expected": [
+        "_posts/面经"
+      ],
+      "first_rank": 2,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 0.5,
+      "top1_cos": 0.5254,
+      "rel_cos": 0.5019,
+      "delta": 0.0235,
+      "class": "A_??",
+      "top5": [
+        [
+          "_posts/基础算法题的归纳总结",
+          0.5254
+        ],
+        [
+          "_posts/面经",
+          0.5019
+        ],
+        [
+          "_posts/网络部分复习",
+          0.4826
+        ],
+        [
+          "_posts/第3章 语言基础",
+          0.4747
+        ],
+        [
+          "_posts/全面肩部训练指南：提升肩部力量与形态",
+          0.4699
+        ]
+      ]
+    },
+    {
+      "id": 15,
+      "query": "MongoDB 怎么用",
+      "type": "term",
+      "category": "后端与数据库",
+      "expected": [
+        "_posts/数据库与ODM-ORM"
+      ],
+      "first_rank": null,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "12": 0.0,
+        "50": 0.0
+      },
+      "rr": 0.0,
+      "top1_cos": 0.576,
+      "rel_cos": null,
+      "delta": null,
+      "class": "C_???",
+      "top5": [
+        [
+          "_posts/react学习",
+          0.576
+        ],
+        [
+          "_posts/第10章-函数",
+          0.5755
+        ],
+        [
+          "_posts/react学习二",
+          0.5717
+        ],
+        [
+          "dom&bom-day2",
+          0.5703
+        ],
+        [
+          "_posts/第4章 变量、作用域与内存",
+          0.5619
+        ]
+      ]
+    },
+    {
+      "id": 16,
+      "query": "什么是 ODM 和 ORM",
+      "type": "concept",
+      "category": "后端与数据库",
+      "expected": [
+        "_posts/数据库与ODM-ORM"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6483,
+      "rel_cos": 0.6483,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/数据库与ODM-ORM",
+          0.6483
+        ],
+        [
+          "dom&bom-day3",
+          0.63
+        ],
+        [
+          "红宝书笔记1-2章",
+          0.6248
+        ],
+        [
+          "_posts/博客优化二",
+          0.6007
+        ],
+        [
+          "_posts/远程连接服务器",
+          0.5989
+        ]
+      ]
+    },
+    {
+      "id": 17,
+      "query": "express 框架",
+      "type": "term",
+      "category": "后端与数据库",
+      "expected": [
+        "_posts/express"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.7518,
+      "rel_cos": 0.7518,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/express",
+          0.7518
+        ],
+        [
+          "_posts/RAG 检索增强生成技术详解",
+          0.5218
+        ],
+        [
+          "_posts/typescript-李立超老师",
+          0.5178
+        ],
+        [
+          "_posts/webpack5",
+          0.5032
+        ],
+        [
+          "_posts/AI-for-Everyone：从基础概念到社会影响的全面解析",
+          0.5018
+        ]
+      ]
+    },
+    {
+      "id": 18,
+      "query": "nodejs 是什么",
+      "type": "concept",
+      "category": "后端与数据库",
+      "expected": [
+        "_posts/nodejs"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.69,
+      "rel_cos": 0.69,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/nodejs",
+          0.69
+        ],
+        [
+          "红宝书笔记1-2章",
+          0.6149
+        ],
+        [
+          "dom&bom-day1",
+          0.6054
+        ],
+        [
+          "_posts/面经",
+          0.5903
+        ],
+        [
+          "_posts/青训营后期笔记",
+          0.5729
+        ]
+      ]
+    },
+    {
+      "id": 19,
+      "query": "RAG 是什么",
+      "type": "concept",
+      "category": "AI与RAG",
+      "expected": [
+        "_posts/RAG 检索增强生成技术详解"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6603,
+      "rel_cos": 0.6603,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/RAG 检索增强生成技术详解",
+          0.6603
+        ],
+        [
+          "_posts/博客优化二",
+          0.5906
+        ],
+        [
+          "_posts/面经",
+          0.5903
+        ],
+        [
+          "_posts/全面肩部训练指南：提升肩部力量与形态",
+          0.5762
+        ],
+        [
+          "_posts/深入理解现代浏览器",
+          0.5694
+        ]
+      ]
+    },
+    {
+      "id": 20,
+      "query": "什么是向量数据库",
+      "type": "concept",
+      "category": "AI与RAG",
+      "expected": [
+        "_posts/RAG 检索增强生成技术详解"
+      ],
+      "first_rank": 15,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "12": 0.0,
+        "50": 1.0
+      },
+      "rr": 0.06666666666666667,
+      "top1_cos": 0.5668,
+      "rel_cos": 0.5238,
+      "delta": 0.0431,
+      "class": "A_??",
+      "top5": [
+        [
+          "_posts/博客优化二",
+          0.5668
+        ],
+        [
+          "_posts/第10章-函数",
+          0.5531
+        ],
+        [
+          "_posts/第4章 变量、作用域与内存",
+          0.5487
+        ],
+        [
+          "_posts/react学习",
+          0.5478
+        ],
+        [
+          "_posts/全面肩部训练指南：提升肩部力量与形态",
+          0.5459
+        ]
+      ]
+    },
+    {
+      "id": 21,
+      "query": "Transformer 架构原理",
+      "type": "concept",
+      "category": "AI与RAG",
+      "expected": [
+        "_posts/AI基础知识：从n-grams到Transformer"
+      ],
+      "first_rank": null,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "12": 0.0,
+        "50": 0.0
+      },
+      "rr": 0.0,
+      "top1_cos": 0.4978,
+      "rel_cos": null,
+      "delta": null,
+      "class": "C_???",
+      "top5": [
+        [
+          "dom&bom-day5",
+          0.4978
+        ],
+        [
+          "_posts/硅谷甄选平台",
+          0.487
+        ],
+        [
+          "_posts/Vue-js设计与实现",
+          0.4848
+        ],
+        [
+          "_posts/Agent评测：多轮推理与任务完成能力的全面解析",
+          0.4813
+        ],
+        [
+          "_posts/react学习二",
+          0.4747
+        ]
+      ]
+    },
+    {
+      "id": 22,
+      "query": "什么是 Prompt 工程",
+      "type": "concept",
+      "category": "AI与RAG",
+      "expected": [
+        "_posts/Prompt工程完全指南"
+      ],
+      "first_rank": null,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "12": 0.0,
+        "50": 0.0
+      },
+      "rr": 0.0,
+      "top1_cos": 0.674,
+      "rel_cos": null,
+      "delta": null,
+      "class": "C_???",
+      "top5": [
+        [
+          "_posts/Chain-of-Thought Prompting 论文详读",
+          0.674
+        ],
+        [
+          "红宝书笔记1-2章",
+          0.6018
+        ],
+        [
+          "_posts/远程连接服务器",
+          0.5952
+        ],
+        [
+          "_posts/博客优化二",
+          0.5898
+        ],
+        [
+          "_posts/react学习",
+          0.5782
+        ]
+      ]
+    },
+    {
+      "id": 23,
+      "query": "ReAct 是什么",
+      "type": "concept",
+      "category": "AI与RAG",
+      "expected": [
+        "_posts/ReAct：语言模型中合成推理和行动的创新架构"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6015,
+      "rel_cos": 0.6015,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/ReAct：语言模型中合成推理和行动的创新架构",
+          0.6015
+        ],
+        [
+          "_posts/react学习",
+          0.5937
+        ],
+        [
+          "dom&bom-day3",
+          0.5643
+        ],
+        [
+          "dom&bom-day1",
+          0.5612
+        ],
+        [
+          "dom&bom-day5",
+          0.5597
+        ]
+      ]
+    },
+    {
+      "id": 24,
+      "query": "Chain-of-Thought 思维链是什么",
+      "type": "concept",
+      "category": "AI与RAG",
+      "expected": [
+        "_posts/Chain-of-Thought Prompting 论文详读"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6673,
+      "rel_cos": 0.6673,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/Chain-of-Thought Prompting 论文详读",
+          0.6673
+        ],
+        [
+          "_posts/cnn",
+          0.529
+        ],
+        [
+          "_posts/AI基础知识：从n-grams到Transformer",
+          0.5284
+        ],
+        [
+          "_posts/手写数字识别：从图像到神经网络",
+          0.5278
+        ],
+        [
+          "_posts/js补充",
+          0.5268
+        ]
+      ]
+    },
+    {
+      "id": 26,
+      "query": "什么是 AI Agent 智能体",
+      "type": "concept",
+      "category": "AI与RAG",
+      "expected": [
+        "_posts/Agentic AI：大语言模型驱动的智能体系统解析"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6198,
+      "rel_cos": 0.6198,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/Agentic AI：大语言模型驱动的智能体系统解析",
+          0.6198
+        ],
+        [
+          "_posts/Agent评测：多轮推理与任务完成能力的全面解析",
+          0.6075
+        ],
+        [
+          "_posts/Chain-of-Thought Prompting 论文详读",
+          0.6073
+        ],
+        [
+          "_posts/RAG 检索增强生成技术详解",
+          0.5493
+        ],
+        [
+          "_posts/Perplexity产品研究与分析方法总结",
+          0.529
+        ]
+      ]
+    },
+    {
+      "id": 27,
+      "query": "CNN 卷积神经网络是什么",
+      "type": "concept",
+      "category": "AI与RAG",
+      "expected": [
+        "_posts/CNN-for-sentence-classification",
+        "_posts/cnn"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6754,
+      "rel_cos": 0.6754,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/cnn",
+          0.6754
+        ],
+        [
+          "_posts/CNN-for-sentence-classification",
+          0.6736
+        ],
+        [
+          "_posts/博客优化二",
+          0.5432
+        ],
+        [
+          "_posts/手写数字识别：从图像到神经网络",
+          0.5381
+        ],
+        [
+          "_posts/面经",
+          0.5367
+        ]
+      ]
+    },
+    {
+      "id": 28,
+      "query": "手写数字识别怎么实现",
+      "type": "howto",
+      "category": "AI与RAG",
+      "expected": [
+        "_posts/手写数字识别：从图像到神经网络"
+      ],
+      "first_rank": 7,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 0.14285714285714285,
+      "top1_cos": 0.5332,
+      "rel_cos": 0.4999,
+      "delta": 0.0333,
+      "class": "A_??",
+      "top5": [
+        [
+          "_posts/Vue-js设计与实现",
+          0.5332
+        ],
+        [
+          "_posts/一文多发助手2.0技术实现详解",
+          0.5233
+        ],
+        [
+          "projects/ai-content-distribution",
+          0.5197
+        ],
+        [
+          "_posts/react脚手架配置代理总结",
+          0.5157
+        ],
+        [
+          "_posts/Promise理论及手写",
+          0.5084
+        ]
+      ]
+    },
+    {
+      "id": 29,
+      "query": "为什么广度优先遍历能得到最短路径",
+      "type": "concept",
+      "category": "算法与数据结构",
+      "expected": [
+        "_posts/为什么广度优先遍历得到的是最短路径"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.7028,
+      "rel_cos": 0.7028,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/为什么广度优先遍历得到的是最短路径",
+          0.7028
+        ],
+        [
+          "dom&bom-day3",
+          0.6355
+        ],
+        [
+          "_posts/react学习二",
+          0.575
+        ],
+        [
+          "_posts/react学习",
+          0.5745
+        ],
+        [
+          "_posts/手写数字识别：从图像到神经网络",
+          0.5655
+        ]
+      ]
+    },
+    {
+      "id": 30,
+      "query": "常见算法题归纳总结",
+      "type": "term",
+      "category": "算法与数据结构",
+      "expected": [
+        "_posts/基础算法题的归纳总结"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6109,
+      "rel_cos": 0.6109,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/基础算法题的归纳总结",
+          0.6109
+        ],
+        [
+          "_posts/react学习",
+          0.5036
+        ],
+        [
+          "_posts/Vue-js设计与实现",
+          0.4911
+        ]
+      ]
+    },
+    {
+      "id": 31,
+      "query": "刷题掌握了哪些技能",
+      "type": "term",
+      "category": "算法与数据结构",
+      "expected": [
+        "_posts/刷题掌握的技能"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.5756,
+      "rel_cos": 0.5756,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/刷题掌握的技能",
+          0.5756
+        ],
+        [
+          "dom&bom-day3",
+          0.5668
+        ],
+        [
+          "dom&bom-day5",
+          0.5609
+        ],
+        [
+          "红宝书笔记1-2章",
+          0.5474
+        ],
+        [
+          "dom&bom-day2",
+          0.5458
+        ]
+      ]
+    },
+    {
+      "id": 32,
+      "query": "怎么配置内网穿透让本地服务公网访问",
+      "type": "howto",
+      "category": "工程与运维",
+      "expected": [
+        "_posts/给n8n的本地访问链接配置成公网访问"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.5633,
+      "rel_cos": 0.5633,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/给n8n的本地访问链接配置成公网访问",
+          0.5633
+        ],
+        [
+          "红宝书笔记1-2章",
+          0.523
+        ],
+        [
+          "_posts/typescript-李立超老师",
+          0.5197
+        ],
+        [
+          "_posts/第8章-对象、类与面向对象编程",
+          0.4978
+        ],
+        [
+          "_posts/react学习",
+          0.4952
+        ]
+      ]
+    },
+    {
+      "id": 33,
+      "query": "怎么远程连接服务器",
+      "type": "howto",
+      "category": "工程与运维",
+      "expected": [
+        "_posts/远程连接服务器"
+      ],
+      "first_rank": 3,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 0.3333333333333333,
+      "top1_cos": 0.5425,
+      "rel_cos": 0.5138,
+      "delta": 0.0287,
+      "class": "A_??",
+      "top5": [
+        [
+          "dom&bom-day5",
+          0.5425
+        ],
+        [
+          "dom&bom-day6",
+          0.5369
+        ],
+        [
+          "_posts/远程连接服务器",
+          0.5138
+        ],
+        [
+          "_posts/Chain-of-Thought Prompting 论文详读",
+          0.5133
+        ],
+        [
+          "_posts/第14章-DOM",
+          0.495
+        ]
+      ]
+    },
+    {
+      "id": 34,
+      "query": "linux 常用命令",
+      "type": "term",
+      "category": "工程与运维",
+      "expected": [
+        "_posts/linux命令"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6276,
+      "rel_cos": 0.6276,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/linux命令",
+          0.6276
+        ],
+        [
+          "_posts/远程连接服务器",
+          0.617
+        ],
+        [
+          "_posts/react学习二",
+          0.5893
+        ],
+        [
+          "_posts/第4章 变量、作用域与内存",
+          0.5849
+        ],
+        [
+          "_posts/第5章 基本引用类型",
+          0.5768
+        ]
+      ]
+    },
+    {
+      "id": 35,
+      "query": "hexo 博客怎么优化和搭建",
+      "type": "howto",
+      "category": "工程与运维",
+      "expected": [
+        "_posts/博客优化",
+        "_posts/博客优化二"
+      ],
+      "first_rank": 2,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 0.5,
+      "top1_cos": 0.5633,
+      "rel_cos": 0.5419,
+      "delta": 0.0214,
+      "class": "A_??",
+      "top5": [
+        [
+          "dom&bom-day1",
+          0.5633
+        ],
+        [
+          "_posts/博客优化二",
+          0.5419
+        ],
+        [
+          "_posts/第3章 语言基础",
+          0.5233
+        ],
+        [
+          "_posts/Chain-of-Thought Prompting 论文详读",
+          0.5199
+        ],
+        [
+          "_posts/react学习",
+          0.5198
+        ]
+      ]
+    },
+    {
+      "id": 36,
+      "query": "github 怎么新建仓库并 push 代码",
+      "type": "howto",
+      "category": "工程与运维",
+      "expected": [
+        "_posts/github新建仓库并push本地代码过程"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6709,
+      "rel_cos": 0.6709,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/github新建仓库并push本地代码过程",
+          0.6709
+        ],
+        [
+          "_posts/react学习",
+          0.5701
+        ],
+        [
+          "_posts/博客优化二",
+          0.5573
+        ],
+        [
+          "_posts/react学习二",
+          0.5508
+        ],
+        [
+          "_posts/博客优化",
+          0.5493
+        ]
+      ]
+    },
+    {
+      "id": 37,
+      "query": "huggingface transformers 库怎么安装使用",
+      "type": "howto",
+      "category": "工程与运维",
+      "expected": [
+        "_posts/huggingface-transformers库的使用"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.5263,
+      "rel_cos": 0.5263,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/huggingface-transformers库的使用",
+          0.5263
+        ],
+        [
+          "dom&bom-day5",
+          0.4876
+        ],
+        [
+          "dom&bom-day2",
+          0.4863
+        ],
+        [
+          "dom&bom-day1",
+          0.4832
+        ],
+        [
+          "_posts/neuralcoref的安装与使用",
+          0.4724
+        ]
+      ]
+    },
+    {
+      "id": 38,
+      "query": "一文多发助手的技术实现",
+      "type": "term",
+      "category": "项目实战",
+      "expected": [
+        "_posts/一文多发助手2.0开发全记录",
+        "_posts/一文多发助手2.0技术实现详解"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.7016,
+      "rel_cos": 0.7016,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/一文多发助手2.0技术实现详解",
+          0.7016
+        ],
+        [
+          "_posts/一文多发助手2.0开发全记录",
+          0.6824
+        ],
+        [
+          "_posts/一文多发助手2.0产品设计",
+          0.678
+        ],
+        [
+          "_posts/一文多发助手MVP实践报告",
+          0.6694
+        ],
+        [
+          "projects/ai-content-distribution",
+          0.6666
+        ]
+      ]
+    },
+    {
+      "id": 39,
+      "query": "Figma 智能批量产图平台",
+      "type": "term",
+      "category": "项目实战",
+      "expected": [
+        "_posts/Figma智能批量产图平台产品设计",
+        "projects/figma-batch-render"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.7066,
+      "rel_cos": 0.7066,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/Figma智能批量产图平台产品设计",
+          0.7066
+        ],
+        [
+          "projects/figma-batch-render",
+          0.6678
+        ],
+        [
+          "_posts/项目演进与关键问题分析",
+          0.545
+        ],
+        [
+          "_posts/Agent评测：多轮推理与任务完成能力的全面解析",
+          0.518
+        ],
+        [
+          "_posts/第8章-对象、类与面向对象编程",
+          0.5166
+        ]
+      ]
+    },
+    {
+      "id": 40,
+      "query": "硅谷甄选项目",
+      "type": "term",
+      "category": "项目实战",
+      "expected": [
+        "_posts/硅谷甄选平台"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6309,
+      "rel_cos": 0.6309,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/硅谷甄选平台",
+          0.6309
+        ]
+      ]
+    },
+    {
+      "id": 41,
+      "query": "http 接口平台开发",
+      "type": "term",
+      "category": "项目实战",
+      "expected": [
+        "_posts/http接口平台开发"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6642,
+      "rel_cos": 0.6642,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/http接口平台开发",
+          0.6642
+        ],
+        [
+          "projects/ai-content-distribution",
+          0.5422
+        ],
+        [
+          "_posts/臀腿训练指南：四个高效健身动作",
+          0.5373
+        ],
+        [
+          "_posts/一文多发产品调研",
+          0.5288
+        ],
+        [
+          "_posts/硅谷甄选平台",
+          0.5231
+        ]
+      ]
+    },
+    {
+      "id": 42,
+      "query": "背部训练动作怎么做",
+      "type": "howto",
+      "category": "随笔·生活",
+      "expected": [
+        "_posts/健身第一课：背部训练指南",
+        "_posts/背部肌群锻炼指南：高效动作解析"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.5634,
+      "rel_cos": 0.5634,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/背部肌群锻炼指南：高效动作解析",
+          0.5634
+        ],
+        [
+          "_posts/全面肩部训练指南：提升肩部力量与形态",
+          0.5452
+        ],
+        [
+          "_posts/健身第一课：背部训练指南",
+          0.5381
+        ],
+        [
+          "_posts/臀腿训练指南：四个高效健身动作",
+          0.5373
+        ],
+        [
+          "dom&bom-day5",
+          0.5334
+        ]
+      ]
+    },
+    {
+      "id": 43,
+      "query": "肩部训练指南",
+      "type": "howto",
+      "category": "随笔·生活",
+      "expected": [
+        "_posts/全面肩部训练指南：提升肩部力量与形态"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.7044,
+      "rel_cos": 0.7044,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/全面肩部训练指南：提升肩部力量与形态",
+          0.7044
+        ],
+        [
+          "_posts/背部肌群锻炼指南：高效动作解析",
+          0.611
+        ],
+        [
+          "_posts/健身第一课：背部训练指南",
+          0.5873
+        ],
+        [
+          "_posts/网络部分复习",
+          0.5777
+        ],
+        [
+          "_posts/臀腿训练指南：四个高效健身动作",
+          0.5757
+        ]
+      ]
+    },
+    {
+      "id": 44,
+      "query": "掌控习惯这本书讲了什么",
+      "type": "concept",
+      "category": "随笔·生活",
+      "expected": [
+        "_posts/掌控习惯阅读笔记"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.6715,
+      "rel_cos": 0.6715,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "_posts/掌控习惯阅读笔记",
+          0.6715
+        ],
+        [
+          "dom&bom-day1",
+          0.6094
+        ],
+        [
+          "_posts/react学习二",
+          0.5864
+        ],
+        [
+          "_posts/react学习",
+          0.5794
+        ],
+        [
+          "_posts/图与图学习",
+          0.5701
+        ]
+      ]
+    },
+    {
+      "id": 45,
+      "query": "博主离职后的自我反思",
+      "type": "personal",
+      "category": "随笔·生活",
+      "expected": [
+        "_posts/离职一年后的自我反思：从迷茫到自律的心路历程"
+      ],
+      "first_rank": 3,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 0.3333333333333333,
+      "top1_cos": 0.95,
+      "rel_cos": 0.6302,
+      "delta": 0.3198,
+      "class": "B_?rerank",
+      "top5": [
+        [
+          "about",
+          0.95
+        ],
+        [
+          "_posts/博客优化二",
+          0.6507
+        ],
+        [
+          "_posts/离职一年后的自我反思：从迷茫到自律的心路历程",
+          0.6302
+        ],
+        [
+          "_posts/基础算法题的归纳总结",
+          0.6081
+        ],
+        [
+          "_posts/typescript-李立超老师",
+          0.6078
+        ]
+      ]
+    },
+    {
+      "id": 46,
+      "query": "博主叫什么名字",
+      "type": "personal",
+      "category": "个人-关于我",
+      "expected": [
+        "about"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.95,
+      "rel_cos": 0.95,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "about",
+          0.95
+        ],
+        [
+          "_posts/博客优化二",
+          0.6249
+        ],
+        [
+          "_posts/数据库与ODM-ORM",
+          0.568
+        ],
+        [
+          "_posts/cnn",
+          0.5653
+        ],
+        [
+          "_posts/博客优化",
+          0.5615
+        ]
+      ]
+    },
+    {
+      "id": 47,
+      "query": "博主的教育背景和工作经历",
+      "type": "personal",
+      "category": "个人-关于我",
+      "expected": [
+        "about"
+      ],
+      "first_rank": 1,
+      "recall": {
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0,
+        "12": 1.0,
+        "50": 1.0
+      },
+      "rr": 1.0,
+      "top1_cos": 0.95,
+      "rel_cos": 0.95,
+      "delta": 0.0,
+      "class": "??top1",
+      "top5": [
+        [
+          "about",
+          0.95
+        ],
+        [
+          "红宝书笔记1-2章",
+          0.7065
+        ],
+        [
+          "_posts/博客优化二",
+          0.688
+        ],
+        [
+          "_posts/博客优化",
+          0.661
+        ],
+        [
+          "_posts/cnn",
+          0.6445
+        ]
+      ]
+    },
+    {
+      "id": 48,
+      "query": "JavaScript 是什么",
+      "type": "concept",
+      "category": "PDF探针",
+      "expected": [
+        "红宝书笔记1-2章"
+      ],
+      "first_rank": null,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "12": 0.0,
+        "50": 0.0
+      },
+      "rr": 0.0,
+      "top1_cos": 0.6221,
+      "rel_cos": null,
+      "delta": null,
+      "class": "C_???",
+      "top5": [
+        [
+          "_posts/第17章-事件",
+          0.6221
+        ],
+        [
+          "_posts/第4章 变量、作用域与内存",
+          0.6071
+        ],
+        [
+          "_posts/第11章-期约与异步函数",
+          0.5972
+        ],
+        [
+          "dom&bom-day1",
+          0.5971
+        ],
+        [
+          "_posts/第5章 基本引用类型",
+          0.5932
+        ]
+      ]
+    },
+    {
+      "id": 49,
+      "query": "可伸缩矢量图 SVG 和数学标记语言",
+      "type": "term",
+      "category": "PDF探针",
+      "expected": [
+        "红宝书笔记1-2章"
+      ],
+      "first_rank": null,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "12": 0.0,
+        "50": 0.0
+      },
+      "rr": 0.0,
+      "top1_cos": 0.5859,
+      "rel_cos": null,
+      "delta": null,
+      "class": "C_???",
+      "top5": [
+        [
+          "_posts/图与图学习",
+          0.5859
+        ],
+        [
+          "_posts/react学习",
+          0.5267
+        ],
+        [
+          "_posts/全面肩部训练指南：提升肩部力量与形态",
+          0.5173
+        ],
+        [
+          "_posts/Agent评测：多轮推理与任务完成能力的全面解析",
+          0.5166
+        ],
+        [
+          "_posts/臀腿训练指南：四个高效健身动作",
+          0.5146
+        ]
+      ]
+    },
+    {
+      "id": 50,
+      "query": "DOM 和 BOM 的学习笔记",
+      "type": "term",
+      "category": "PDF探针",
+      "expected": [
+        "dom&bom-day1",
+        "dom&bom-day2",
+        "dom&bom-day3",
+        "dom&bom-day5",
+        "dom&bom-day6"
+      ],
+      "first_rank": null,
+      "recall": {
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "12": 0.0,
+        "50": 0.0
+      },
+      "rr": 0.0,
+      "top1_cos": 0.6826,
+      "rel_cos": null,
+      "delta": null,
+      "class": "C_???",
+      "top5": [
+        [
+          "红宝书笔记1-2章",
+          0.6826
+        ],
+        [
+          "_posts/第16章 DOM2和DOM3",
+          0.649
+        ],
+        [
+          "_posts/react学习",
+          0.6411
+        ],
+        [
+          "_posts/AI-for-Everyone：从基础概念到社会影响的全面解析",
+          0.5981
+        ],
+        [
+          "_posts/react学习二",
+          0.5913
+        ]
+      ]
+    }
+  ]
+}
