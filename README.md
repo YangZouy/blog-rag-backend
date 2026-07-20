@@ -89,7 +89,7 @@ vercel地址：https://blog-rag-backend.vercel.app
 | `EMBED_BATCH_SIZE` / `QDRANT_UPSERT_BATCH_SIZE` / `QDRANT_WRITE_TIMEOUT` | 入库批处理与写超时 | 64 / 32 / 120 |
 | `QDRANT_READ_TIMEOUT` / `QDRANT_WARMUP_ENABLED` | 查询超时 / 启动时预热查询连接 | 3 / 开 |
 | `GEN_MODEL` / `GEN_BASE_URL` / `DEEPSEEK_API_KEY` | 生成 | deepseek-chat |
-| `RETRIEVAL_CANDIDATE_K` | hybrid 检索与 rerank 的候选池大小 | 8 |
+| `RETRIEVAL_CANDIDATE_K` / `GENERATION_CONTEXT_K` / `RERANK_RELEVANCE_THRESHOLD` | rerank 候选池 / 最终上下文块数 / 站内资料相关性门槛 | 8 / 3 / 0.30 |
 | `API_KEY` / `ALLOWED_ORIGINS` / `RATE_LIMIT_PER_MIN` / `CACHE_TTL` | 加固 | 关 / * / 10 / 600 |
 
 ## 6. 测试

@@ -35,17 +35,20 @@ app.add_middleware(CORSMiddleware, allow_origins=s.allowed_origins_list, allow_m
 @app.get("/health")
 def health() -> dict: return {"status": "ok"}
 def _cache_key(req: SearchRequest) -> str:
-    return f"rag\x1f{req.query}\x1f{req.top_k}"
+    history = "\x1e".join(turn.content for turn in req.history)
+    return f"rag\x1f{req.query}\x1f{req.top_k}\x1f{history}"
 def _sse(event: str, data: dict) -> str: return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+
 @app.post("/search", response_model=SearchResponse, dependencies=[Depends(verify_api_key), Depends(rate_limit)])
 def search(req: SearchRequest, request: Request) -> SearchResponse:
     key = _cache_key(req); cached = cache_get(key)
     if cached is not None: return cached
-    try: response = run_rag(req.query, top_k=req.top_k)
+    try: response = run_rag(req.query, top_k=req.top_k, history=req.history)
     except Exception:
         logger.exception("RAG search failed for query=%r", req.query)
         return SearchResponse(answer="Search failed. Please try again later.", fallback=True, mode="error")
     cache_set(key, response); return response
+
 @app.post("/search/stream", dependencies=[Depends(verify_api_key), Depends(rate_limit)])
 def search_stream(req: SearchRequest, request: Request) -> StreamingResponse:
     key = _cache_key(req)
@@ -55,7 +58,7 @@ def search_stream(req: SearchRequest, request: Request) -> StreamingResponse:
             yield _sse("sources", {"citations": [citation.model_dump() for citation in cached.citations], "mode": cached.mode})
             if cached.answer: yield _sse("token", {"text": cached.answer})
             yield _sse("done", cached.model_dump()); return
-        for event, data in stream_rag(req.query, req.top_k):
+        for event, data in stream_rag(req.query, req.top_k, req.history):
             yield _sse(event, data)
             if event == "done": cache_set(key, SearchResponse.model_validate(data))
     return StreamingResponse(events(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})

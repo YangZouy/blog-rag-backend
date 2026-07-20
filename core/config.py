@@ -25,8 +25,12 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     # Retrieval tuning
     # ------------------------------------------------------------------
-    # 先拉大候选池再交给 LLM 筛选，避免只取 top5 漏掉长尾相关片段
-    RETRIEVAL_CANDIDATE_K: int = 30
+    # 召回后交给 reranker 的候选数。eval 已验证 top5 可覆盖答案，8 保留余量。
+    RETRIEVAL_CANDIDATE_K: int = 8
+    # 最终送入生成模型的上下文块数；同一文章最多保留一个最高分 chunk。
+    GENERATION_CONTEXT_K: int = 3
+    # reranker 最高分低于此值时，视为没有足够相关的站内资料。
+    RERANK_RELEVANCE_THRESHOLD: float = 0.30
 
     # ------------------------------------------------------------------
     # Embedding model (default: 智谱 embedding-3, 2048-dim)
