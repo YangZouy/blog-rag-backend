@@ -1,6 +1,6 @@
 {
   "generated_from": "D:/Blog",
-  "count": 81,
+  "count": 85,
   "articles": [
     {
       "title": "关于我",
@@ -25,7 +25,7 @@
     },
     {
       "title": "Agentic AI：大语言模型驱动的智能体系统解析",
-      "url": "https://zyydgrbk.top/2026/07/08/agentic-ai：-da-yu-yan-mo-xing-qu-dong-de-zhi-neng-ti-xi-tong-jie-xi/",
+      "url": "https://zyydgrbk.top/2026/07/08/agentic-ai-da-yu-yan-mo-xing-qu-dong-de-zhi-neng-ti-xi-tong-jie-xi/",
       "doc_type": "post",
       "tags": [
         "AI实践",
@@ -38,7 +38,7 @@
     },
     {
       "title": "Agent评测：多轮推理与任务完成能力的全面解析",
-      "url": "https://zyydgrbk.top/2026/06/11/agent-ping-ce-：-duo-lun-tui-li-yu-ren-wu-wan-cheng-neng-li-de-quan-mian-jie-xi/",
+      "url": "https://zyydgrbk.top/2026/06/11/agent-ping-ce-duo-lun-tui-li-yu-ren-wu-wan-cheng-neng-li-de-quan-mian-jie-xi/",
       "doc_type": "post",
       "tags": [
         "AI实践",
@@ -51,7 +51,7 @@
     },
     {
       "title": "AI-for-Everyone：从基础概念到社会影响的全面解析",
-      "url": "https://zyydgrbk.top/2026/07/08/ai-for-everyone：-cong-ji-chu-gai-nian-dao-she-hui-ying-xiang-de-quan-mian-jie-xi/",
+      "url": "https://zyydgrbk.top/2026/07/08/ai-for-everyone-cong-ji-chu-gai-nian-dao-she-hui-ying-xiang-de-quan-mian-jie-xi/",
       "doc_type": "post",
       "tags": [
         "AI基础",
@@ -77,7 +77,7 @@
     },
     {
       "title": "AI基础知识：从n-grams到Transformer",
-      "url": "https://zyydgrbk.top/2026/06/12/ai-ji-chu-zhi-shi-：-cong-n-grams-dao-transformer/",
+      "url": "https://zyydgrbk.top/2026/06/12/ai-ji-chu-zhi-shi-cong-n-grams-dao-transformer/",
       "doc_type": "post",
       "tags": [
         "AI",
@@ -90,7 +90,7 @@
     },
     {
       "title": "Bom&&Dom",
-      "url": "https://zyydgrbk.top/2023/05/20/bom&&dom/",
+      "url": "https://zyydgrbk.top/2023/05/20/bom-dom/",
       "doc_type": "post",
       "tags": [],
       "excerpt": "{% pdf /pdf/dom&bom-day1.pdf %}\n\n{% pdf /pdf/dom&bom-day2.pdf %}\n\n{% pdf /pdf/dom&bom-day3.pdf %}\n\n{"
@@ -119,7 +119,7 @@
     },
     {
       "title": "CNN解读",
-      "url": "https://zyydgrbk.top/2023/05/26/cnn-jie-du/",
+      "url": "https://zyydgrbk.top/2023/05/26/cnn/",
       "doc_type": "post",
       "tags": [
         "论文 cnn"
@@ -166,14 +166,14 @@
     },
     {
       "title": "transformers库以及pytorch的安装与使用",
-      "url": "https://zyydgrbk.top/2023/06/24/transformers-ku-yi-ji-pytorch-de-an-zhuang-yu-shi-yong/",
+      "url": "https://zyydgrbk.top/2023/06/24/huggingface-transformers-ku-de-shi-yong/",
       "doc_type": "post",
       "tags": [],
       "excerpt": "## 卸载包\n\nconda remove package-name\n\nconda uninstall 库名（该库以及依赖库一起删除）\n\nconda uninstall 库名 --force （仅卸载该"
     },
     {
       "title": "js深入-ife.baidu.com",
-      "url": "https://zyydgrbk.top/2023/09/13/js-shen-ru-ife.baidu.com/",
+      "url": "https://zyydgrbk.top/2023/09/13/js-shen-ru-ife-baidu-com/",
       "doc_type": "post",
       "tags": [
         "前端"
@@ -258,7 +258,7 @@
     },
     {
       "title": "RAG 检索增强生成技术详解",
-      "url": "https://zyydgrbk.top/2026/06/12/rag-jian-suo-zeng-qiang-sheng-cheng-ji-zhu-xiang-jie/",
+      "url": "https://zyydgrbk.top//2026/06/12/rag-jian-suo-zeng-qiang-sheng-cheng-ji-zhu-xiang-jie/",
       "doc_type": "post",
       "tags": [
         "AI实践",
@@ -298,7 +298,7 @@
     },
     {
       "title": "ReAct：语言模型中合成推理和行动的创新架构",
-      "url": "https://zyydgrbk.top/2026/06/12/react：-yu-yan-mo-xing-zhong-he-cheng-tui-li-he-xing-dong-de-chuang-xin-jia-gou/",
+      "url": "https://zyydgrbk.top/2026/06/12/react-yu-yan-mo-xing-zhong-he-cheng-tui-li-he-xing-dong-de-chuang-xin-jia-gou/",
       "doc_type": "post",
       "tags": [
         "AI实践",
@@ -318,7 +318,7 @@
     },
     {
       "title": "Vue.js源码解析一",
-      "url": "https://zyydgrbk.top/2023/05/23/vue.js-yuan-ma-jie-xi-yi/",
+      "url": "https://zyydgrbk.top/2023/05/23/vue-js-yuan-ma-jie-xi-yi/",
       "doc_type": "post",
       "tags": [
         "Vue 前端"
@@ -327,7 +327,7 @@
     },
     {
       "title": "Vue.js设计与实现",
-      "url": "https://zyydgrbk.top/2023/04/21/vue.js-she-ji-yu-shi-xian/",
+      "url": "https://zyydgrbk.top/2023/04/21/vue-js-she-ji-yu-shi-xian/",
       "doc_type": "post",
       "tags": [],
       "excerpt": "### 第一章：权衡的艺术\n\n框架的设计，本身就是一种权衡的艺术。\n\n命令式与声明式\n\n命令式：关注过程\n\n```js\nconst div = document.querySelector('#app"
@@ -381,7 +381,7 @@
     },
     {
       "title": "一文多发助手2.0技术实现详解",
-      "url": "https://zyydgrbk.top/2026/06/12/yi-wen-duo-fa-zhu-shou-2.0-ji-shu-shi-xian-xiang-jie/",
+      "url": "https://zyydgrbk.top/2026/06/12/yi-wen-duo-fa-zhu-shou-2.0-ji-zhu-shi-xian-xiang-jie/",
       "doc_type": "post",
       "tags": [
         "技术实现",
@@ -407,7 +407,7 @@
     },
     {
       "title": "为什么广度优先遍历得到的是最短路径",
-      "url": "https://zyydgrbk.top/2023/04/15/wei-shen-me-guang-du-you-xian-bian-li-de-dao-de-shi-zui-duan-lu-jing/",
+      "url": "https://zyydgrbk.top/2023/04/15/wei-shi-me-guang-du-you-xian-bian-li-de-dao-de-shi-zui-duan-lu-jing/",
       "doc_type": "post",
       "tags": [
         "leetcode刷题"
@@ -416,7 +416,7 @@
     },
     {
       "title": "健身第一课：背部训练指南",
-      "url": "https://zyydgrbk.top/2026/07/01/jian-shen-di-yi-ke-：-bei-bu-xun-lian-zhi-nan/",
+      "url": "https://zyydgrbk.top/2026/07/01/jian-shen-di-yi-ke-bei-bu-xun-lian-zhi-nan/",
       "doc_type": "post",
       "tags": [
         "健身",
@@ -428,8 +428,64 @@
       "excerpt": "### 动作一：直臂下压\n\n**训练参数**\n- 15个/组，每次4-5组\n- 目前力量三片，后续随着力量增加进行调配\n\n**姿势讲解**\n\n掌根握住手柄，拉绳索与肩平齐时后退两步，做好准备姿势。\n\n"
     },
     {
+      "title": "健身第七课",
+      "url": "https://zyydgrbk.top/2026/07/20/jian-shen-di-qi-ke/",
+      "doc_type": "post",
+      "tags": [
+        "健身",
+        "臀腿训练",
+        "哈克深蹲",
+        "罗马尼亚硬拉",
+        "力量训练",
+        "动作教学"
+      ],
+      "excerpt": "# 健身第七课\n\n锻炼部位：臀腿\n\n动作一：坐姿髋外展\n\n动作二：哈克深蹲\n\n- 姿势讲解\n\n**腰背打直**，核心收紧，双脚分开，与肩同宽，略微外八，踩在踏板中间\n下蹲至大腿与地面平行，保持**背部"
+    },
+    {
+      "title": "健身第九课",
+      "url": "https://zyydgrbk.top/2026/07/20/jian-shen-di-jiu-ke/",
+      "doc_type": "post",
+      "tags": [
+        "健身",
+        "肩部训练",
+        "三角肌",
+        "绳索面拉",
+        "侧平举",
+        "力量训练"
+      ],
+      "excerpt": "# 健身第九课\n\n训练部位：肩\n\n动作一：绳索面拉\n\n- 姿势讲解\n训练部位：三角肌后束\n起始姿势：\n退后一步，绳索绷紧，双脚与肩同宽\n发力过程：\n肩胛骨后缩，双手向耳后水平拉\n顶峰收缩1秒，感受肩后"
+    },
+    {
+      "title": "健身第八课",
+      "url": "https://zyydgrbk.top/2026/07/20/jian-shen-di-ba-ke/",
+      "doc_type": "post",
+      "tags": [
+        "健身",
+        "背部训练",
+        "引体向上",
+        "杠铃划船",
+        "背阔肌",
+        "力量训练"
+      ],
+      "excerpt": "## 动作一：辅助引体向上\n\n**姿势讲解**\n\n握距大约1.5倍肩宽，沉肩收紧核心。保持身体在一个平面上。肩胛下沉，用背部力量向上拉起，大臂向内收，不要展开。形成与高位下拉基本一致，控制匀速回落。\n"
+    },
+    {
+      "title": "健身第六课",
+      "url": "https://zyydgrbk.top/2026/07/20/jian-shen-di-liu-ke/",
+      "doc_type": "post",
+      "tags": [
+        "健身",
+        "胸部训练",
+        "蝴蝶机飞鸟",
+        "史密斯卧推",
+        "上斜卧推",
+        "力量训练"
+      ],
+      "excerpt": "### 动作一：蝴蝶机飞鸟\n\n- 姿势讲解\n\n需要有**胸部拉伸到较大，然后合拢**的过程，找胸部发力\n\n![](https://zyydgrbk.oss-cn-chengdu.aliyuncs.co"
+    },
+    {
       "title": "全面肩部训练指南：提升肩部力量与形态",
-      "url": "https://zyydgrbk.top/2026/07/02/quan-mian-jian-bu-xun-lian-zhi-nan-：-ti-sheng-jian-bu-li-liang-yu-xing-tai/",
+      "url": "https://zyydgrbk.top/2026/07/02/quan-mian-jian-bu-xun-lian-zhi-nan-ti-sheng-jian-bu-li-liang-yu-xing-tai/",
       "doc_type": "post",
       "tags": [
         "肩部训练",
@@ -467,7 +523,7 @@
     },
     {
       "title": "博客优化一",
-      "url": "https://zyydgrbk.top/2023/05/16/bo-ke-you-hua-yi/",
+      "url": "https://zyydgrbk.top/2023/05/16/bo-ke-you-hua/",
       "doc_type": "post",
       "tags": [],
       "excerpt": "### gitcalendar中提交次数不显示\n\n原因：github中url传回来的数据count里面为空，且为object对象\n\n解决：在gitcalendar.pug和gitcalendar-js"
@@ -497,14 +553,14 @@
     },
     {
       "title": "屏幕、窗口、文档之间的区别",
-      "url": "https://zyydgrbk.top/2023/05/16/ping-mu-、-chuang-kou-、-wen-dang-zhi-jian-de-qu-bie/",
+      "url": "https://zyydgrbk.top/2023/05/16/ping-mu-chuang-kou-wen-dang-zhi-jian-de-qu-bie/",
       "doc_type": "post",
       "tags": [],
       "excerpt": "#### 屏幕\n\n> 屏幕尺寸是屏幕的宽度和高度：显示器或移动屏幕。window.screen是保存屏幕尺寸信息的对象。\n\n- **screen.width**：屏幕的宽。\n- **screen.he"
     },
     {
       "title": "手写数字识别：从图像到神经网络",
-      "url": "https://zyydgrbk.top/2026/06/12/shou-xie-shu-zi-shi-bie-：-cong-tu-xiang-dao-shen-jing-wang-luo/",
+      "url": "https://zyydgrbk.top/2026/06/12/shou-xie-shu-zi-shi-bie-cong-tu-xiang-dao-shen-jing-wang-luo/",
       "doc_type": "post",
       "tags": [
         "手写数字识别",
@@ -526,7 +582,7 @@
     },
     {
       "title": "数据库与ODM/ORM",
-      "url": "https://zyydgrbk.top/2023/08/08/shu-ju-ku-yu-odm/orm/",
+      "url": "https://zyydgrbk.top/2023/08/08/shu-ju-ku-yu-odm-orm/",
       "doc_type": "post",
       "tags": [
         "前端 数据库"
@@ -544,14 +600,14 @@
     },
     {
       "title": "硅谷甄选平台",
-      "url": "https://zyydgrbk.top/2023/08/24/gui-gu-zhen-xuan-ping-tai/",
+      "url": "https://zyydgrbk.top/2023/08/24/huo-gu-zhen-xuan-ping-tai/",
       "doc_type": "post",
       "tags": [],
       "excerpt": "# 硅谷甄选运营平台\n\n此次教学课程为硅谷甄选运营平台项目,包含运营平台项目模板从0到1开发，以及数据大屏幕、权限等业务。\n\n此次教学课程涉及到技术栈包含***:vue3+TypeScript+vue"
     },
     {
       "title": "离职一年后的自我反思：从迷茫到自律的心路历程",
-      "url": "https://zyydgrbk.top/2026/06/24/li-zhi-yi-nian-hou-de-zi-wo-fan-si-：-cong-mi-mang-dao-zi-lv-de-xin-lu-li-cheng/",
+      "url": "https://zyydgrbk.top/2026/06/24/chi-zhi-yi-nian-hou-de-zi-wo-fan-si-cong-mi-mang-dao-zi-lu-de-xin-lu-li-cheng/",
       "doc_type": "post",
       "tags": [
         "经验总结",
@@ -607,7 +663,7 @@
     },
     {
       "title": "第16章 DOM2和DOM3",
-      "url": "https://zyydgrbk.top/di-16-zhang-dom2-he-dom3/",
+      "url": "https://zyydgrbk.top/2023/05/11/di-16-zhang-dom2-he-dom3/",
       "doc_type": "post",
       "tags": [
         "javaScript高级程序设计"
@@ -641,7 +697,7 @@
     },
     {
       "title": "第4章 变量、作用域与内存",
-      "url": "https://zyydgrbk.top/2023/04/10/di-4-zhang-bian-liang-、-zuo-yong-yu-yu-nei-cun/",
+      "url": "https://zyydgrbk.top/2023/04/10/di-4-zhang-bian-liang-zuo-yong-yu-yu-nei-cun/",
       "doc_type": "post",
       "tags": [
         "javaScript高级程序设计"
@@ -675,7 +731,7 @@
     },
     {
       "title": "第8章 对象、类与面向对象编程",
-      "url": "https://zyydgrbk.top/2023/04/16/di-8-zhang-dui-xiang-、-lei-yu-mian-xiang-dui-xiang-bian-cheng/",
+      "url": "https://zyydgrbk.top/2023/04/16/di-8-zhang-dui-xiang-lei-yu-mian-xiang-dui-xiang-bian-cheng/",
       "doc_type": "post",
       "tags": [],
       "excerpt": "## 理解对象\n\n可以通过Object的实例创建，或者直接通过字面量创建\n\n```js\n// 通过Object构造函数创建\nlet person = new Object();\nperson.name"
@@ -707,7 +763,7 @@
     },
     {
       "title": "背部肌群锻炼指南：高效动作解析",
-      "url": "https://zyydgrbk.top/2026/07/08/bei-bu-ji-qun-duan-lian-zhi-nan-：-gao-xiao-dong-zuo-jie-xi/",
+      "url": "https://zyydgrbk.top/2026/07/08/bei-bu-ji-qun-duan-lian-zhi-nan-gao-xiao-dong-zuo-jie-xi/",
       "doc_type": "post",
       "tags": [
         "健身",
@@ -720,7 +776,7 @@
     },
     {
       "title": "臀腿训练指南：四个高效健身动作",
-      "url": "https://zyydgrbk.top/2026/07/07/tun-tui-xun-lian-zhi-nan-：-si-ge-gao-xiao-jian-shen-dong-zuo/",
+      "url": "https://zyydgrbk.top/2026/07/07/tun-tui-xun-lian-zhi-nan-si-ge-gao-xiao-jian-shen-dong-zuo/",
       "doc_type": "post",
       "tags": [
         "健身",

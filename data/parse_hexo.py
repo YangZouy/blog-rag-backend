@@ -108,6 +108,64 @@ class DocumentChunk:
         )
 
 
+def _norm_title(t: str) -> str:
+    """标题归一化用于匹配：去首尾空白、合并内部空白、小写。
+    Hexo search.xml 的标题与 frontmatter title 理应一致，归一化只为容错。"""
+    return re.sub(r"\s+", " ", (t or "").strip()).lower()
+
+
+# search.xml（hexo-generator-search 产物）里 title→真实 URL 的映射，按 repo_path 缓存。
+_SEARCH_URL_CACHE: dict[str, dict[str, str]] = {}
+
+
+def _load_search_url_map(repo_path: str) -> dict[str, str]:
+    """从 Hexo 生成的 search.xml 读取「标题 → 真实相对 URL」映射。
+
+    这是 URL 的权威来源：Hexo 用 hexo-permalink-pinyin 生成的 slug 才是线上
+    真实路由。后端自己用 pypinyin 猜拼音会因多音字（自律 zi-lu vs zi-lv、
+    离职 chi-zhi vs li-zhi）和全角符号残留字节导致 slug 不一致 → 推荐阅读 404。
+    优先查这张表，猜拼音仅作兜底。
+
+    在 repo_path 下按优先级查找：public/search.xml（hexo generate 产物）→
+    .deploy_git/search.xml（hexo deploy 产物）。找不到或解析失败返回空表。
+    """
+    if repo_path in _SEARCH_URL_CACHE:
+        return _SEARCH_URL_CACHE[repo_path]
+
+    mapping: dict[str, str] = {}
+    candidates = [
+        os.path.join(repo_path, "public", "search.xml"),
+        os.path.join(repo_path, ".deploy_git", "search.xml"),
+    ]
+    xml_path = next((p for p in candidates if os.path.isfile(p)), None)
+    if xml_path is None:
+        _SEARCH_URL_CACHE[repo_path] = mapping
+        return mapping
+
+    try:
+        import xml.etree.ElementTree as ET
+
+        tree = ET.parse(xml_path)
+        for entry in tree.getroot().findall("entry"):
+            title_el = entry.find("title")
+            url_el = entry.find("url")
+            url = None
+            if url_el is not None and (url_el.text or "").strip():
+                url = url_el.text.strip()
+            else:
+                link_el = entry.find("link")
+                if link_el is not None:
+                    url = (link_el.get("href") or "").strip() or None
+            if title_el is not None and title_el.text and url:
+                mapping[_norm_title(title_el.text)] = url
+    except Exception:
+        # 解析失败不应阻断建索引，退回拼音兜底。
+        mapping = {}
+
+    _SEARCH_URL_CACHE[repo_path] = mapping
+    return mapping
+
+
 def _pinyin_slug(text: str) -> str:
     """复刻 hexo-permalink-pinyin：中文转拼音、空格转连字符、整体小写。
     多音字可能与 Hexo 有细微差异；若文章 frontmatter 显式写了 permalink，
@@ -118,23 +176,38 @@ def _pinyin_slug(text: str) -> str:
         value = _fn(text, separator="-", strict=False).lower()
     except Exception:
         value = text.lower()
-    return re.sub(r"-+", "-", re.sub(r"\s+", "-", value)).strip("-")
+    value = re.sub(r"\s+", "-", value)
+    # 只保留 [a-z0-9-]：清理全角符号（：、）经拼音转换后残留的非 ASCII 字节，
+    # 与 hexo-permalink-pinyin 剥符号的行为对齐。仅兜底用，主路径走 search.xml。
+    value = re.sub(r"[^a-z0-9-]+", "-", value)
+    return re.sub(r"-+", "-", value).strip("-")
 
 
-def _build_url(meta: dict, date, url_slug: str, is_post: bool) -> str:
+def _build_url(meta: dict, date, url_slug: str, is_post: bool,
+               title: str = "", repo_path: str = "") -> str:
     s = get_settings()
     base = s.SITE_URL.rstrip("/")
-    # 1) frontmatter 显式 permalink 最优先（最精确，避免拼音多音字偏差）
+    # 0) Hexo search.xml 权威 URL（线上真实路由，规避拼音猜测偏差）最优先。
+    if title and repo_path:
+        real = _load_search_url_map(repo_path).get(_norm_title(title))
+        if real:
+            return real if real.startswith("http") else f"{base}{real}"
+    # 1) frontmatter 显式 permalink 次优先（精确，避免拼音多音字偏差）
     permalink = meta.get("permalink") or meta.get("url")
     if permalink:
         return permalink if permalink.startswith("http") else f"{base}{permalink}"
     # 2) 文章(post)：Hexo 默认 /YYYY/MM/DD/title/ 路由
     if is_post and date is not None:
-        try:
+        y = m = day = None
+        if hasattr(date, "year"):
             y, m, day = date.year, date.month, date.day
+        else:
+            # frontmatter date 常被读成字符串 '2026-07-20 17:10:14'，提取 Y/M/D
+            match = re.match(r"\s*(\d{4})-(\d{1,2})-(\d{1,2})", str(date))
+            if match:
+                y, m, day = (int(g) for g in match.groups())
+        if y is not None:
             return f"{base}/{y:04d}/{m:02d}/{day:02d}/{url_slug}/"
-        except AttributeError:
-            pass
     # 3) 页面(page) 及其它：直接用目录路径 /slug/（如 /about/、/projects/.../）
     return f"{base}/{url_slug}/"
 
@@ -261,7 +334,8 @@ def parse_hexo_repo(repo_path: str) -> List[DocumentChunk]:
             # slug：index.md 页面用目录路径（如 about），其余用相对路径，均保证唯一
             slug = url_slug if base_name == "index" else rel_noext
             doc_type = "post" if is_post else "page"
-            url = _build_url(meta, raw_date, url_slug, is_post)
+            url = _build_url(meta, raw_date, url_slug, is_post,
+                             title=title, repo_path=repo_path)
 
             chunks.extend(
                 _split_post_into_chunks(slug, title, url, date_str, tags, body, doc_type)

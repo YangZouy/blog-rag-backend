@@ -30,10 +30,24 @@ def build_index(repo_path: str, out_path: str = DEFAULT_OUT) -> dict:
             "tags": c.tags,
             "excerpt": (c.content or "").strip()[:100],
         }
+    articles = list(by_slug.values())
+    # 校验：URL 里若残留非 ASCII 字节、以 // 结尾、或 post 缺少日期段，多半是标题没匹配上
+    # search.xml 且拼音兜底不准 → 线上 404。建索引时显式告警，避免坏链静默进向量库。
+    suspicious = [
+        a for a in articles
+        if any(ord(c) > 127 for c in a["url"])
+        or a["url"].endswith("//")
+        or (a["doc_type"] == "post" and a["url"].count("/") < 6)
+    ]
+    if suspicious:
+        print(f"⚠️  {len(suspicious)} 篇文章 URL 可疑（可能 404），请检查其标题是否已在 search.xml 中：")
+        for a in suspicious:
+            print(f"    - {a['title']!r} -> {a['url']}")
+
     index = {
         "generated_from": repo_path,
         "count": len(by_slug),
-        "articles": list(by_slug.values()),
+        "articles": articles,
     }
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
