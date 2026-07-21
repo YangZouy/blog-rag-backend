@@ -1,0 +1,24 @@
+# ---------------------------------------------------------------------------
+# 本地 / 离线依赖：ingest、build_index、eval、以及本地嵌入/重排后端。
+# Vercel 部署不安装本文件（不在 bundle 内）。
+#
+# 用法：
+#   pip install -r requirements.txt -r requirements-dev.txt
+# ---------------------------------------------------------------------------
+
+# 运行时依赖照单全收
+-r requirements.txt
+
+# 本地嵌入 / 重排后端（EMBED_BACKEND=local / RERANK_BACKEND=local）
+# 体积大头：torch 2GB+，绝不能进 Vercel bundle
+sentence-transformers>=3.0
+
+# Ingestion：Hexo Markdown + PDF 解析
+python-frontmatter>=1.0
+pypinyin>=0.50
+pymupdf>=1.24
+pdfplumber>=0.11
+requests>=2.31
+
+# Tests
+pytest>=8.0

@@ -1,0 +1,29 @@
+# 阻止本地大目录被打进 Vercel 函数 bundle（5GB→轻量的关键）。
+# Vercel 只需 requirements.txt 声明的运行时依赖，其余一律排除。
+
+# 虚拟环境（含 torch 2GB+，绝不能上传）
+.venv/
+venv/
+env/
+
+# Python 缓存与测试产物
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 本地开发 / 评测，运行时用不到
+# 注意：data/blog_index.json 运行时需要（_blog_overview 全站概览注入），勿排除
+eval/
+.codex/
+.workbuddy/
+.claude/
+
+# 文档与配置示例
+README.md
+*.md
+.env.example
+
+# 本地脚本（ingest / build_index 在本地手动跑，不随函数部署）
+# 注意：保留 api/ 与 core/，仅排除纯离线入口
