@@ -46,7 +46,7 @@ _GENERATE_PROMPT = """你是博主邹阳博客的 AI 问答助手。请根据下
 
 ## 回答要求（严格）
 1. **先给结论，再补充关键要点**；不要铺陈背景、不要机械罗列
-2. **严格控制在 300 字以内**；资料再多也只保留最核心、最相关的 3-5 个要点
+2. **严格控制在 500 字以内**；资料再多也只保留最核心、最相关的要点，技术类问题可适当展开步骤
 3. **不要以"根据检索到的资料""根据博客资料"等套话开头**，直接回答用户问题
 4. 用 Markdown 组织：分段清晰，可用 **加粗** 和 `代码` 突出关键信息，不要使用一级/二级大标题
 5. **不要在答案里写 [1][2][3] 这类引用编号**——前端会单独展示「推荐阅读」列表
@@ -72,14 +72,14 @@ _GENERATE_PROMPT = """你是博主邹阳博客的 AI 问答助手。请根据下
 ## 本轮之前的用户问题
 {history}
 
-## 回答（简洁、300字以内）"""
+## 回答（简洁、500字以内）"""
 
 # 检索为空时：没有资料可用，直接让模型自由回答
 _FREE_ANSWER_PROMPT = """你是博主邹阳博客的 AI 问答助手。当前没有检索到相关的博客内容，请直接基于你自己的知识回答用户问题。
 
 ## 回答要求（严格）
 1. 用自然、连贯的中文回答，不要铺陈背景
-2. **严格控制在 300 字以内**
+2. **严格控制在 500 字以内**
 3. **不要以"根据检索到的资料"等套话开头**，直接回答
 4. 不要写 [1][2][3] 这类引用编号
 5. 你没有实时数据和外部工具；不要输出工具调用、函数调用或 CALL 指令
@@ -95,7 +95,7 @@ _FREE_ANSWER_PROMPT = """你是博主邹阳博客的 AI 问答助手。当前没
 ## 用户问题
 {query}
 
-## 回答（简洁、300字以内）"""
+## 回答（简洁、500字以内）"""
 
 
 def _retrieve_docs(query: str, top_k: int) -> List[DocumentChunk]:
@@ -176,17 +176,14 @@ def _live_data_response() -> SearchResponse:
 
 
 def _dedupe_citations(
-    chunks: List[DocumentChunk], query: str, max_citations: int = 2
+    chunks: List[DocumentChunk], query: str, max_citations: int = 3
 ) -> List[Citation]:
     """按文章（slug）去重，返回「推荐阅读」列表。
 
-    - 完全按 rerank 后的相关性排序取前 max_citations 篇，不固定 3 篇。
-    - 不再对「关于我」做特殊置顶：博主信息已前置到前端开场白，
-      避免每个回答都硬塞关于我链接。
-    - 同一篇文章会被切成多个 chunk，但前端只需要展示一篇文章链接。
-    - **置信度门槛（CITATION_MIN_SCORE）高于上下文门槛**：只有 rerank 分数
-      足够高的文章才进推荐阅读。宁可少推、不推，也比推一堆基本不相关的
-      文章体验更好（见 P0 优化说明）。
+    入参应为 retrieved（rerank 后全部候选），而非截断后的 docs，
+    否则只在前 3 个 chunk 里找 citation，高分长文会被漏掉。
+    同一篇文章会被切成多个 chunk，但前端只需要展示一篇文章链接。
+    CITATION_MIN_SCORE 门槛：宁可少推、不推，也比推不相关的文章体验更差。
     """
     threshold = get_settings().CITATION_MIN_SCORE
     seen: set[str] = set()
@@ -215,19 +212,8 @@ def _dedupe_citations(
 def _select_generation_context(
     chunks: List[DocumentChunk], max_chunks: int
 ) -> List[DocumentChunk]:
-    """保留不同文章的最高分 chunk，控制生成上下文大小。"""
-    selected: List[DocumentChunk] = []
-    seen_slugs: set[str] = set()
-    for chunk in chunks:
-        # 同一篇文章的相邻块通常高度重叠，不重复消耗生成模型上下文。
-        identity = chunk.slug or f"{chunk.title}:{chunk.chunk_index}"
-        if identity in seen_slugs:
-            continue
-        seen_slugs.add(identity)
-        selected.append(chunk)
-        if len(selected) >= max_chunks:
-            break
-    return selected
+    """取 rerank 最高分的 top-K chunk，不限制单篇文章数量。"""
+    return chunks[:max_chunks]
 
 
 def _build_prompt(
@@ -255,7 +241,7 @@ def run_rag(
     )
     context_k = min(top_k, get_settings().GENERATION_CONTEXT_K)
     docs = _select_generation_context(retrieved, context_k)
-    citations = _dedupe_citations(docs, query)
+    citations = _dedupe_citations(retrieved, query)
     prompt, mode = _build_prompt(docs, query, history)
     try:
         with timed_stage("generate", count=len(docs)):
@@ -292,7 +278,7 @@ def stream_rag(
     )
     context_k = min(top_k, get_settings().GENERATION_CONTEXT_K)
     docs = _select_generation_context(retrieved, context_k)
-    citations = _dedupe_citations(docs, query)
+    citations = _dedupe_citations(retrieved, query)
     prompt, mode = _build_prompt(docs, query, history)
 
     # 先把「推荐阅读」推给前端，数量与答案解耦，永远不会错配

@@ -44,11 +44,14 @@ def _load_chunks() -> List[DocumentChunk]:
             break
     return chunks
 
-
+# 
 @lru_cache(maxsize=1)
 def get_bm25_index() -> Tuple[BM25Okapi, Tuple[DocumentChunk, ...]]:
     """Build a process-local index; restart after recreating the collection."""
+    # 全量scroll整个集合 不按照查询过滤，把整个集合导出一遍，
+    # 在内存里建BM25索引，靠lru_cache缓存
     chunks = _load_chunks()
+    # jieba全量分词
     corpus = [tokenize(chunk.embed_text()) for chunk in chunks]
     return BM25Okapi(corpus), tuple(chunks)
 
@@ -60,7 +63,7 @@ def search(query: str, limit: int) -> List[Tuple[DocumentChunk, float]]:
     ranked = sorted(enumerate(scores), key=lambda item: item[1], reverse=True)
     return [(chunks[position], float(score)) for position, score in ranked[:limit] if score > 0]
 
-
+# 耗时2-5s
 def warm_bm25() -> None:
     """Pre-build the BM25 index so the first request does not pay the cost."""
     logger = logging.getLogger("blog-rag")

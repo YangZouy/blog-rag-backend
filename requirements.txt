@@ -25,6 +25,8 @@ rank-bm25>=0.2.2
 jieba>=0.42.1
 sentence-transformers>=3.0
 
+# HTTP client (used by Jina rerank API backend)
+httpx>=0.27
+
 # Tests
 pytest>=8.0
-httpx>=0.27

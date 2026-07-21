@@ -15,7 +15,7 @@ from core.config import get_settings
 
 logger = logging.getLogger("blog-rag")
 
-
+# 获取qdrant客户端
 @lru_cache
 def get_qdrant() -> QdrantClient:
     s = get_settings()
@@ -28,7 +28,7 @@ def get_qdrant() -> QdrantClient:
     # 直接在python进程中开一个临时的、内存版的Qdrant 数据在内存中
     return QdrantClient(path=":memory:")
 
-
+# 用零向量query_points强制握手
 def warm_qdrant() -> None:
     """Warm the same Qdrant query path used by retrieval before serving requests."""
     s = get_settings()
@@ -40,6 +40,7 @@ def warm_qdrant() -> None:
             query=[0.0] * s.EMBED_DIM,
             limit=1,
             with_payload=False,
+            # 设置的30s 一般在1-3s
             timeout=s.QDRANT_READ_TIMEOUT,
         )
     except Exception:

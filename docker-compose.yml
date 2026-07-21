@@ -1,0 +1,76 @@
+# 阿里云轻量服务器部署编排
+# 三个服务：caddy(反代+HTTPS) / rag(FastAPI) / qdrant(本地向量库)
+# 密钥通过同目录 .env 注入（已被 .gitignore 忽略，不会进 git）
+
+services:
+  # ---------- 反代 + 自动 HTTPS ----------
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - rag
+
+  # ---------- FastAPI RAG 服务 ----------
+  rag:
+    build: .
+    restart: unless-stopped
+    # 只暴露到容器网络/本机，公网流量统一走 Caddy
+    expose:
+      - "8000"
+    environment:
+      # ---- Qdrant：默认用同机 qdrant 服务 ----
+      # 想继续用 Qdrant Cloud(EU) 的话，把下面改成你的云地址、并删掉下面的 qdrant 服务即可
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_API_KEY: ""
+      QDRANT_COLLECTION: blog_chunks
+      # ---- Embedding（智谱 embedding-3, 2048 维）----
+      EMBED_MODEL: embedding-3
+      EMBED_BASE_URL: https://open.bigmodel.cn/api/paas/v4/
+      EMBED_DIM: "2048"
+      ZHIPU_API_KEY: ${ZHIPU_API_KEY}
+      # ---- Generation（DeepSeek-chat）----
+      GEN_MODEL: deepseek-chat
+      GEN_BASE_URL: https://api.deepseek.com/v1
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      # ---- Reranker：VM 上直接用本地 CrossEncoder（无 250MB 限制）----
+      RERANK_BACKEND: local
+      HF_ENDPOINT: https://hf-mirror.com
+      # ---- 检索调优（显式写出，避免依赖代码默认值巧合相等；调参改这里即可）----
+      RETRIEVAL_CANDIDATE_K: "8"
+      GENERATION_CONTEXT_K: "5"
+      RERANK_RELEVANCE_THRESHOLD: "0.30"
+      CITATION_MIN_SCORE: "0.50"
+      CACHE_TTL: "600"
+      # ---- API 加固 ----
+      ALLOWED_ORIGINS: https://zyydgrbk.top
+      SITE_URL: https://zyydgrbk.top
+      RATE_LIMIT_PER_MIN: "10"
+      LOG_LEVEL: INFO
+      WARMUP_ON_START: "true"
+    volumes:
+      # 模型缓存持久化，避免容器重建后重新下载 bge-reranker
+      - hf_cache:/root/.cache/huggingface
+    depends_on:
+      - qdrant
+
+  # ---------- 本地 Qdrant（推荐，和 rag 同机，零跨区延迟）----------
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    expose:
+      - "6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  hf_cache:
+  qdrant_data:
+  caddy_data:
+  caddy_config:

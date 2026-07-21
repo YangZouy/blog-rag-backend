@@ -1,4 +1,15 @@
-"""FastAPI application exposing RAG search endpoints."""
+"""
+FastAPI application exposing RAG search endpoints.
+本地跑uvicorn：进程24h常驻，模型一直在内存
+vercel serverless funciton：部署的是一份打包好的函数快照
+有请求、且没有在跑的实例时：vercel临时拉起一个容器，加载代码，跑lifespan
+预热（冷启动）在服务请求
+请求处理完、空闲一小段时间（几十秒~几分钟，看套餐）→ 
+Vercel 把这个容器冻结/销毁（scale-to-zero = 没流量时缩到 0 个实例）。
+"无状态（stateless）" = 容器不保留任何东西。文件系统（含 HF 模型缓存）
+是临时的，随容器死亡被丢弃；内存里的 lru_cache、
+已加载的模型、BM25 索引，全没了。
+"""
 from __future__ import annotations
 import json
 import logging
@@ -17,7 +28,7 @@ from core.qdrant_client import warm_qdrant
 from core.rerank import warm_reranker
 s = get_settings(); logger = logging.getLogger(__name__); logging.getLogger("blog-rag").setLevel(getattr(logging, s.LOG_LEVEL.upper(), logging.INFO))
 
-
+# Vercel的@vercel/python是无状态、scale-to-zero的
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     s = get_settings()
@@ -25,11 +36,12 @@ async def lifespan(_: FastAPI):
     if s.WARMUP_ON_START:
         logger.info("warming up bm25 index and reranker model...")
         warm_bm25()
+        # cross-encoder模型加载预热
         warm_reranker()
         logger.info("warmup done")
     yield
 
-
+# 将lifespan挂给fastapi，它会在正确时机自动调用
 app = FastAPI(title="Blog RAG Search", version="1.0.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=s.allowed_origins_list, allow_methods=["POST", "GET", "OPTIONS"], allow_headers=["*"])
 @app.get("/health")

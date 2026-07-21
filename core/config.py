@@ -27,14 +27,12 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     # 召回后交给 reranker 的候选数。eval 已验证 top5 可覆盖答案，8 保留余量。
     RETRIEVAL_CANDIDATE_K: int = 8
-    # 最终送入生成模型的上下文块数；同一文章最多保留一个最高分 chunk。
-    GENERATION_CONTEXT_K: int = 3
+    # 最终送入生成模型的上下文块数
+    GENERATION_CONTEXT_K: int = 5
     # reranker 最高分低于此值时，视为没有足够相关的站内资料。
     RERANK_RELEVANCE_THRESHOLD: float = 0.30
-    # 推荐阅读（citations）的独立置信度门槛，必须高于上述阈值。
-    # 理由：context 允许「边缘相关」资料让 LLM 自行判断（它也许能救场），
-    # 但前端展示的「推荐阅读」一旦给出基本不相关的文章，比完全不推荐体验更差。
-    # 0.5 表示只有 rerank 分数相当高的文章才进推荐阅读列表。
+    # 推荐阅读（citations）的置信度门槛，作用于 _dedupe_citations 的 retrieved 全集。
+    # 生成上下文门槛（0.30）允许边缘相关；推荐阅读门槛更严，宁缺毋滥。
     CITATION_MIN_SCORE: float = 0.50
 
     # ------------------------------------------------------------------
@@ -61,6 +59,14 @@ class Settings(BaseSettings):
     QDRANT_WARMUP_ENABLED: bool = True
     # 服务启动时预加载 BM25 索引与 reranker 模型，避免首次请求冷启动
     WARMUP_ON_START: bool = True
+
+    # ------------------------------------------------------------------
+    # Reranker backend: "jina" (API, recommended for Vercel) | "local" (CrossEncoder)
+    # ------------------------------------------------------------------
+    RERANK_BACKEND: str = "local"
+    JINA_API_KEY: str = ""
+    JINA_RERANK_MODEL: str = "jina-reranker-v2-base-multilingual"
+    RERANK_API_TIMEOUT: int = 15
 
     # ------------------------------------------------------------------
     # Generation model (default: DeepSeek-chat)

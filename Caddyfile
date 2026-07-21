@@ -1,0 +1,16 @@
+# Caddy 自动签发 TLS 证书并反代到 rag 服务
+# 前提：rag.zyydgrbk.top 的 DNS 已 A 记录指向本机公网 IP，且域名已 ICP 备案
+rag.zyydgrbk.top {
+    # 反代到 compose 网络内的 rag 服务 8000 端口
+    # flush_interval -1：每次写入立即 flush，不缓冲响应。
+    # 否则 Caddy 默认会攒住 SSE 的 token 事件、结尾一次性下发，
+    # 逐 token 流式又会退化成"转圈后整段蹦出"。
+    reverse_proxy rag:8000 {
+        flush_interval -1
+    }
+
+    # 可选：限制仅允许 POST /search 等，简单留空即可
+    # log {
+    #     output stdout
+    # }
+}

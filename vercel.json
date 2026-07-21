@@ -7,9 +7,7 @@
     }
   ],
   "routes": [
-    { "src": "/search", "dest": "api/index.py" },
-    { "src": "/search/stream", "dest": "api/index.py" },
-    { "src": "/health", "dest": "api/index.py" }
+    { "src": "/(.*)", "dest": "api/index.py" }
   ],
   "maxDuration": 60,
   "env": {
