@@ -20,6 +20,7 @@ from core.embeddings import get_embeddings
 from core.qdrant_client import ensure_collection, get_qdrant
 from data.parse_hexo import parse_hexo_repo
 from data.parse_pdf import parse_pdfs
+from api.build_index import build_index
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ingest")
@@ -71,6 +72,12 @@ def run_ingest(repo_path: str, recreate: bool = False) -> int:
             timeout=s.QDRANT_WRITE_TIMEOUT,
         )
     logger.info("ingested %d chunks into '%s'", len(points), s.QDRANT_COLLECTION)
+    # 同步刷新全站文章清单（供生成链路注入「本站文章概览」，详见 P3）
+    try:
+        idx = build_index(repo_path)
+        logger.info("built blog index: %d articles", idx["count"])
+    except Exception:
+        logger.warning("blog index build skipped (non-fatal)", exc_info=True)
     return len(points)
 
 
@@ -83,8 +90,18 @@ def main() -> None:
         action="store_true",
         help="drop and recreate the collection before ingest (use after URL/schema changes)",
     )
+    parser.add_argument(
+        "--collection",
+        default=None,
+        help="override QDRANT_COLLECTION for this run (e.g. an experimental "
+        "small-dim collection). Useful for A/B comparisons without clobbering prod.",
+    )
     args = parser.parse_args()
     # 取出用户传进来的值
+    if args.collection:
+        # 同一进程内所有 get_settings() 调用共享该单例，覆盖后 ensure_collection
+        # 与 upsert 都会指向新的 collection，无需改其它代码。
+        get_settings().QDRANT_COLLECTION = args.collection
     n = run_ingest(args.repo, recreate=args.recreate)
     print(f"ingested {n} chunks")
     sys.exit(0 if n >= 0 else 1)

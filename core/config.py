@@ -31,17 +31,28 @@ class Settings(BaseSettings):
     GENERATION_CONTEXT_K: int = 3
     # reranker 最高分低于此值时，视为没有足够相关的站内资料。
     RERANK_RELEVANCE_THRESHOLD: float = 0.30
+    # 推荐阅读（citations）的独立置信度门槛，必须高于上述阈值。
+    # 理由：context 允许「边缘相关」资料让 LLM 自行判断（它也许能救场），
+    # 但前端展示的「推荐阅读」一旦给出基本不相关的文章，比完全不推荐体验更差。
+    # 0.5 表示只有 rerank 分数相当高的文章才进推荐阅读列表。
+    CITATION_MIN_SCORE: float = 0.50
 
     # ------------------------------------------------------------------
     # Embedding model (default: 智谱 embedding-3, 2048-dim)
     # 8192 tokens 的输入 编码格式：float或base64
     # API限制：每次最多64条文本
     # ------------------------------------------------------------------
+    # 嵌入后端切换：zhipu（远程 API，默认）/ local（本地 sentence-transformers）
+    EMBED_BACKEND: str = "zhipu"
     EMBED_MODEL: str = "embedding-3"
     EMBED_BASE_URL: str = "https://open.bigmodel.cn/api/paas/v4/"
     EMBED_DIM: int = 2048
     EMBED_BATCH_SIZE: int = 64
     ZHIPU_API_KEY: str = ""
+    # 本地嵌入模型（仅当 EMBED_BACKEND=local 时生效），如 BAAI/bge-small-zh-v1.5 (512维)
+    EMBED_LOCAL_MODEL: str = "BAAI/bge-small-zh-v1.5"
+    # bge 系列建议给查询加的前缀（提升检索质量）；文档侧不加。
+    EMBED_LOCAL_QUERY_PREFIX: str = "为这个句子生成表示以用于检索："
     QDRANT_UPSERT_BATCH_SIZE: int = 32
     QDRANT_WRITE_TIMEOUT: int = 120
     # 单次 Qdrant 请求超时（秒）。云端 TLS 冷连接握手可能 >3s，过短会 SSL 握手超时；

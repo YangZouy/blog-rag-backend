@@ -22,6 +22,9 @@ class Citation(BaseModel):
     url: str
     snippet: str = ""
     source: Literal["post", "page", "pdf", "web"] = "post"
+    # rerank 相关性分数（0~1）。用于前端按置信度展示/排序，也作为
+    # CITATION_MIN_SCORE 过滤的依据。未经过滤时为 rerank 原始分数。
+    score: float = 0.0
 
 
 class SearchResponse(BaseModel):

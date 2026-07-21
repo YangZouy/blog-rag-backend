@@ -1,0 +1,784 @@
+{
+  "generated_from": "D:/Blog",
+  "count": 81,
+  "articles": [
+    {
+      "title": "关于我",
+      "url": "https://zyydgrbk.top/about/",
+      "doc_type": "page",
+      "tags": [],
+      "excerpt": "## 个人历程\n\n邹阳，21届延大数字媒体本科，24届西交软件工程硕，有全栈和模型训练经历，1篇专利，1年前端开发（途虎养车），1年gap。\n\n22年到24年毕业前夕，根据大部分师兄师姐就业情况，选定"
+    },
+    {
+      "title": "AI内容分发自动化助手",
+      "url": "https://zyydgrbk.top/projects/ai-content-distribution/",
+      "doc_type": "page",
+      "tags": [],
+      "excerpt": "## 项目简介\n\nAI内容分发自动化助手，核心目标是把「写完一篇内容之后的重复发布动作」尽可能自动化，减少格式适配、图片处理、摘要补充、封面整理和多平台同步的时间成本。\n\n当前项目主要覆盖：\n\n- 从"
+    },
+    {
+      "title": "Figma智能批量产图平台",
+      "url": "https://zyydgrbk.top/projects/figma-batch-render/",
+      "doc_type": "page",
+      "tags": [],
+      "excerpt": "## 项目简介\n\nFigma智能批量产图平台，核心目标是让设计稿从「一次性产出」变成「可模板化、可数据驱动、可批量渲染」的素材生产流程，降低设计师与素材团队之间的协作成本。\n\n当前项目主要覆盖：\n\n-"
+    },
+    {
+      "title": "Agentic AI：大语言模型驱动的智能体系统解析",
+      "url": "https://zyydgrbk.top/2026/07/08/agentic-ai：-da-yu-yan-mo-xing-qu-dong-de-zhi-neng-ti-xi-tong-jie-xi/",
+      "doc_type": "post",
+      "tags": [
+        "AI实践",
+        "智能体系统",
+        "任务分解",
+        "工具调用",
+        "多智能体协作"
+      ],
+      "excerpt": "## 核心定义\n\n**Agentic AI** 是基于大语言模型构建，通过多步骤工作流完成复杂任务的智能系统。它模仿人类解决问题的自然过程，将复杂任务拆解为多个步骤，通过规划、执行、反思、修正的循环逐"
+    },
+    {
+      "title": "Agent评测：多轮推理与任务完成能力的全面解析",
+      "url": "https://zyydgrbk.top/2026/06/11/agent-ping-ce-：-duo-lun-tui-li-yu-ren-wu-wan-cheng-neng-li-de-quan-mian-jie-xi/",
+      "doc_type": "post",
+      "tags": [
+        "AI实践",
+        "评测方法",
+        "多轮推理",
+        "任务完成",
+        "稳定性"
+      ],
+      "excerpt": "## 一句话理解\n\nAgent 评测的重点，不是看模型\"会不会回答\"，而是看它**能不能稳定地把事情做成**。\n\n因为 Agent 会多轮推理、调用工具、修改环境、连续决策，所以评测必须覆盖**完整任"
+    },
+    {
+      "title": "AI-for-Everyone：从基础概念到社会影响的全面解析",
+      "url": "https://zyydgrbk.top/2026/07/08/ai-for-everyone：-cong-ji-chu-gai-nian-dao-she-hui-ying-xiang-de-quan-mian-jie-xi/",
+      "doc_type": "post",
+      "tags": [
+        "AI基础",
+        "生成式AI",
+        "机器学习",
+        "数据科学",
+        "AI伦理"
+      ],
+      "excerpt": "### AI的分类\n\n**ANI（狭义人工智能）**：专注于单一特定任务的智能系统，如图像识别、语音助手等。\n\n**AGI（通用人工智能）**：具备人类水平或超越人类的通用认知能力，能够完成人类能做的"
+    },
+    {
+      "title": "AI内容分发自动化助手评测",
+      "url": "https://zyydgrbk.top/2026/06/18/ai-nei-rong-fen-fa-zi-dong-hua-zhu-shou-ping-ce/",
+      "doc_type": "post",
+      "tags": [
+        "AI",
+        "内容分发",
+        "自动化",
+        "效率提升",
+        "评测"
+      ],
+      "excerpt": "### 1.1 评测范围\n\n本轮手工基线共覆盖 8 篇文章，输入方式分布如下：\n\n- 本地 Obsidian：4 篇\n- 飞书链接：2 篇\n- 带外链 Markdown：2 篇\n\n所有样本均以\"博客可"
+    },
+    {
+      "title": "AI基础知识：从n-grams到Transformer",
+      "url": "https://zyydgrbk.top/2026/06/12/ai-ji-chu-zhi-shi-：-cong-n-grams-dao-transformer/",
+      "doc_type": "post",
+      "tags": [
+        "AI",
+        "语言模型",
+        "n-grams",
+        "神经网络",
+        "Transformer"
+      ],
+      "excerpt": "## 基于统计方法的语言模型\n\n**n-grams 语言模型**基于马尔可夫假设和离散变量的极大似然估计给出词元的预测概率。\n\n$$P\\text {n-}grams(w_{1}:N)=\\prod _{"
+    },
+    {
+      "title": "Bom&&Dom",
+      "url": "https://zyydgrbk.top/2023/05/20/bom&&dom/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "{% pdf /pdf/dom&bom-day1.pdf %}\n\n{% pdf /pdf/dom&bom-day2.pdf %}\n\n{% pdf /pdf/dom&bom-day3.pdf %}\n\n{"
+    },
+    {
+      "title": "Chain-of-Thought Prompting 论文详读",
+      "url": "https://zyydgrbk.top/2026/06/11/chain-of-thought-prompting-lun-wen-xiang-du/",
+      "doc_type": "post",
+      "tags": [
+        "AI实践",
+        "大语言模型",
+        "推理能力",
+        "Prompting",
+        "NeurIPS 2022"
+      ],
+      "excerpt": "## 论文信息\n\n- 标题：**Chain-of-Thought Prompting Elicits Reasoning in Large Language Models**\n- 中文可粗译为：**思"
+    },
+    {
+      "title": "CNN for sentence classification",
+      "url": "https://zyydgrbk.top/2023/05/26/cnn-for-sentence-classification/",
+      "doc_type": "post",
+      "tags": [
+        "论文 kimCNN"
+      ],
+      "excerpt": "# Convolutional Neural Networks for Sentence Classification\n\n2014年"
+    },
+    {
+      "title": "CNN解读",
+      "url": "https://zyydgrbk.top/2023/05/26/cnn-jie-du/",
+      "doc_type": "post",
+      "tags": [
+        "论文 cnn"
+      ],
+      "excerpt": "### 作用\n\n将图片分割成不同的区域，对于每个小区域，它对应的特征是不一样的，选择一种计算方法，对每个小区域，它应该的特征值是等于多少的。\n\n图像颜色通道\n\nRGB（3 channel）所以一般来说"
+    },
+    {
+      "title": "express",
+      "url": "https://zyydgrbk.top/2023/08/07/express/",
+      "doc_type": "post",
+      "tags": [
+        "前端 框架"
+      ],
+      "excerpt": "# Express\n\n一、服务端网页编程\n\n1、什么是一个web服务器\n\n前面已经记录，看笔记，如果不太好记得再来整理一下\n\n[什么是 web 服务器？ - 学习 Web 开发 | MDN (mozi"
+    },
+    {
+      "title": "Figma智能批量产图平台产品设计",
+      "url": "https://zyydgrbk.top/2026/06/18/figma-zhi-neng-pi-liang-chan-tu-ping-tai-chan-pin-she-ji/",
+      "doc_type": "post",
+      "tags": [
+        "Figma",
+        "自动化",
+        "设计工具",
+        "批量处理",
+        "素材生成"
+      ],
+      "excerpt": "### 1.1 需求说明\n\n业务侧素材生产需求增长，尤其在商品单元、活动素材大量扩张后，同一套设计版式经常需要替换不同商品图、价格、利益点、标题和活动信息，生成大量近似但内容不同的图片。\n\n传统流程通"
+    },
+    {
+      "title": "github新建仓库并push本地代码过程",
+      "url": "https://zyydgrbk.top/2023/08/10/github-xin-jian-cang-ku-bing-push-ben-di-dai-ma-guo-cheng/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "一、初始化\n\n在项目的根目录下git bash\n\n```\ngit init\n```\n\n二、github上新建仓库\n\n直接new一个新的仓库 添加url以及描述 不添加readme\n\n获取远程仓库的链接"
+    },
+    {
+      "title": "http接口平台开发",
+      "url": "https://zyydgrbk.top/2023/08/10/http-jie-kou-ping-tai-kai-fa/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "## 一、框架搭建\n\n前端vue\n\n```\n// 基本框架\n// 安装vue-cli\nnpm install -g @vue/cli\n// 创建项目\n// vue create http-fronte"
+    },
+    {
+      "title": "transformers库以及pytorch的安装与使用",
+      "url": "https://zyydgrbk.top/2023/06/24/transformers-ku-yi-ji-pytorch-de-an-zhuang-yu-shi-yong/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "## 卸载包\n\nconda remove package-name\n\nconda uninstall 库名（该库以及依赖库一起删除）\n\nconda uninstall 库名 --force （仅卸载该"
+    },
+    {
+      "title": "js深入-ife.baidu.com",
+      "url": "https://zyydgrbk.top/2023/09/13/js-shen-ru-ife.baidu.com/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "## 闭包和IIFE\n\n- 高阶函数\n\n参数或者返回值为函数的函数\n\n- 头等函数\n\n当一门编程语言的函数可以被当作变量一样用时，则称这门语言拥有**头等函数**。在这门语言中，函数可以被当作参数传递"
+    },
+    {
+      "title": "js补充",
+      "url": "https://zyydgrbk.top/2023/06/12/js-bu-chong/",
+      "doc_type": "post",
+      "tags": [
+        "前端 javascript"
+      ],
+      "excerpt": "# 前端知识补充\n\n听的内容是B站里面的课程——javascript李立超，之前直接看的javascript高级（第四版）虽然看的还是比较仔细了，但是有些内容可能直接看书有没有理解的地方，现在听下课会"
+    },
+    {
+      "title": "linux命令",
+      "url": "https://zyydgrbk.top/2023/06/18/linux-ming-ling/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "### 查看服务器CUDA最高版本\n\nnvidia-smi\n\n可以查看到我的服务器CUDA Version: 11.7"
+    },
+    {
+      "title": "neuralcoref的安装与使用",
+      "url": "https://zyydgrbk.top/2023/12/03/neuralcoref-de-an-zhuang-yu-shi-yong/",
+      "doc_type": "post",
+      "tags": [
+        "论文"
+      ],
+      "excerpt": "## neuralcoref安装\n\n版本\n\nspacy 2.1.0\n\nneuralcoref 4.0\n\nen_core_web_sm-2.1.0\n\npython 3.7\n\n1、新建conda 虚拟环境"
+    },
+    {
+      "title": "nodejs",
+      "url": "https://zyydgrbk.top/2023/09/02/nodejs/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "Nodejs内容\n\n博客笔记：[01 【nodejs简介】 | dselegent-blog](https://blog.dselegent.cf/back_end/nodeJs/01.html)\n\n"
+    },
+    {
+      "title": "openclaw安装及简单了解",
+      "url": "https://zyydgrbk.top/2026/06/12/openclaw-an-zhuang-ji-jian-dan-liao-jie/",
+      "doc_type": "post",
+      "tags": [
+        "openclaw AI实践 AI应用 AI辅助工具"
+      ],
+      "excerpt": "## 简介\n\nOpenClaw是一个开源、可本地部署的自主AI Agent框架，相当于机器人的操作系统与躯体，让机器人拥有长期记忆、操作本地文件并在设备上持续运行的能力。"
+    },
+    {
+      "title": "Perplexity产品研究与分析方法总结",
+      "url": "https://zyydgrbk.top/2026/06/24/perplexity-chan-pin-yan-jiu-yu-fen-xi-fang-fa-zong-jie/",
+      "doc_type": "post",
+      "tags": [
+        "AI搜索",
+        "产品分析",
+        "商业模式",
+        "用户体验",
+        "技术核心"
+      ],
+      "excerpt": "# Perplexity产品研究与分析方法总结\n\n以下内容是个人使用后得到的结论，目前没有任何别的参考，基于纯体验思考和官网信息等得出。\n\n文章主要分为两部分：前半部分是对 Perplexity 产品"
+    },
+    {
+      "title": "Promise理论及手写",
+      "url": "https://zyydgrbk.top/2023/06/10/promise-li-lun-ji-shou-xie/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "### 错误的类型\n\nError：所有错误的父类型\n\nReferenceError：引用的变量不存在\n\nTypeError：数据类型不正确\n\n```js\nlet b\nconsole.log(b.xxx"
+    },
+    {
+      "title": "Prompt工程完全指南",
+      "url": "https://zyydgrbk.top/2026/06/18/prompt-gong-cheng-wan-quan-zhi-nan/",
+      "doc_type": "post",
+      "tags": [
+        "AI实践",
+        "Prompt设计",
+        "机器学习",
+        "自然语言处理",
+        "技术指南"
+      ],
+      "excerpt": "## Prompt的组成要素\n\n一个完整的Prompt通常包含以下四个核心部分：\n\n- **任务说明** - 具体的任务要求\n- **上下文** - 任务的相关背景，包括知识前提、受众、任务示例或有助"
+    },
+    {
+      "title": "RAG 检索增强生成技术详解",
+      "url": "https://zyydgrbk.top/2026/06/12/rag-jian-suo-zeng-qiang-sheng-cheng-ji-zhu-xiang-jie/",
+      "doc_type": "post",
+      "tags": [
+        "AI实践",
+        "知识检索",
+        "生成技术",
+        "大语言模型",
+        "个性化知识库"
+      ],
+      "excerpt": "## 定义\n\n**检索增强生成**（Retrieval-Augmented Generation，RAG）是一种从外部数据库检索出相关信息来辅助改善LLM生成质量的系统。"
+    },
+    {
+      "title": "react学习",
+      "url": "https://zyydgrbk.top/2023/08/16/react-xue-xi/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "# react学习路径\n\n一份很好的前后端学习笔记：个人博客，react笔记是尚硅谷中的笔记 但不是很详细\n\n[React应用(基于React脚手架) (gitee.io)](https://brig"
+    },
+    {
+      "title": "react学习二",
+      "url": "https://zyydgrbk.top/2023/08/16/react-xue-xi-er/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "## 引言\n\n在了解了 Antd 组件库之后，我们现在开始学习了 Redux ，在我们之前写的案例当中，例如：todolist 案例，GitHub 搜索案例当中，我们对于状态的管理，都是通过 stat"
+    },
+    {
+      "title": "react脚手架配置代理总结",
+      "url": "https://zyydgrbk.top/2023/08/17/react-jiao-shou-jia-pei-zhi-dai-li-zong-jie/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "## 方法一\n\n> 在package.json中追加如下配置\n\n```json\n\"proxy\":\"http://localhost:5000\"\n```\n\n说明：\n\n1. 优点：配置简单，前端请求资源时"
+    },
+    {
+      "title": "ReAct：语言模型中合成推理和行动的创新架构",
+      "url": "https://zyydgrbk.top/2026/06/12/react：-yu-yan-mo-xing-zhong-he-cheng-tui-li-he-xing-dong-de-chuang-xin-jia-gou/",
+      "doc_type": "post",
+      "tags": [
+        "AI实践",
+        "语言模型",
+        "推理与行动",
+        "知识密集型任务",
+        "决策任务"
+      ],
+      "excerpt": "## Abstract\n\n语言模型中的**reasoning**（例如CoT等）和**acting**（action plan等）作为了单独的研究课题。本文探索LLM以交错的方式生成**推理轨迹**（"
+    },
+    {
+      "title": "typescript-李立超老师",
+      "url": "https://zyydgrbk.top/2023/06/05/typescript-li-li-chao-lao-shi/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "## **TypeScript中的基本类型**\n\n- 类型声明\n\n  - 类型声明是TS非常重要的一个特点；\n\n  - 通过类型声明可以指定TS中变量（参数、形参）的类型；\n\n  - 指定类型后，当为"
+    },
+    {
+      "title": "Vue.js源码解析一",
+      "url": "https://zyydgrbk.top/2023/05/23/vue.js-yuan-ma-jie-xi-yi/",
+      "doc_type": "post",
+      "tags": [
+        "Vue 前端"
+      ],
+      "excerpt": "# 依赖追踪\n\n前三章主要讲解的是响应式系统，vue侦测数据的变化，当数据变化时，会通知视图进行响应的更新。\n\n侦测一个对象的变化 Object.defineProperty(后面会使用ES6的Pro"
+    },
+    {
+      "title": "Vue.js设计与实现",
+      "url": "https://zyydgrbk.top/2023/04/21/vue.js-she-ji-yu-shi-xian/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "### 第一章：权衡的艺术\n\n框架的设计，本身就是一种权衡的艺术。\n\n命令式与声明式\n\n命令式：关注过程\n\n```js\nconst div = document.querySelector('#app"
+    },
+    {
+      "title": "webpack5",
+      "url": "https://zyydgrbk.top/2023/08/22/webpack5/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "为什么引入webpack\n\n必须了解ES6的模块化语法\n\n[ES6的模块化语法 - 掘金 (juejin.cn)](https://juejin.cn/post/6844903810549170190"
+    },
+    {
+      "title": "一文多发产品调研",
+      "url": "https://zyydgrbk.top/2026/04/26/yi-wen-duo-fa-chan-pin-diao-yan/",
+      "doc_type": "post",
+      "tags": [
+        "一文多发",
+        "创作者工具",
+        "内容分发",
+        "产品设计"
+      ],
+      "excerpt": "### 1. 产品定位\n\n面向知识型长文创作者的一文多发 Agent，输入 word 笔记，**内容增强**、自动适配不同平台并自动分发。"
+    },
+    {
+      "title": "一文多发助手2.0产品设计",
+      "url": "https://zyydgrbk.top/2026/06/18/yi-wen-duo-fa-zhu-shou-2.0-chan-pin-she-ji/",
+      "doc_type": "post",
+      "tags": [
+        "技术教程",
+        "内容管理",
+        "自动化",
+        "Markdown",
+        "Obsidian"
+      ],
+      "excerpt": "### 1.1 产品定位与价值主张\n\n**产品定位**\n\n面向个人知识型创作者的内容分发自动化工具，支持从飞书链接、带外链的Markdown文档、本地Obsidian文档三种来源输入，自动完成内容解析"
+    },
+    {
+      "title": "一文多发助手2.0开发全记录",
+      "url": "https://zyydgrbk.top/2026/06/07/yi-wen-duo-fa-zhu-shou-2.0-kai-fa-quan-ji-lu/",
+      "doc_type": "post",
+      "tags": [
+        "技术教程",
+        "项目实战",
+        "内容管理",
+        "自动化",
+        "工具选型"
+      ],
+      "excerpt": "### 1.1 浏览器插件方案\n\n最初调研过 `wechatsync` 这类浏览器插件方案。它的思路是在浏览器层拦截内容，再一键同步到多个平台。\n\n**优点**\n\n- 轻量，安装后即可使用，无需额外搭"
+    },
+    {
+      "title": "一文多发助手2.0技术实现详解",
+      "url": "https://zyydgrbk.top/2026/06/12/yi-wen-duo-fa-zhu-shou-2.0-ji-shu-shi-xian-xiang-jie/",
+      "doc_type": "post",
+      "tags": [
+        "技术实现",
+        "Dify workflow",
+        "Node.js",
+        "自动化发布",
+        "架构设计"
+      ],
+      "excerpt": "### 1.1 整体架构\n\n2.0版本采用\"Dify workflow + Node.js客户端\"的双层架构：\n\n```text\n用户\n  ↓\nNode.js（本地）\n  ↓ HTTP API调用\nD"
+    },
+    {
+      "title": "一文多发助手MVP实践报告",
+      "url": "https://zyydgrbk.top/2026/05/13/yi-wen-duo-fa-zhu-shou-mvp-shi-jian-bao-gao/",
+      "doc_type": "post",
+      "tags": [
+        "技术教程",
+        "内容管理",
+        "自动化",
+        "多平台发布",
+        "MVP实践"
+      ],
+      "excerpt": "### 一、文档信息\n\n- **版本**：v0.1 MVP\n- **状态**：已验证跑通（个人博客、微信公众号）\n- **撰写人**：邹阳\n- **日期**：2026-04-23"
+    },
+    {
+      "title": "为什么广度优先遍历得到的是最短路径",
+      "url": "https://zyydgrbk.top/2023/04/15/wei-shen-me-guang-du-you-xian-bian-li-de-dao-de-shi-zui-duan-lu-jing/",
+      "doc_type": "post",
+      "tags": [
+        "leetcode刷题"
+      ],
+      "excerpt": "为什么广度优先遍历得到的是最短路径\t\t\t\n\n假设我们需要找到从A到G的最短路径：\n\n<img src=\"https://img-blog.csdnimg.cn/20200310114505306.gi"
+    },
+    {
+      "title": "健身第一课：背部训练指南",
+      "url": "https://zyydgrbk.top/2026/07/01/jian-shen-di-yi-ke-：-bei-bu-xun-lian-zhi-nan/",
+      "doc_type": "post",
+      "tags": [
+        "健身",
+        "背部训练",
+        "力量训练",
+        "健身教程",
+        "肌肉锻炼"
+      ],
+      "excerpt": "### 动作一：直臂下压\n\n**训练参数**\n- 15个/组，每次4-5组\n- 目前力量三片，后续随着力量增加进行调配\n\n**姿势讲解**\n\n掌根握住手柄，拉绳索与肩平齐时后退两步，做好准备姿势。\n\n"
+    },
+    {
+      "title": "全面肩部训练指南：提升肩部力量与形态",
+      "url": "https://zyydgrbk.top/2026/07/02/quan-mian-jian-bu-xun-lian-zhi-nan-：-ti-sheng-jian-bu-li-liang-yu-xing-tai/",
+      "doc_type": "post",
+      "tags": [
+        "肩部训练",
+        "健身",
+        "力量训练",
+        "动作指导",
+        "健身技巧"
+      ],
+      "excerpt": "### 姿势讲解\n\n- 手臂放下时绷紧沉肩，大臂小臂间些微弯曲\n- 手臂向外展时与肩平齐，感受肩部发力\n- 打造肩宽，帮助塑造 **直角肩** 视觉\n- 匀速上下\n\n> 💡 这个动作主要针对三角肌中束"
+    },
+    {
+      "title": "写练手项目时遇见的问题",
+      "url": "https://zyydgrbk.top/2023/08/17/xie-lian-shou-xiang-mu-shi-yu-jian-de-wen-ti/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "## github搜索页面\n\n1、端口号没有设为3000默认端口 然后axios连接数据时获取不到\n\n疑问：默认端口转换之后 webpack server中间代理服务器的端口号是否改变\n\n2、项目第二"
+    },
+    {
+      "title": "刷题掌握的技能",
+      "url": "https://zyydgrbk.top/2023/04/26/shua-ti-zhang-wo-de-ji-neng/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "## 1、输入\n\n```java\nScanner sc = new Scanner(System.in);\n// 获取字符串\nString str = sc.nextLine();\n// 获取整数\ni"
+    },
+    {
+      "title": "前端巩固",
+      "url": "https://zyydgrbk.top/2023/09/15/qian-duan-gong-gu/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "## 防抖\n\n```js\nconst debounce = (fn,delay) => {\n    let timeout = null\n        return function(...args"
+    },
+    {
+      "title": "博客优化一",
+      "url": "https://zyydgrbk.top/2023/05/16/bo-ke-you-hua-yi/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "### gitcalendar中提交次数不显示\n\n原因：github中url传回来的数据count里面为空，且为object对象\n\n解决：在gitcalendar.pug和gitcalendar-js"
+    },
+    {
+      "title": "博客优化二",
+      "url": "https://zyydgrbk.top/2026/03/27/bo-ke-you-hua-er/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "### 搭建流程如下\n\ngithub + hexo  \n教程链接：(20 封私信 / 20 条消息) 从零开始搭建个人博客（超详细） - 知乎\n\n1、拥有自己的github账号<br>\n<img sr"
+    },
+    {
+      "title": "图与图学习",
+      "url": "https://zyydgrbk.top/2023/11/06/tu-yu-tu-xue-xi/",
+      "doc_type": "post",
+      "tags": [
+        "论文"
+      ],
+      "excerpt": "### 图的定义\n\n图表示物件与物件之间的关系的数学对象，是图论的基本研究对象。  \n图可用于表示:  \n\n- 社交网络  \n- 网页  \n- 生物网络  \n- …  \n\n我们可以在图上执行怎样的分析"
+    },
+    {
+      "title": "基础算法题的归纳总结",
+      "url": "https://zyydgrbk.top/2023/10/09/ji-chu-suan-fa-ti-de-gui-na-zong-jie/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "### 简单排序\n\n每次都找到最小值放置到对应的数组位置上即可\n\n```java\n// 这里需要找n-1趟就可以了 因为最后一个默认已经到了最后的位置\nfor(int i = 0;i<arr.leng"
+    },
+    {
+      "title": "屏幕、窗口、文档之间的区别",
+      "url": "https://zyydgrbk.top/2023/05/16/ping-mu-、-chuang-kou-、-wen-dang-zhi-jian-de-qu-bie/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "#### 屏幕\n\n> 屏幕尺寸是屏幕的宽度和高度：显示器或移动屏幕。window.screen是保存屏幕尺寸信息的对象。\n\n- **screen.width**：屏幕的宽。\n- **screen.he"
+    },
+    {
+      "title": "手写数字识别：从图像到神经网络",
+      "url": "https://zyydgrbk.top/2026/06/12/shou-xie-shu-zi-shi-bie-：-cong-tu-xiang-dao-shen-jing-wang-luo/",
+      "doc_type": "post",
+      "tags": [
+        "手写数字识别",
+        "神经网络",
+        "MNIST",
+        "机器学习",
+        "深度学习"
+      ],
+      "excerpt": "# 手写数字识别\n\n数据集MNIST\n\n图片：28*28像素 灰度值：0~255之间 每张图片带有一个标记，就是该图片的真实值\n\n训练集：6万张\n\n测试集：1万张\n\n**思考**：通过不同的神经网络进"
+    },
+    {
+      "title": "掌控习惯阅读笔记",
+      "url": "https://zyydgrbk.top/2023/08/15/zhang-kong-xi-guan-yue-du-bi-ji/",
+      "doc_type": "post",
+      "tags": [
+        "读书笔记"
+      ],
+      "excerpt": "# 掌控习惯：如何养成好习惯并戒除坏习惯\n\n先说说看这本书的缘由，由于种种原因，我从2023年7月15号到北京，到今天8月15号整整一个月的时间，并没有做多少重要的事情，但是这是一个很关键的时间节点，"
+    },
+    {
+      "title": "数据库与ODM/ORM",
+      "url": "https://zyydgrbk.top/2023/08/08/shu-ju-ku-yu-odm/orm/",
+      "doc_type": "post",
+      "tags": [
+        "前端 数据库"
+      ],
+      "excerpt": "### 基础知识\n\nC++编写 \n\n基于**分布式文件**存储的开源数据库系统\n\n将数据存储为一个文档， 数据结构由键值对组成，MongoDB文档类似于JSON对象\n\n数据库分类\n\n- 关系型 RDB"
+    },
+    {
+      "title": "深入理解现代浏览器",
+      "url": "https://zyydgrbk.top/2023/09/21/shen-ru-li-jie-xian-dai-liu-lan-qi/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "# 深入理解现代浏览器\n\n转载，非原创，最后连接在结尾。\n\n好了，言归正传。本文分4个部分，对应上述4篇文章（原文链接附后）。\n\n- 架构：以Chrome为例，介绍现代浏览器的实现架构。\n- 导航：从"
+    },
+    {
+      "title": "硅谷甄选平台",
+      "url": "https://zyydgrbk.top/2023/08/24/gui-gu-zhen-xuan-ping-tai/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "# 硅谷甄选运营平台\n\n此次教学课程为硅谷甄选运营平台项目,包含运营平台项目模板从0到1开发，以及数据大屏幕、权限等业务。\n\n此次教学课程涉及到技术栈包含***:vue3+TypeScript+vue"
+    },
+    {
+      "title": "离职一年后的自我反思：从迷茫到自律的心路历程",
+      "url": "https://zyydgrbk.top/2026/06/24/li-zhi-yi-nian-hou-de-zi-wo-fan-si-：-cong-mi-mang-dao-zi-lv-de-xin-lu-li-cheng/",
+      "doc_type": "post",
+      "tags": [
+        "经验总结",
+        "职业发展",
+        "自我提升",
+        "心路历程",
+        "职场反思"
+      ],
+      "excerpt": "# 离职一年的思考：从迷茫到自律的心路历程\n\n从去年5月30号离职那天，到如今已经一年零一个月，时间很长，我经历了几个时期：离职前规划、前期执行一部分、到迷茫、到无序、到执行、到些微自律。\n\n期间有段"
+    },
+    {
+      "title": "第10章 函数",
+      "url": "https://zyydgrbk.top/2023/04/23/di-10-zhang-han-shu/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "## 函数定义\n\n```js\n// 函数声明式定义\nfunction sum(num1, num2) {\n\treturn num1 + num2;\t\n}\n// 函数表达式定义 注意：这里函数末尾是有分"
+    },
+    {
+      "title": "第11章 期约与异步函数",
+      "url": "https://zyydgrbk.top/2023/05/05/di-11-zhang-qi-yue-yu-yi-bu-han-shu/",
+      "doc_type": "post",
+      "tags": [
+        "javaScript高级程序设计"
+      ],
+      "excerpt": "# 第十一章：期约和异步函数\n\njs的异步行为会推入一个队列中，当前同步代码执行完毕之后，会执行队列中的异步代码，ES6之前多用回调完成异步操作。"
+    },
+    {
+      "title": "第12章 BOM",
+      "url": "https://zyydgrbk.top/2023/05/08/di-12-zhang-bom/",
+      "doc_type": "post",
+      "tags": [
+        "javaScript高级程序设计"
+      ],
+      "excerpt": "# 第12章：BOM\n\n语法糖含义：相当于汉语里面的成语，即用更加简练的言语表达较复杂的含义，在得到广泛接受的情况下，可以提升交流的效率。"
+    },
+    {
+      "title": "第14章 DOM",
+      "url": "https://zyydgrbk.top/2023/05/08/di-14-zhang-dom/",
+      "doc_type": "post",
+      "tags": [
+        "javaScript高级程序设计"
+      ],
+      "excerpt": "## 节点层级\n\n任何HTML或XML文档都可以用DOM表示为一个由节点构成的层级结构。document节点表示每个文档的根节点。根节点的唯一子节点是html元素，我们称之为文档元素（document"
+    },
+    {
+      "title": "第15章 DOM扩展",
+      "url": "https://zyydgrbk.top/2023/05/08/di-15-zhang-dom-kuo-zhan/",
+      "doc_type": "post",
+      "tags": [
+        "javaScript高级程序设计"
+      ],
+      "excerpt": "### querySelector()\n\n接受CSS选择符参数，返回匹配该模式的第一个后代元素。\n\n```js\n// 获取body元素\nlet body = document.querySelecto"
+    },
+    {
+      "title": "第16章 DOM2和DOM3",
+      "url": "https://zyydgrbk.top/di-16-zhang-dom2-he-dom3/",
+      "doc_type": "post",
+      "tags": [
+        "javaScript高级程序设计"
+      ],
+      "excerpt": "## 样式\n\nhtml的样式有3中定义方式：外部样式表<link&gt;、文档样式表<style&gt;、元素特定样式（使用style属性）"
+    },
+    {
+      "title": "第17章 事件",
+      "url": "https://zyydgrbk.top/2023/05/16/di-17-zhang-shi-jian/",
+      "doc_type": "post",
+      "tags": [
+        "javaScript高级程序设计"
+      ],
+      "excerpt": "### 事件冒泡\n\nIE事件流被称为事件冒泡，事件冒泡中事件被定义为从最具体的元素（文档树中最深的节点）开始触发，然后向上传播至没有那么具体的元素（文档）。"
+    },
+    {
+      "title": "第25章 客户端存储",
+      "url": "https://zyydgrbk.top/2023/05/19/di-25-zhang-ke-hu-duan-cun-chu/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "# 第25章 客户端存储\n\nWeb应用程序的出现，直接在客户端存储用户信息的需求也随之出现，无论是登录信息、个人偏好还是其它数据，与特定用户相关的信息应该保存在用户的机器上。"
+    },
+    {
+      "title": "第3章 语言基础",
+      "url": "https://zyydgrbk.top/2023/05/10/di-3-zhang-yu-yan-ji-chu/",
+      "doc_type": "post",
+      "tags": [
+        "javaScript高级程序设计"
+      ],
+      "excerpt": "##### 语法\n\n区分大小写，ECMAScript中一切都区分大小写\n\n标识符：变量、函数、属性或者函数参数的名称，可以由一个或者多个下列字符组成：\n\n第一个字符必须是一个字母、下划线或者美元符号\n"
+    },
+    {
+      "title": "第4章 变量、作用域与内存",
+      "url": "https://zyydgrbk.top/2023/04/10/di-4-zhang-bian-liang-、-zuo-yong-yu-yu-nei-cun/",
+      "doc_type": "post",
+      "tags": [
+        "javaScript高级程序设计"
+      ],
+      "excerpt": "##### 基本类型与引用类型\n\n存储位置不同：基本类型（存储在栈中的实际值）引用类型(保存在内存中的对象)\n\n复制值：\n\n- 把一个原始值赋值给另一个变量时，原始值会被复制到新变量的位置。\n\n  `"
+    },
+    {
+      "title": "第5章 基本引用类型",
+      "url": "https://zyydgrbk.top/2023/04/15/di-5-zhang-ji-ben-yin-yong-lei-xing/",
+      "doc_type": "post",
+      "tags": [
+        "javaScript高级程序设计"
+      ],
+      "excerpt": "## Date\n\n```js\nlet now = new Date(); // Fri Apr 14 2023 13:51:39 GMT+0800 (中国标准时间)\nlet someDate = ne"
+    },
+    {
+      "title": "第6章 集合引用类型",
+      "url": "https://zyydgrbk.top/2023/04/15/di-6-zhang-ji-he-yin-yong-lei-xing/",
+      "doc_type": "post",
+      "tags": [
+        "javaScript高级程序设计"
+      ],
+      "excerpt": "## Object\n\n显示地创建Object的实例由两种方式\n\n```js\n// 使用new 操作符和Object构造函数\nlet person = new Object(); \nperson.nam"
+    },
+    {
+      "title": "第7章 迭代器与生成器",
+      "url": "https://zyydgrbk.top/2023/04/16/di-7-zhang-die-dai-qi-yu-sheng-cheng-qi/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "## 迭代器模式\n\n```js\ninterface IteratorResult {\n    // 表示是否还有更多值可以访问\n\tdone: boolean;\n    // 包含迭代器返回的当前值\n\t"
+    },
+    {
+      "title": "第8章 对象、类与面向对象编程",
+      "url": "https://zyydgrbk.top/2023/04/16/di-8-zhang-dui-xiang-、-lei-yu-mian-xiang-dui-xiang-bian-cheng/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "## 理解对象\n\n可以通过Object的实例创建，或者直接通过字面量创建\n\n```js\n// 通过Object构造函数创建\nlet person = new Object();\nperson.name"
+    },
+    {
+      "title": "第9章 代理与反射",
+      "url": "https://zyydgrbk.top/2023/04/23/di-9-zhang-dai-li-yu-fan-she/",
+      "doc_type": "post",
+      "tags": [],
+      "excerpt": "## 代理基础\n\n代理是目标对象的抽象，目标对象可以通过代理来操作，并施加行为。\n\n```js\nconst target = {\n  id: 'target'\n}\nconst handler = {}"
+    },
+    {
+      "title": "给n8n的本地访问链接配置成公网访问",
+      "url": "https://zyydgrbk.top/2026/04/09/gei-n8n-de-ben-di-fang-wen-lian-jie-pei-zhi-cheng-gong-wang-fang-wen/",
+      "doc_type": "post",
+      "tags": [
+        "AI实践"
+      ],
+      "excerpt": "# 给n8n的本地访问链接配置成公网访问\n\n指导链接：Cloudflare Tunnel 内网穿透工具（Windows + 自定义域名）\\_内网穿透自定义域名\\-CSDN博客\n\nWindows 使用 "
+    },
+    {
+      "title": "网络部分复习",
+      "url": "https://zyydgrbk.top/2023/06/03/wang-luo-bu-fen-fu-xi/",
+      "doc_type": "post",
+      "tags": [
+        "前端 计算机网络"
+      ],
+      "excerpt": "### TCP与UDP的区别\n\n**连接性**\n**TCP是面向连接的协议**，在收发数据前必须和对方建立可靠的连接，建立连接的3次握手、断开连接的4次挥手，为数据传输打下可靠基础;**UDP是一个面"
+    },
+    {
+      "title": "背部肌群锻炼指南：高效动作解析",
+      "url": "https://zyydgrbk.top/2026/07/08/bei-bu-ji-qun-duan-lian-zhi-nan-：-gao-xiao-dong-zuo-jie-xi/",
+      "doc_type": "post",
+      "tags": [
+        "健身",
+        "背部锻炼",
+        "力量训练",
+        "动作指导",
+        "健身教程"
+      ],
+      "excerpt": "### 姿势讲解\n\n- 双手宽于肩宽握住横杠\n- 掌心朝向身体外侧\n- 保持脊柱自然曲线，**核心收紧**\n- **沉肩**，下拉前手臂微曲\n- 下拉到下巴或胸部高度\n- 尽量让背部肌肉充分收缩\n\n!"
+    },
+    {
+      "title": "臀腿训练指南：四个高效健身动作",
+      "url": "https://zyydgrbk.top/2026/07/07/tun-tui-xun-lian-zhi-nan-：-si-ge-gao-xiao-jian-shen-dong-zuo/",
+      "doc_type": "post",
+      "tags": [
+        "健身",
+        "臀腿训练",
+        "深蹲",
+        "腿举",
+        "箭步蹲"
+      ],
+      "excerpt": "## 动作一：坐姿髋外展\n\n**姿势讲解**\n\n- 坐姿稳定，坐2/3，无背部支撑\n- 上身保持直立，微微前倾\n- 膝盖发力：主动向外推开，不要靠惯性\n- 动作幅度：**打开到臀外侧明显发力**即可\n"
+    },
+    {
+      "title": "远程连接服务器",
+      "url": "https://zyydgrbk.top/2023/05/28/yuan-cheng-lian-jie-fu-wu-qi/",
+      "doc_type": "post",
+      "tags": [
+        "服务器 winSCP finalShell VSCode Linux windows"
+      ],
+      "excerpt": "## 生成本地公钥\n\n打开windows PowerShell，输入命令\n\n```\nssh-keygen -t rsa -C:\\Users\\邹阳\n```\n\n一直enter，最后生成.ssh文件，其中含"
+    },
+    {
+      "title": "青训营前期笔记",
+      "url": "https://zyydgrbk.top/2023/08/13/qing-xun-ying-qian-qi-bi-ji/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "## 如何写好Javascript\n\n一个好的js代码需要遵守：\n\n1、各司其职：即HTML负责网页结构 CSS负责元素样式 JS负责交互和行为\n\n2、组件封装：组件是指Web页面上抽出来一个个包含模"
+    },
+    {
+      "title": "青训营后期笔记",
+      "url": "https://zyydgrbk.top/2023/08/22/qing-xun-ying-hou-qi-bi-ji/",
+      "doc_type": "post",
+      "tags": [
+        "前端"
+      ],
+      "excerpt": "## Vite知识体系\n\n前端构建工具：\n\n提供模块化加载方案、兼容不同的模块规范\n\n高级语法转译+资源加载解析\n\n输出压缩，TreeShaking（无用代码删除），语法降级\n\n提升开发效率 HMR "
+    },
+    {
+      "title": "面经",
+      "url": "https://zyydgrbk.top/2023/06/05/mian-jing/",
+      "doc_type": "post",
+      "tags": [
+        "前端 面经"
+      ],
+      "excerpt": "### Webpack\n\nwebpack是一个用于现代js应用程序的静态模块打包工具，当webpack处理应用程序时，它会在内部从一个或者多个入口点构建一个依赖图（dependency graph），"
+    },
+    {
+      "title": "项目演进与关键问题分析",
+      "url": "https://zyydgrbk.top/2026/06/18/xiang-mu-yan-jin-yu-guan-jian-wen-ti-fen-xi/",
+      "doc_type": "post",
+      "tags": [
+        "项目实战",
+        "Figma",
+        "HTML",
+        "自动化",
+        "渲染"
+      ],
+      "excerpt": "### 前司版本核心价值\n\n前司版本验证了 Figma 可以作为素材模板入口，也验证了\"模板定义 + 数据替换 + 批量渲染\"的业务闭环。\n\n它的核心能力包括：\n\n- Figma 插件内完成变量绑定\n"
+    }
+  ]
+}
