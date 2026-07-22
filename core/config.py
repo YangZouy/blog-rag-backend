@@ -61,12 +61,9 @@ class Settings(BaseSettings):
     WARMUP_ON_START: bool = True
 
     # ------------------------------------------------------------------
-    # Reranker backend: "jina" (API, recommended for Vercel) | "local" (CrossEncoder)
+    # Jina Reranker v2 multilingual API
     # ------------------------------------------------------------------
-    RERANK_BACKEND: str = "local"
     JINA_API_KEY: str = ""
-    JINA_RERANK_MODEL: str = "jina-reranker-v2-base-multilingual"
-    RERANK_API_TIMEOUT: int = 15
 
     # ------------------------------------------------------------------
     # Generation model (default: DeepSeek-chat)

@@ -1,12 +1,9 @@
 # ---------------------------------------------------------------------------
 # 运行时依赖（Vercel Serverless 部署实际加载的最小集）。
 #
-# 线上后端走远程 API：EMBED_BACKEND=zhipu + RERANK_BACKEND=jina，
-# 因此不含 torch / sentence-transformers（本地嵌入/重排才需要，见 requirements-dev.txt）。
+# 线上后端使用智谱 Embedding 与 Jina Reranker API。
+# 因此不含 torch / sentence-transformers；后者仅用于可选本地嵌入，见 requirements-dev.txt。
 # ingest / build_index / eval 属离线流程，其依赖也在 dev 文件里。
-#
-# ⚠️ Vercel 环境变量必须显式设置 RERANK_BACKEND=jina（默认值是 local，
-#    否则线上会走 CrossEncoder 分支而 import 不到 sentence-transformers 直接崩）。
 # ---------------------------------------------------------------------------
 
 # Web framework

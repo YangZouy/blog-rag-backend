@@ -9,7 +9,7 @@
 # 运行时依赖照单全收
 -r requirements.txt
 
-# 本地嵌入 / 重排后端（EMBED_BACKEND=local / RERANK_BACKEND=local）
+# 可选本地嵌入后端（EMBED_BACKEND=local）
 # 体积大头：torch 2GB+，绝不能进 Vercel bundle
 sentence-transformers>=3.0
 
