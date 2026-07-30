@@ -8,8 +8,6 @@
 - 重排：Jina Reranker v2 multilingual API
 - 前端：右下角悬浮 AI 聊天窗 + 旧字符搜索兜底
 
-> 架构设计见 `D:\wiki\博客RAG检索功能-架构分析v2-20260711.md`
-
 ---
 
 ## 1. 本地开发
@@ -75,6 +73,28 @@ vercel deploy
 
 vercel地址：https://blog-rag-backend.vercel.app
 
+vercel官网上已经绑定对应github仓库，推送后自动部署
+
+## 部署到服务器
+systemd配置常驻+开机自启+崩溃自动拉起
+运维命令：
+```
+journalctl -u blog-rag -f          # 实时看日志（相当于之前的前台输出）
+systemctl restart blog-rag         # 改代码后重启
+systemctl status blog-rag          # 看状态
+```
+## 配置反向代理
+装Nginx
+apt install -y nginx
+写配置文件
+服务器验证：
+curl -s http://127.0.0.1:8000/api/health        # 期望 {"status":"ok"}
+curl -I http://127.0.0.1:8000/api/docs          # 期望 HTTP/1.1 200
+
+外网IP验证：
+curl -I http://服务器IP/api/docs          # 期望 HTTP/1.1 200
+curl -s http://服务器IP/api/health        # 期望 {"status":"ok"}
+
 ## 4. 前端注入（Hexo + Butterfly）
 
 见 `frontend/butterfly-inject.md`：把 `rag-client.js` / `rag-search.css` 放进
@@ -126,10 +146,6 @@ $env:RUN_INTEGRATION = "1"
 
 查询主链路深拆
 1、前端 → FastAPI（api/serve.py）
-
-
-
-
 
 
 ## pdf优化

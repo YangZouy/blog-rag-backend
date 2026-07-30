@@ -42,8 +42,9 @@ async def lifespan(_: FastAPI):
     yield
 
 # 将lifespan挂给fastapi，它会在正确时机自动调用
-app = FastAPI(title="Blog RAG Search", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="Blog RAG Search", version="1.0.0", lifespan=lifespan, root_path="/api")
 app.add_middleware(CORSMiddleware, allow_origins=s.allowed_origins_list, allow_methods=["POST", "GET", "OPTIONS"], allow_headers=["*"])
+
 @app.get("/health")
 def health() -> dict: return {"status": "ok"}
 def _cache_key(req: SearchRequest) -> str:
