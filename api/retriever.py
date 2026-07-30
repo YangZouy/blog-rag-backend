@@ -3,7 +3,7 @@ from __future__ import annotations
 import concurrent.futures
 import time
 from typing import List, Optional
-
+from functools import lru_cache
 from qdrant_client.models import FieldCondition, Filter, MatchAny, MatchValue
 
 from api.models import SearchRequest  # noqa: F401  (kept for symmetry)
@@ -12,13 +12,6 @@ from core.embeddings import get_embeddings
 from core.qdrant_client import get_qdrant
 from data.parse_hexo import DocumentChunk
 
-"""
-查询向量数据库的过滤条件
-FieldCondition表示对某个字段加条件
-MatchValue(value=doc_type) 精确匹配单个值，类似“等于”
-MatchAny(any=tags) 匹配多个候选值中的任意一个，类似 “in (...)”
-must=conditions 表示这些条件都必须满足，类似 AND
-"""
 def _retry_network(fn, attempts: int = 3, base_delay: float = 0.5, label: str = "network"):
     """瞬时网络抖动（如经代理的 TLS 连接被对端重置 -> SSL: UNEXPECTED_EOF_WHILE_READING）
     重试封装。与下方 Qdrant query 的已有重试保持同一策略：递增退避，最多 attempts 次。
@@ -37,6 +30,20 @@ def _retry_network(fn, attempts: int = 3, base_delay: float = 0.5, label: str = 
     # 理论上不会走到这里（最后一次已 raise），仅作静态保险
     raise RuntimeError(f"{label} 失败（{attempts} 次）") from last_error
 
+@lru_cache(maxsize=256)
+def _embed_query_cached(query: str) -> tuple:
+    """Query 向量缓存：同一问题（含追问拼接后的检索 query）只调一次智谱 API。
+
+    实测 embed_query 是链路头号瓶颈（冷 4s+ / 热 300-600ms），且必须在
+    Qdrant 查询前串行完成。lru_cache 以 query 文本为 key，命中时耗时≈0。
+    返回 tuple（不可变）避免调用方意外修改缓存内容；用时转回 list。
+    """
+    vec = _retry_network(
+        lambda: get_embeddings().embed_query(query),
+        attempts=4,
+        label="embed",
+    )
+    return tuple(vec)
 
 def _build_filter(doc_type: Optional[str], tags: Optional[List[str]]) -> Optional[Filter]:
     conditions = []
@@ -61,13 +68,8 @@ def retrieve(
     if candidate_k is None:
         candidate_k = s.RETRIEVAL_CANDIDATE_K
     limit = max(top_k, candidate_k)
-    # embedding 调用经代理/远端时可能出现瞬时 TLS 重置（SSL EOF），无内置重试会直接失败；
-    # 用退避重试兜住，与下方 Qdrant 查询重试策略一致。
-    qvec = _retry_network(
-        lambda: get_embeddings().embed_query(query),
-        attempts=4,
-        label="embed",
-    )
+    
+    qvec = list(_embed_query_cached(query))
     client = get_qdrant()
     """
     query_filter表示在向量相似的搜索基础上，再加结构化过滤条件

@@ -1,0 +1,6 @@
+# 强制仓库内统一用 LF 换行，避免 Windows(CRLF) 编辑后 .sh/.py 在 Linux 服务器换行符失效
+* text=auto eol=lf
+
+# 显式保证脚本类文件为 LF，且保留可执行位
+*.sh text eol=lf
+*.py text eol=lf
