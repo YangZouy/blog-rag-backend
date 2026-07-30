@@ -5,7 +5,7 @@
 - 后端：FastAPI，可部署为 Vercel serverless 函数
 - 向量库：Qdrant Cloud 免费层
 - 生成：DeepSeek-chat ｜ Embedding：智谱 embedding-3（2048 维）
-- 重排：Jina Reranker v2 multilingual API
+- 重排：local模型
 - 前端：右下角悬浮 AI 聊天窗 + 旧字符搜索兜底
 
 ---
@@ -24,8 +24,8 @@ python -m uvicorn api.serve:app --reload --port 8000
 健康检查与搜索：
 
 ```bash
-curl http://localhost:8000/health
-curl -X POST http://localhost:8000/search \
+curl http://localhost:8000/api/health
+curl -X POST http://localhost:8000/api/search \
   -H "Content-Type: application/json" \
   -d '{"query":"如何部署博客","top_k":5}'
 ```
@@ -110,7 +110,6 @@ curl -s http://服务器IP/api/health        # 期望 {"status":"ok"}
 | `EMBED_BATCH_SIZE` / `QDRANT_UPSERT_BATCH_SIZE` / `QDRANT_WRITE_TIMEOUT` | 入库批处理与写超时 | 64 / 32 / 120 |
 | `QDRANT_READ_TIMEOUT` / `QDRANT_WARMUP_ENABLED` | 查询超时 / 启动时预热查询连接 | 3 / 开 |
 | `GEN_MODEL` / `GEN_BASE_URL` / `DEEPSEEK_API_KEY` | 生成 | deepseek-chat |
-| `JINA_API_KEY` | Jina Reranker v2 重排 | — |
 | `RETRIEVAL_CANDIDATE_K` / `GENERATION_CONTEXT_K` / `RERANK_RELEVANCE_THRESHOLD` | rerank 候选池 / 最终上下文块数 / 站内资料相关性门槛 | 8 / 3 / 0.30 |
 | `API_KEY` / `ALLOWED_ORIGINS` / `RATE_LIMIT_PER_MIN` / `CACHE_TTL` | 加固 | 关 / * / 10 / 600 |
 

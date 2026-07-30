@@ -17,12 +17,30 @@ from data.parse_hexo import DocumentChunk
 logger = logging.getLogger("blog-rag")
 RERANK_API_TIMEOUT = 15
 
-# 国内网络默认走 HF 镜像；已设置环境变量时尊重现有值
-os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+# 国内网络默认走 HF 镜像；仅当未显式设置（或为空/默认值）时启用镜像，
+# 避免 setdefault 被环境中已有的 HF_ENDPOINT（可能指向不可达的 huggingface.co）覆盖。
+_HF = os.environ.get("HF_ENDPOINT", "").rstrip("/")
+if not _HF or _HF in ("https://huggingface.co", "http://huggingface.co"):
+    os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 
 # ---------------------------------------------------------------------------
 # Local ONNX backend
 # ---------------------------------------------------------------------------
+
+def _resolve_model_file(filename: str, models_dir: str) -> "str | None":
+    """优先用本地已存在的模型文件（从服务器/镜像拷过来的），完全离线。
+
+    先查直接相对路径，再递归查找，兼容 hf_hub_download(local_dir=...) 可能带
+    repo_id 前缀的不同布局。文件不存在返回 None（交给联网下载兜底）。
+    """
+    direct = os.path.join(models_dir, filename)
+    if os.path.isfile(direct):
+        return direct
+    if os.path.isdir(models_dir):
+        for root, _, files in os.walk(models_dir):
+            if filename in files:
+                return os.path.join(root, filename)
+    return None
 
 _LOCAL_LOCK = threading.Lock()
 _LOCAL_RERANKER: Optional["_OnnxReranker"] = None
@@ -40,10 +58,18 @@ class _OnnxReranker:
           "models", "reranker",
       )
 
-      model_path = hf_hub_download(repo_id=repo, filename=onnx_file, local_dir=models_dir)
-      tokenizer_path = hf_hub_download(
-          repo_id=repo, filename="tokenizer.json", local_dir=models_dir
-      )
+      # 本地已有模型文件则直接复用（离线，免去联网下载）；否则再尝试从 Hugging Face 拉取
+      model_path = _resolve_model_file(onnx_file, models_dir)
+      tokenizer_path = _resolve_model_file("tokenizer.json", models_dir)
+      if model_path is None or tokenizer_path is None:
+          logger.warning(
+              "本地未找到 reranker 模型（%s / tokenizer.json），尝试联网下载（需能访问 Hugging Face 镜像）",
+              onnx_file,
+          )
+          model_path = hf_hub_download(repo_id=repo, filename=onnx_file, local_dir=models_dir)
+          tokenizer_path = hf_hub_download(
+              repo_id=repo, filename="tokenizer.json", local_dir=models_dir
+          )
 
       with open(tokenizer_path, encoding="utf-8") as fh:
           self.tokenizer = Tokenizer.from_str(fh.read())
