@@ -1,9 +1,6 @@
 # ---------------------------------------------------------------------------
 # 运行时依赖（Vercel Serverless 部署实际加载的最小集）。
 #
-# 线上后端使用智谱 Embedding 与 Jina Reranker API。
-# 因此不含 torch / sentence-transformers；后者仅用于可选本地嵌入，见 requirements-dev.txt。
-# ingest / build_index / eval 属离线流程，其依赖也在 dev 文件里。
 # ---------------------------------------------------------------------------
 
 # Web framework
@@ -26,3 +23,9 @@ python-dotenv>=1.0
 
 # HTTP client（Jina rerank API backend）
 httpx>=0.27
+
+# 本地 ONNX reranker（bge-reranker-base int8 量化，CPU 推理，无 torch 依赖）
+onnxruntime>=1.17
+tokenizers>=0.15
+huggingface_hub>=0.23
+numpy>=1.26

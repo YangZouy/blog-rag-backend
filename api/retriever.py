@@ -1,9 +1,3 @@
-"""Vector retrieval from Qdrant.
-
-Each point stores the serialized DocumentChunk in its payload["chunk"], so we
-can reconstruct typed chunks directly. Optional payload filtering by doc_type
-and tags is supported.
-"""
 from __future__ import annotations
 
 import concurrent.futures
@@ -171,6 +165,6 @@ def retrieve_with_rerank(
         top_k=limit,
         doc_type=doc_type,
         tags=tags,
-        candidate_k=max(limit, 50),
+        candidate_k=max(limit, settings.RERANK_CANDIDATE_K),
     )
     return rerank(query, candidates, limit)

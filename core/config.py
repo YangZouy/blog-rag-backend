@@ -61,10 +61,17 @@ class Settings(BaseSettings):
     WARMUP_ON_START: bool = True
 
     # ------------------------------------------------------------------
-    # Jina Reranker v2 multilingual API
+    # Reranker：local（本地ONNX int8，默认，无网络依赖）
     # ------------------------------------------------------------------
-    JINA_API_KEY: str = ""
-
+    RERANK_BACKEND: str = "local"
+    # 本地 ONNX 模型仓库与文件（Xenova 转换的 bge-reranker-base int8 量化版，~280MB）
+    RERANK_MODEL_REPO: str = "Xenova/bge-reranker-base"
+    RERANK_ONNX_FILE: str = "onnx/model_quantized.onnx"
+    # query+doc 拼接后的最大 token 长度。
+    RERANK_MAX_LENGTH: int = 256
+    # 进入 rerank 的候选池大小。
+    RERANK_CANDIDATE_K: int = 20
+    
     # ------------------------------------------------------------------
     # Generation model (default: DeepSeek-chat)
     # ------------------------------------------------------------------
