@@ -1,11 +1,3 @@
-"""Generate data/blog_index.json: one entry per article (de-duplicated from chunks).
-
-This lightweight inventory (title / url / tags / doc_type / short excerpt) is
-injected into the generation prompt so the LLM knows what the blog actually
-contains — even when retrieval returns nothing relevant. It prevents the
-"can't answer but still recommends / hallucinates a topic" failure mode by
-giving the model a global map of the site.
-"""
 from __future__ import annotations
 
 import json

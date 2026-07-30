@@ -1,11 +1,7 @@
-"""Simplified RAG pipeline: hybrid retrieval + rerank -> generate.
+"""RAG pipeline: 前置意图路由 → (hybrid+rerank 检索) → 生成。
 
-设计原则（2026-07-20 简化）:
-- 检索层（向量 + BM25 hybrid + cross-encoder rerank）已验证足够强
-  （eval: R@3=0.98 / R@10=1.00 / MRR=0.87），直接进入生成即可。
-- 链路压缩为两步：retrieve_with_rerank(top-k) -> generate。
-- 检索为空（或没有相关 chunk）时，直接让生成模型基于自身知识自由回答。
-- 答案中不出现 [n] 引用标记；前端单独展示「推荐阅读」文章列表。
+在检索之前先判断意图（问候/闲聊/实时数据直接短路，不浪费检索）；
+SSE 新增 stage 事件，让前端显示真实进度而非假定时器。
 """
 from __future__ import annotations
 
@@ -13,27 +9,22 @@ import json
 import logging
 import os
 import re
+import concurrent.futures
 from functools import lru_cache
 from typing import Iterator, List
 
 from api.models import Citation, ConversationTurn, SearchResponse
 from api.retriever import retrieve_with_rerank
 from core.config import get_settings
+from core.intent import Intent, rule_intent, classify_intent
 from core.llm import get_gen_llm
 from core.observability import timed_stage
 from data.parse_hexo import DocumentChunk
 
 logger = logging.getLogger("blog-rag")
 
-# 全站文章清单（由 api/build_index.py 生成）。让 LLM 在检索为空时也能判断
-# 「站内有什么 / 没有什么」，减少幻觉与错误推荐。详见 P3 优化说明。
 _INDEX_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "data", "blog_index.json")
-)
-
-_LIVE_DATA_PATTERNS = (
-    r"(?:今天|现在|当前|实时|最新).{0,8}(?:天气|气温|温度|降雨|空气质量|股价|汇率|金价|油价|新闻|路况)",
-    r"(?:天气|气温|温度|降雨|空气质量).{0,8}(?:怎么样|如何|多少|查询|预报|吗)",
 )
 
 _LIVE_DATA_ANSWER = (
@@ -41,7 +32,6 @@ _LIVE_DATA_ANSWER = (
     "建议使用天气、地图或新闻应用查询最新信息。"
 )
 
-# 有检索结果时：基于博客资料回答，但允许模型在资料不相关时自由发挥
 _GENERATE_PROMPT = """你是博主邹阳博客的 AI 问答助手。请根据下面提供的「博客资料」回答用户问题。
 
 ## 回答要求（严格）
@@ -54,11 +44,8 @@ _GENERATE_PROMPT = """你是博主邹阳博客的 AI 问答助手。请根据下
    不要把其他项目、学习笔记或案例中的技术栈混成本站 AI 问答的实现。
 7. 资料不足或只有主题相近的资料时，明确说明没有检索到可确认的本站资料，不要猜测博主使用过的平台、技术栈或部署方式。
 8. 你没有实时数据和外部工具。不要输出工具调用、函数调用、CALL 指令或假想的操作步骤。
-9. **意图对齐校验**：如果博客资料的侧重点与用户问题的关注点不一致
-   （例如用户问「技术实现 / 架构方案」，但资料只讲了「使用方法 / 数据录入方式」；
-   或用户问「A 方案的优劣」，但资料只介绍了 B 方案），
-   请主动点明「站内资料没有直接覆盖你关注的[具体方面]」，
-   不要强行从侧面资料里拼凑出一个看似相关、实则答非所问的答案。
+9. **意图对齐校验**：如果博客资料的侧重点与用户问题的关注点不一致，
+   请主动点明「站内资料没有直接覆盖你关注的[具体方面]」，不要强行拼凑答非所问的答案。
 
 ## 本站文章概览（用于在资料不足时判断站内是否覆盖该话题，勿逐条复述）
 {overview}
@@ -74,7 +61,6 @@ _GENERATE_PROMPT = """你是博主邹阳博客的 AI 问答助手。请根据下
 
 ## 回答（简洁、500字以内）"""
 
-# 检索为空时：没有资料可用，直接让模型自由回答
 _FREE_ANSWER_PROMPT = """你是博主邹阳博客的 AI 问答助手。当前没有检索到相关的博客内容，请直接基于你自己的知识回答用户问题。
 
 ## 回答要求（严格）
@@ -86,8 +72,7 @@ _FREE_ANSWER_PROMPT = """你是博主邹阳博客的 AI 问答助手。当前没
 6. 如果用户问的是博客本身相关但你不知道的内容，可以诚实说明你不确定
 7. 用 Markdown 组织内容，不要使用大标题
 8. 如果用户问的是本博客相关内容但你没有找到对应资料，可以结合下方「本站文章概览」
-   诚实说明「站内暂无关于[具体话题]的文章」，并可顺带提一句站内已有的相近主题，
-   不要编造不存在的文章或链接。
+   诚实说明「站内暂无关于[具体话题]的文章」，并可顺带提一句站内已有的相近主题，不要编造不存在的文章或链接。
 
 ## 本站文章概览（用于判断站内是否覆盖该话题，勿逐条复述）
 {overview}
@@ -97,6 +82,48 @@ _FREE_ANSWER_PROMPT = """你是博主邹阳博客的 AI 问答助手。当前没
 
 ## 回答（简洁、500字以内）"""
 
+_CHAT_PROMPT = """你是「邹阳博客」的 AI 问答小助手。用户现在不是在问博客具体内容，而是在和你打招呼或闲聊。
+
+请用自然、简短、友好的中文回应（1-3 句）：
+- 可以顺带说明你能基于博客文章回答技术/项目类问题
+- 不要使用大标题，不要写 [1][2] 这类引用编号
+- 不要输出工具调用、函数调用或 CALL 指令
+- 如果对方问你是什么，说明你是这个博客的 AI 问答助手即可
+
+用户说：{query}
+
+回答："""
+
+
+# ---------------- 意图路由 + 检索调度 ----------------
+def _route_and_retrieve(query: str, top_k: int, history: List[ConversationTurn]) -> tuple[Intent, List[DocumentChunk], str]:
+    """前置意图路由：先规则快路短路，模糊问题再让 LLM 分类 ∥ 检索 并行。"""
+    # 基于规则判定
+    ruled = rule_intent(query)
+    # 实时数据
+    if ruled == Intent.LIVE:
+        return Intent.LIVE, [], "out_of_scope"
+    # 问候/闲聊
+    if ruled == Intent.CHAT:
+        return Intent.CHAT, [], "chat"
+
+    # 模糊：LLM 分类 与 检索 并行，互不等待
+    candidate_k = max(top_k, get_settings().RETRIEVAL_CANDIDATE_K)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
+        # 一条worker判别意图
+        f_cls = ex.submit(classify_intent, query)
+        # 一条worker开始检索
+        f_ret = ex.submit(_retrieve_docs, _build_retrieval_query(query, history), candidate_k)
+        intent = f_cls.result()
+        retrieved = f_ret.result()
+    if intent == Intent.CHAT:
+        return Intent.CHAT, [], "chat"   # 判为闲聊，丢弃检索结果
+    return Intent.RAG, retrieved, "rag"
+
+# 对retrieve_with_rerank进行生产安全包装
+# 1、异常兜底：Qdrant抖动、embedding API超时，rerank加载失败时
+# 因为包裹了try catch，所以返回空列表，上层走到free-answer
+# 2、观测性：timed_stage把检索耗时打点到core.observability
 
 def _retrieve_docs(query: str, top_k: int) -> List[DocumentChunk]:
     """执行 hybrid + rerank 检索，返回重排后的候选 chunk 列表。"""
@@ -110,7 +137,6 @@ def _retrieve_docs(query: str, top_k: int) -> List[DocumentChunk]:
 
 
 def _build_retrieval_query(query: str, history: List[ConversationTurn]) -> str:
-    """将短追问补成可检索的独立问题，不使用模型改写。"""
     previous = [turn.content.strip() for turn in history if turn.content.strip()]
     if not previous:
         return query
@@ -125,11 +151,6 @@ def _format_history(history: List[ConversationTurn]) -> str:
 
 @lru_cache(maxsize=1)
 def _blog_overview() -> str:
-    """把全站文章清单拼成紧凑的 Markdown 列表，注入 prompt。
-
-    仅在 build_index.py 已生成 data/blog_index.json 时生效；否则返回空串，
-    对现有链路零侵入。列表只放标题 + 链接 + 标签，控制在可接受 token 量级。
-    """
     if not os.path.exists(_INDEX_PATH):
         return ""
     try:
@@ -150,7 +171,6 @@ def _blog_overview() -> str:
 
 
 def _filter_relevant_chunks(chunks: List[DocumentChunk]) -> List[DocumentChunk]:
-    """无可信站内命中时，不把语义相近但无关的文章交给生成或前端。"""
     if not chunks:
         return []
     threshold = get_settings().RERANK_RELEVANCE_THRESHOLD
@@ -160,66 +180,44 @@ def _filter_relevant_chunks(chunks: List[DocumentChunk]) -> List[DocumentChunk]:
     return chunks
 
 
-def _is_live_data_query(query: str) -> bool:
-    """识别不适合站内 RAG 的实时信息请求。"""
-    text = (query or "").strip().lower()
-    return any(re.search(pattern, text) for pattern in _LIVE_DATA_PATTERNS)
-
-
 def _live_data_response() -> SearchResponse:
-    return SearchResponse(
-        answer=_LIVE_DATA_ANSWER,
-        citations=[],
-        fallback=False,
-        mode="out_of_scope",
-    )
+    return SearchResponse(answer=_LIVE_DATA_ANSWER, citations=[], fallback=False, mode="out_of_scope")
 
 
-def _dedupe_citations(
-    chunks: List[DocumentChunk], query: str, max_citations: int = 3
-) -> List[Citation]:
-    """按文章（slug）去重，返回「推荐阅读」列表。
+def _chat_response(query: str) -> SearchResponse:
+    prompt = _CHAT_PROMPT.format(query=query)
+    try:
+        answer = get_gen_llm().invoke(prompt).content
+    except Exception:
+        answer = "你好！我是这个博客的 AI 问答助手，可以基于博客里的文章回答你的技术问题～"
+    return SearchResponse(answer=answer, citations=[], fallback=False, mode="chat")
 
-    入参应为 retrieved（rerank 后全部候选），而非截断后的 docs，
-    否则只在前 3 个 chunk 里找 citation，高分长文会被漏掉。
-    同一篇文章会被切成多个 chunk，但前端只需要展示一篇文章链接。
-    CITATION_MIN_SCORE 门槛：宁可少推、不推，也比推不相关的文章体验更差。
-    """
+
+def _dedupe_citations(chunks: List[DocumentChunk], query: str, max_citations: int = 3) -> List[Citation]:
     threshold = get_settings().CITATION_MIN_SCORE
     seen: set[str] = set()
     citations: List[Citation] = []
     for chunk in chunks:
         if not chunk.url or chunk.slug in seen:
             continue
-        # 跳过置信度不达标的文章：即使它侥幸进了候选池。
         if chunk.score is not None and chunk.score < threshold:
             continue
         seen.add(chunk.slug)
-        citations.append(
-            Citation(
-                title=chunk.title,
-                url=chunk.url,
-                snippet=(chunk.content or "")[:200],
-                source=chunk.doc_type,
-                score=round(float(chunk.score or 0.0), 4),
-            )
-        )
+        citations.append(Citation(
+            title=chunk.title, url=chunk.url,
+            snippet=(chunk.content or "")[:200],
+            source=chunk.doc_type, score=round(float(chunk.score or 0.0), 4),
+        ))
         if len(citations) >= max_citations:
             break
     return citations
 
 
-def _select_generation_context(
-    chunks: List[DocumentChunk], max_chunks: int
-) -> List[DocumentChunk]:
-    """取 rerank 最高分的 top-K chunk，不限制单篇文章数量。"""
+def _select_generation_context(chunks: List[DocumentChunk], max_chunks: int) -> List[DocumentChunk]:
     return chunks[:max_chunks]
 
 
-def _build_prompt(
-    docs: List[DocumentChunk], query: str, history: List[ConversationTurn]
-) -> tuple[str, str]:
-    """根据是否有检索结果选择 prompt，返回 (prompt, mode)。"""
+def _build_prompt(docs: List[DocumentChunk], query: str, history: List[ConversationTurn]) -> tuple[str, str]:
     overview = _blog_overview()
     if not docs:
         return _FREE_ANSWER_PROMPT.format(query=query, overview=overview), "free"
@@ -229,16 +227,17 @@ def _build_prompt(
     ), "rag"
 
 
-def run_rag(
-    query: str, top_k: int = 5, history: List[ConversationTurn] | None = None
-) -> SearchResponse:
-    """非流式：检索 -> 一次性生成。"""
-    if _is_live_data_query(query):
-        return _live_data_response()
+# ---------------- 对外接口 ----------------
+def run_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | None = None) -> SearchResponse:
+    """非流式：路由 → 检索 → 一次性生成。"""
     history = history or []
-    retrieved = _filter_relevant_chunks(
-        _retrieve_docs(_build_retrieval_query(query, history), top_k)
-    )
+    intent, retrieved, _ = _route_and_retrieve(query, top_k, history)
+    if intent == Intent.LIVE:
+        return _live_data_response()
+    if intent == Intent.CHAT:
+        return _chat_response(query)
+
+    retrieved = _filter_relevant_chunks(retrieved)
     context_k = min(top_k, get_settings().GENERATION_CONTEXT_K)
     docs = _select_generation_context(retrieved, context_k)
     citations = _dedupe_citations(retrieved, query)
@@ -248,43 +247,51 @@ def run_rag(
             answer = get_gen_llm().invoke(prompt).content
     except Exception:
         logger.exception("generation failed")
-        return SearchResponse(
-            answer="回答生成失败，请稍后重试。",
-            citations=citations,
-            fallback=True,
-            mode="error",
-        )
-    return SearchResponse(
-        answer=answer,
-        citations=citations,
-        fallback=False,
-        mode=mode,
-    )
+        return SearchResponse(answer="回答生成失败，请稍后重试。", citations=citations, fallback=True, mode="error")
+    return SearchResponse(answer=answer, citations=citations, fallback=False, mode=mode)
 
 
-def stream_rag(
-    query: str, top_k: int = 5, history: List[ConversationTurn] | None = None
-) -> Iterator[tuple[str, dict]]:
-    """流式：先回传 sources（推荐阅读），再逐 token 输出答案。"""
-    if _is_live_data_query(query):
-        response = _live_data_response()
-        yield "sources", {"citations": [], "mode": response.mode}
-        yield "token", {"text": response.answer}
-        yield "done", response.model_dump()
-        return
+def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | None = None) -> Iterator[tuple[str, dict]]:
+    """流式：先回传 stage（真实阶段）→ sources（推荐阅读）→ 逐 token 答案。"""
     history = history or []
-    retrieved = _filter_relevant_chunks(
-        _retrieve_docs(_build_retrieval_query(query, history), top_k)
-    )
+    yield "stage", {"stage": "routing"}
+
+    intent, retrieved, _ = _route_and_retrieve(query, top_k, history)
+
+    if intent == Intent.LIVE:
+        resp = _live_data_response()
+        yield "sources", {"citations": [], "mode": resp.mode}
+        yield "token", {"text": resp.answer}
+        yield "done", resp.model_dump()
+        return
+
+    if intent == Intent.CHAT:
+        yield "stage", {"stage": "generating"}
+        yield "sources", {"citations": [], "mode": "chat"}
+        parts: list[str] = []
+        try:
+            for chunk in get_gen_llm().stream(_CHAT_PROMPT.format(query=query)):
+                token = getattr(chunk, "content", "") or ""
+                if token:
+                    parts.append(token)
+                    yield "token", {"text": token}
+        except Exception:
+            yield "error", {"message": "回答生成失败，请稍后重试。"}
+        yield "done", SearchResponse(answer="".join(parts), citations=[], fallback=False, mode="chat").model_dump()
+        return
+
+    # ---- RAG 路径 ----
+    yield "stage", {"stage": "retrieving"}
+    retrieved = _filter_relevant_chunks(retrieved)
     context_k = min(top_k, get_settings().GENERATION_CONTEXT_K)
     docs = _select_generation_context(retrieved, context_k)
     citations = _dedupe_citations(retrieved, query)
     prompt, mode = _build_prompt(docs, query, history)
 
-    # 先把「推荐阅读」推给前端，数量与答案解耦，永远不会错配
+    yield "stage", {"stage": "generating"}
     yield "sources", {"citations": [c.model_dump() for c in citations], "mode": mode}
 
-    parts: list[str] = []
+    parts = []
     try:
         with timed_stage("generate", count=len(docs)):
             for chunk in get_gen_llm().stream(prompt):
@@ -295,17 +302,7 @@ def stream_rag(
     except Exception:
         logger.exception("stream generation failed")
         yield "error", {"message": "回答生成失败，请稍后重试。"}
-        yield "done", SearchResponse(
-            answer="回答生成失败，请稍后重试。",
-            citations=citations,
-            fallback=True,
-            mode="error",
-        ).model_dump()
+        yield "done", SearchResponse(answer="回答生成失败，请稍后重试。", citations=citations, fallback=True, mode="error").model_dump()
         return
 
-    yield "done", SearchResponse(
-        answer="".join(parts),
-        citations=citations,
-        fallback=False,
-        mode=mode,
-    ).model_dump()
+    yield "done", SearchResponse(answer="".join(parts), citations=citations, fallback=False, mode=mode).model_dump()

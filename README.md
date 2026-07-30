@@ -82,6 +82,8 @@ systemd配置常驻+开机自启+崩溃自动拉起
 journalctl -u blog-rag -f          # 实时看日志（相当于之前的前台输出）
 systemctl restart blog-rag         # 改代码后重启
 systemctl status blog-rag          # 看状态
+systemctl is-active blog-rag # 服务是否启动
+
 ```
 ## 配置反向代理
 装Nginx

@@ -55,7 +55,7 @@ def _build_filter(doc_type: Optional[str], tags: Optional[List[str]]) -> Optiona
         return None
     return Filter(must=conditions)
 
-
+# 纯向量检索
 def retrieve(
     query: str,
     top_k: int = 5,
@@ -110,7 +110,9 @@ def retrieve(
             chunks.append(c)
     return sorted(chunks, key=lambda chunk: chunk.score or 0.0, reverse=True)
 
-
+# 向量+BM25融合
+# 使用RRF（K = 60）把两套排名融合成一个分数重排
+# 解决term类遗漏问题（TypeScript/BOM向量召回失败但BM25能命中的情况）
 def retrieve_hybrid(
     query: str,
     top_k: int = 5,
@@ -150,6 +152,7 @@ def retrieve_hybrid(
         chunks.append(chunk)
     return sorted(chunks, key=lambda chunk: chunk.score or 0.0, reverse=True)[:limit]
 
+# Hybrid候选+本地cross-encoder重排
 def retrieve_with_rerank(
     query: str,
     top_k: int = 5,

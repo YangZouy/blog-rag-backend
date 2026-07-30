@@ -65,7 +65,10 @@ class Settings(BaseSettings):
     RERANK_MAX_LENGTH: int = 256
     # 进入 rerank 的候选池大小。
     RERANK_CANDIDATE_K: int = 20
-    
+
+    # 意图识别模型
+    INTENT_LLM_MODEL: str = "glm-4-flash"
+
     # ------------------------------------------------------------------
     # Generation model (default: DeepSeek-chat)
     # ------------------------------------------------------------------
