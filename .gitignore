@@ -10,3 +10,4 @@ __pycache__/
 .workbuddy/
 eval/results/
 models/
+data/ingest_state.json

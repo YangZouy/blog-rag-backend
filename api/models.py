@@ -33,3 +33,8 @@ class SearchResponse(BaseModel):
     # 表示前端是否需要回退，当后端无法给出回答时表示需要前端兜底了，true表示后端无RAG答案
     fallback: bool = False  # True when we could not produce a RAG answer
     mode: str = "rag"  # "rag" | "web" | "not_found" | "error"
+
+class AdminReloadRequest(BaseModel):
+    repo: str # 博客源仓库路径
+    incremental: bool = True # 默认增量；设为 False 走全量
+    summarize: bool = False # 是否重新生成摘要

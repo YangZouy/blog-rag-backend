@@ -4,11 +4,11 @@
 任何敏感信息都不会硬编码在代码中。
 """
 from __future__ import annotations
-
 from functools import lru_cache
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -68,7 +68,7 @@ class Settings(BaseSettings):
 
     # 意图识别模型
     INTENT_LLM_MODEL: str = "glm-4-flash"
-
+    ZHIPU_BASE_URL: str = "https://open.bigmodel.cn/api/paas/v4/"
     # ------------------------------------------------------------------
     # Generation model (default: DeepSeek-chat)
     # ------------------------------------------------------------------
@@ -84,6 +84,16 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MIN: int = 10
     # 检索后答案保存时间 600s就是10min
     CACHE_TTL: int = 600
+
+        # ------------------------------------------------------------------
+    # Admin / 增量入库
+    # ------------------------------------------------------------------
+    # 独立令牌，用于 /admin/reload，CI调用时使用
+    ADMIN_TOKEN: str = ""
+    # 增量入库用的 slug→hash 状态文件（运行时生成，应 gitignore）
+    # data/ingest_state.json：保存slug→content_hash
+    # 增量入库需要知道相对上次 哪些变化了
+    INGEST_STATE_PATH: str = os.path.join(ROOT, "data", "ingest_state.json")
 
     # ------------------------------------------------------------------
     # Misc

@@ -59,6 +59,7 @@ class DocumentChunk:
     section: Optional[str] = None
     # 检索相似度分数（查询时由 retriever 填充，入库时为 None）
     score: Optional[float] = None
+    description: Optional[str] = None
 
     def embed_text(self) -> str:
         """用于生成向量的组合文本：标题 / 标签 / 章节 / 正文一起嵌入，
@@ -86,6 +87,7 @@ class DocumentChunk:
             "chunk_index": self.chunk_index,
             "ocr": self.ocr,
             "section": self.section,
+            "description": self.description
         }
 
     """
@@ -105,6 +107,7 @@ class DocumentChunk:
             ocr=p.get("ocr", False),
             section=p.get("section"),
             score=p.get("score"),
+            description=p.get("description")
         )
 
 
@@ -241,7 +244,7 @@ def _split_by_headings(body: str):
     return out
 
 
-def _split_post_into_chunks(slug, title, url, date, tags, body, doc_type="post"):
+def _split_post_into_chunks(slug, title, url, date, tags, body, doc_type="post", desc=None):
     """把一篇文章切成带 section 的 chunk：先按标题分段，单段过长再切分；
     禁止只包含标题、图片链接或极短代码碎片的块入库。"""
     out = []
@@ -249,23 +252,21 @@ def _split_post_into_chunks(slug, title, url, date, tags, body, doc_type="post")
     for section, text in _split_by_headings(body):
         if not text or len(text.strip()) < 50:
             continue
-        # 去掉 markdown 图片后若所剩实质内容过短，视为无上下文碎片，跳过
         no_img = _WIKI_IMG_RE.sub("", _IMG_RE.sub("", text))
         if len(no_img.strip()) < 40:
             continue
         if len(text) <= 700:
-            out.append(_make_chunk(slug, title, url, date, tags, section, text, idx, doc_type))
+            out.append(_make_chunk(slug, title, url, date, tags, section, text, idx, doc_type, desc))
             idx += 1
         else:
             for piece in _POST_SPLITTER.split_text(text):
                 if len(piece.strip()) < 40:
                     continue
-                out.append(_make_chunk(slug, title, url, date, tags, section, piece, idx, doc_type))
+                out.append(_make_chunk(slug, title, url, date, tags, section, piece, idx, doc_type, desc))
                 idx += 1
     return out
 
-
-def _make_chunk(slug, title, url, date, tags, section, content, idx, doc_type="post"):
+def _make_chunk(slug, title, url, date, tags, section, content, idx, doc_type="post", desc=None):
     return DocumentChunk(
         slug=slug,
         title=title,
@@ -276,6 +277,7 @@ def _make_chunk(slug, title, url, date, tags, section, content, idx, doc_type="p
         tags=tags or [],
         chunk_index=idx,
         section=section,
+        description=desc
     )
 
 
@@ -301,6 +303,7 @@ def parse_hexo_repo(repo_path: str) -> List[DocumentChunk]:
                 continue
 
             meta = post.metadata
+            desc = meta.get("description")
             if meta.get("published") is False or meta.get("draft"):
                 continue
             body = post.content.strip()
@@ -338,6 +341,6 @@ def parse_hexo_repo(repo_path: str) -> List[DocumentChunk]:
                              title=title, repo_path=repo_path)
 
             chunks.extend(
-                _split_post_into_chunks(slug, title, url, date_str, tags, body, doc_type)
+                _split_post_into_chunks(slug, title, url, date_str, tags, body, doc_type, desc)
             )
     return chunks

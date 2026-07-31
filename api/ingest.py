@@ -12,21 +12,84 @@ import argparse
 import logging
 import sys
 import uuid
-
-from qdrant_client.models import PointStruct
-
 from core.config import get_settings
 from core.embeddings import get_embeddings
 from core.qdrant_client import ensure_collection, get_qdrant
 from data.parse_hexo import parse_hexo_repo
 from data.parse_pdf import parse_pdfs
 from api.build_index import build_index
+# ===== 在文件顶部 import 区新增 =====
+import hashlib
+import json
+import os
+
+from qdrant_client.models import (
+    FieldCondition,
+    Filter,
+    MatchAny,
+    PointStruct,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ingest")
 
+def _group_by_slug(docs):
+    """把同一slug的所有chunk归到一组"""
+    grouped: dict[str, list] = {}
+    for c in docs:
+        grouped.setdefault(c.slug, []).append(c)
+    return grouped
 
-def run_ingest(repo_path: str, recreate: bool = False) -> int:
+def _slug_hash(chunks) -> str:
+    """给一篇（一个 slug 的所有 chunk）算一个稳定 hash。
+
+    拼接 标题/标签/章节/正文 后 sha256。只要文章实质内容变了，hash 就变，
+    从而判出"该 slug 需要重新嵌入"。
+    """
+    norm = []
+    for c in sorted(chunks, key=lambda x: x.chunk_index):
+        norm.append(f"{c.title}\n{c.tags}\n{c.section}\n{c.content}")
+    return hashlib.sha256("\n===\n".join(norm).encode("utf-8")).hexdigest()
+
+def _load_state() -> dict:
+    """读取上次入库留下的 slug→hash 状态。"""
+    from core.config import get_settings
+    p = get_settings().INGEST_STATE_PATH
+    if os.path.isfile(p):
+        try:
+            with open(p, encoding="utf-8") as f:
+                return json.load(f).get("hashes", {})
+        except Exception:
+            return {}
+    return {}
+
+def _save_state(hashes: dict) -> None:
+    from core.config import get_settings
+    p = get_settings().INGEST_STATE_PATH
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    with open(p, "w", encoding="utf-8") as f:
+        json.dump({"hashes": hashes}, f, ensure_ascii=False, indent=2)
+
+def _delete_by_slugs(client, slugs) -> None:
+    """按 slug 批量删除 Qdrant 点（用于"文章变了/删了"的清理）。"""
+    from core.config import get_settings
+    if not slugs:
+        return
+    s = get_settings()
+    client.delete(
+        collection_name=s.QDRANT_COLLECTION,
+        points_selector=Filter(
+            must=[FieldCondition(key="slug", match=MatchAny(any=list(slugs)))]
+        ),
+        timeout=s.QDRANT_WRITE_TIMEOUT,
+    )
+
+def run_ingest(
+    repo_path: str,
+    recreate: bool = False,
+    incremental: bool = False,
+    summarize: bool = False,
+) -> int:
     s = get_settings()
     ensure_collection(recreate=recreate)
     client = get_qdrant()
@@ -38,74 +101,108 @@ def run_ingest(repo_path: str, recreate: bool = False) -> int:
         logger.warning("no ingestable documents found in %s", repo_path)
         return 0
 
-    logger.info(
-        "embedding %d chunks in batches of %d...",
-        len(docs),
-        s.EMBED_BATCH_SIZE,
-    )
-    # 嵌入模型API输入最大为64
-    # 用组合文本（标题/标签/章节/正文）做 embedding，而非仅正文
-    vectors = embed.embed_documents(
-        [c.embed_text() for c in docs],
-        chunk_size=s.EMBED_BATCH_SIZE,
-    )
+    grouped = _group_by_slug(docs)
+    current_hashes = {slug: _slug_hash(cs) for slug, cs in grouped.items()}
 
-    points = [
-        # 定义向量点的数据结构
-        PointStruct(
-            # Qdrant 要求使用 UUID 或无符号整数作为 ID；此处根据
-            # slug:chunk_index 生成一个稳定的 ID，以保证写入操作的幂等性。
-            id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{c.slug}:{c.chunk_index}")),
-            vector=v,
-            payload={"chunk": c.to_payload(), "doc_type": c.doc_type, "tags": c.tags, "slug": c.slug},
+    changed: set[str] = set()
+    removed: list[str] = []
+    if incremental and not recreate:
+        prev = _load_state()
+        changed = {sl for sl, h in current_hashes.items() if prev.get(sl) != h}
+        removed = [sl for sl in prev if sl not in current_hashes]
+        logger.info(
+            "incremental: %d changed, %d removed, %d unchanged",
+            len(changed), len(removed), len(current_hashes) - len(changed),
         )
-        for c, v in zip(docs, vectors)
-    ]
+        target = {sl: cs for sl, cs in grouped.items() if sl in changed}
+        # 关键：先删掉这些 slug 的全部旧点，避免文章变短残留尾部 chunk
+        _delete_by_slugs(client, list(changed) + removed)
+    else:
+        # 非增量的全量：仍清掉"磁盘已删"的 slug，防止陈旧残留
+        target = grouped
+        if not recreate:
+            prev = _load_state()
+            removed = [sl for sl in prev if sl not in current_hashes]
+            _delete_by_slugs(client, removed)
 
-    # 分批写入向量数据库
-    # upsert容易超时，现在分批写入，默认值为32
-    batch = s.QDRANT_UPSERT_BATCH_SIZE
-    for i in range(0, len(points), batch):
-        client.upsert(
-            collection_name=s.QDRANT_COLLECTION,
-            points=points[i : i + batch],
-            timeout=s.QDRANT_WRITE_TIMEOUT,
+    to_embed = [c for cs in target.values() for c in cs]
+    if to_embed:
+        logger.info(
+            "embedding %d chunks (incremental=%s, batch=%d)...",
+            len(to_embed), incremental, s.EMBED_BATCH_SIZE,
         )
-    logger.info("ingested %d chunks into '%s'", len(points), s.QDRANT_COLLECTION)
-    # 同步刷新全站文章清单（供生成链路注入「本站文章概览」，详见 P3）
+        vectors = embed.embed_documents(
+            [c.embed_text() for c in to_embed],
+            chunk_size=s.EMBED_BATCH_SIZE,
+        )
+        points = [
+            PointStruct(
+                id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{c.slug}:{c.chunk_index}")),
+                vector=v,
+                payload={
+                    "chunk": c.to_payload(),
+                    "doc_type": c.doc_type,
+                    "tags": c.tags,
+                    "slug": c.slug,
+                    "content_hash": current_hashes[c.slug],  # 可选：便于排查
+                },
+            )
+            for c, v in zip(to_embed, vectors)
+        ]
+        batch = s.QDRANT_UPSERT_BATCH_SIZE
+        for i in range(0, len(points), batch):
+            client.upsert(
+                collection_name=s.QDRANT_COLLECTION,
+                points=points[i : i + batch],
+                timeout=s.QDRANT_WRITE_TIMEOUT,
+            )
+        logger.info("upserted %d chunks", len(points))
+    else:
+        logger.info("nothing to embed")
+
+    _save_state(current_hashes)
+
+    # 重建文章清单（含可选摘要）。增量模式只给"变化 slug"重新摘要，省 token。
     try:
-        idx = build_index(repo_path)
+        changed_slugs = (set(changed) | set(removed)) if incremental else None
+        idx = build_index(
+            repo_path, summarize=summarize, changed_slugs=changed_slugs
+        )
         logger.info("built blog index: %d articles", idx["count"])
     except Exception:
         logger.warning("blog index build skipped (non-fatal)", exc_info=True)
-    return len(points)
-
+    return len(to_embed)
 
 def main() -> None:
-    # 创建一个参数解析器
     parser = argparse.ArgumentParser(description="Ingest a Hexo repo into Qdrant")
     parser.add_argument("--repo", required=True, help="path to the Hexo repo root")
     parser.add_argument(
         "--recreate",
         action="store_true",
-        help="drop and recreate the collection before ingest (use after URL/schema changes)",
+        help="drop and recreate the collection before ingest",
     )
     parser.add_argument(
-        "--collection",
-        default=None,
-        help="override QDRANT_COLLECTION for this run (e.g. an experimental "
-        "small-dim collection). Useful for A/B comparisons without clobbering prod.",
+        "--incremental",
+        action="store_true",
+        help="only embed changed/new slugs and delete removed ones (needs prior state)",
     )
+    parser.add_argument(
+        "--summarize",
+        action="store_true",
+        help="generate a one-line LLM summary per article into blog_index.json",
+    )
+    parser.add_argument("--collection", default=None, help="override QDRANT_COLLECTION")
     args = parser.parse_args()
-    # 取出用户传进来的值
     if args.collection:
-        # 同一进程内所有 get_settings() 调用共享该单例，覆盖后 ensure_collection
-        # 与 upsert 都会指向新的 collection，无需改其它代码。
         get_settings().QDRANT_COLLECTION = args.collection
-    n = run_ingest(args.repo, recreate=args.recreate)
+    n = run_ingest(
+        args.repo,
+        recreate=args.recreate,
+        incremental=args.incremental,
+        summarize=args.summarize,
+    )
     print(f"ingested {n} chunks")
     sys.exit(0 if n >= 0 else 1)
-
 
 if __name__ == "__main__":
     main()

@@ -44,7 +44,7 @@ def _load_chunks() -> List[DocumentChunk]:
             break
     return chunks
 
-# 
+# BM25索引是运行中的后端进程，在内存中用qdrant的数据复印出来的一份全文检索结构
 @lru_cache(maxsize=1)
 def get_bm25_index() -> Tuple[BM25Okapi, Tuple[DocumentChunk, ...]]:
     """Build a process-local index; restart after recreating the collection."""

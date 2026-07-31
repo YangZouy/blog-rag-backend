@@ -9,7 +9,7 @@ import logging
 from functools import lru_cache
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import Distance, PayloadSchemaType, VectorParams
 
 from core.config import get_settings
 
@@ -61,11 +61,24 @@ def ensure_collection(client: QdrantClient | None = None, recreate: bool = False
             collection_name=s.QDRANT_COLLECTION,
             vectors_config=VectorParams(size=s.EMBED_DIM, distance=Distance.COSINE),
         )
-        return
-    try:
-        client.get_collection(s.QDRANT_COLLECTION)
-    except Exception:
-        client.create_collection(
-            collection_name=s.QDRANT_COLLECTION,
-            vectors_config=VectorParams(size=s.EMBED_DIM, distance=Distance.COSINE),
-        )
+    else:
+        try:
+            client.get_collection(s.QDRANT_COLLECTION)
+        except Exception:
+            client.create_collection(
+                collection_name=s.QDRANT_COLLECTION,
+                vectors_config=VectorParams(size=s.EMBED_DIM, distance=Distance.COSINE),
+            )
+    # 为过滤/删除用到的 payload 字段建索引（幂等，重复创建不会报错）：
+    #  - slug    : _delete_by_slugs 按 slug 过滤删除，Qdrant 强制要求被过滤字段有索引，否则 400
+    #  - doc_type: retriever 检索时按 doc_type 过滤，建索引后走倒排、更快
+    #  - tags    : retriever 检索时按 tags 过滤（数组字段，KEYWORD 索引同样支持数组）
+    for field in ("slug", "doc_type", "tags"):
+        try:
+            client.create_payload_index(
+                collection_name=s.QDRANT_COLLECTION,
+                field_name=field,
+                field_schema=PayloadSchemaType.KEYWORD,
+            )
+        except Exception:
+            logger.warning("payload index %s may already exist; ignoring", field)

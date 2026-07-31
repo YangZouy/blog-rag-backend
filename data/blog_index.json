@@ -1,27 +1,30 @@
 {
   "generated_from": "D:/Blog",
-  "count": 85,
+  "count": 87,
   "articles": [
     {
       "title": "关于我",
       "url": "https://zyydgrbk.top/about/",
       "doc_type": "page",
       "tags": [],
-      "excerpt": "## 个人历程\n\n邹阳，21届延大数字媒体本科，24届西交软件工程硕，有全栈和模型训练经历，1篇专利，1年前端开发（途虎养车），1年gap。\n\n22年到24年毕业前夕，根据大部分师兄师姐就业情况，选定"
+      "excerpt": "## 个人历程\n\n邹阳，21届延大数字媒体本科，24届西交软件工程硕，有全栈和模型训练经历，1篇专利，1年前端开发（途虎养车），1年gap。\n\n22年到24年毕业前夕，根据大部分师兄师姐就业情况，选定",
+      "description": null
     },
     {
       "title": "AI内容分发自动化助手",
       "url": "https://zyydgrbk.top/projects/ai-content-distribution/",
       "doc_type": "page",
       "tags": [],
-      "excerpt": "## 项目简介\n\nAI内容分发自动化助手，核心目标是把「写完一篇内容之后的重复发布动作」尽可能自动化，减少格式适配、图片处理、摘要补充、封面整理和多平台同步的时间成本。\n\n当前项目主要覆盖：\n\n- 从"
+      "excerpt": "## 项目简介\n\nAI内容分发自动化助手，核心目标是把「写完一篇内容之后的重复发布动作」尽可能自动化，减少格式适配、图片处理、摘要补充、封面整理和多平台同步的时间成本。\n\n当前项目主要覆盖：\n\n- 从",
+      "description": "汇总 AI 内容分发自动化助手项目的背景、文档、系列文章与演示视频入口。"
     },
     {
       "title": "Figma智能批量产图平台",
       "url": "https://zyydgrbk.top/projects/figma-batch-render/",
       "doc_type": "page",
       "tags": [],
-      "excerpt": "## 项目简介\n\nFigma智能批量产图平台，核心目标是让设计稿从「一次性产出」变成「可模板化、可数据驱动、可批量渲染」的素材生产流程，降低设计师与素材团队之间的协作成本。\n\n当前项目主要覆盖：\n\n-"
+      "excerpt": "## 项目简介\n\nFigma智能批量产图平台，核心目标是让设计稿从「一次性产出」变成「可模板化、可数据驱动、可批量渲染」的素材生产流程，降低设计师与素材团队之间的协作成本。\n\n当前项目主要覆盖：\n\n-",
+      "description": "汇总 Figma 智能批量产图平台项目的方案设计、演进分析、系列文章与演示视频入口。"
     },
     {
       "title": "Agentic AI：大语言模型驱动的智能体系统解析",
@@ -34,7 +37,8 @@
         "工具调用",
         "多智能体协作"
       ],
-      "excerpt": "## 核心定义\n\n**Agentic AI** 是基于大语言模型构建，通过多步骤工作流完成复杂任务的智能系统。它模仿人类解决问题的自然过程，将复杂任务拆解为多个步骤，通过规划、执行、反思、修正的循环逐"
+      "excerpt": "## 核心定义\n\n**Agentic AI** 是基于大语言模型构建，通过多步骤工作流完成复杂任务的智能系统。它模仿人类解决问题的自然过程，将复杂任务拆解为多个步骤，通过规划、执行、反思、修正的循环逐",
+      "description": "本文探讨了Agentic AI的概念及其相较于传统AI的优势。Agentic AI通过多步骤工作流和反思优化，模仿人类思考过程，提升任务完成效率和质量。文章详细介绍了智能体工作流的自主性层级、任务分解方法、工具使用机制及多智能体协作模式，强调了其在复杂任务中的应用潜力和挑战。"
     },
     {
       "title": "Agent评测：多轮推理与任务完成能力的全面解析",
@@ -47,7 +51,8 @@
         "任务完成",
         "稳定性"
       ],
-      "excerpt": "## 一句话理解\n\nAgent 评测的重点，不是看模型\"会不会回答\"，而是看它**能不能稳定地把事情做成**。\n\n因为 Agent 会多轮推理、调用工具、修改环境、连续决策，所以评测必须覆盖**完整任"
+      "excerpt": "## 一句话理解\n\nAgent 评测的重点，不是看模型\"会不会回答\"，而是看它**能不能稳定地把事情做成**。\n\n因为 Agent 会多轮推理、调用工具、修改环境、连续决策，所以评测必须覆盖**完整任",
+      "description": "本文深入探讨了Agent评测的核心要点，强调评测不仅关注模型的回答能力，更注重其在多轮推理和任务完成中的稳定性。通过详细分析评测框架、评分器设计和非确定性处理，文章提供了构建高质量Agent评测体系的实用原则，帮助读者理解如何通过评测提升Agent的整体性能和用户体验。"
     },
     {
       "title": "AI-for-Everyone：从基础概念到社会影响的全面解析",
@@ -60,7 +65,8 @@
         "数据科学",
         "AI伦理"
       ],
-      "excerpt": "### AI的分类\n\n**ANI（狭义人工智能）**：专注于单一特定任务的智能系统，如图像识别、语音助手等。\n\n**AGI（通用人工智能）**：具备人类水平或超越人类的通用认知能力，能够完成人类能做的"
+      "excerpt": "### AI的分类\n\n**ANI（狭义人工智能）**：专注于单一特定任务的智能系统，如图像识别、语音助手等。\n\n**AGI（通用人工智能）**：具备人类水平或超越人类的通用认知能力，能够完成人类能做的",
+      "description": "本文详细介绍了人工智能的基础概念、项目实践及其社会影响。通过对AI分类、生成式AI原理、项目生命周期、机器学习与数据科学的协同关系等方面的探讨，文章强调了AI在自动化任务、商业决策中的应用潜力。同时，分析了AI对就业的影响、数据垄断风险及伦理挑战，提供了选择高潜力AI项目的标准和评估框架。"
     },
     {
       "title": "AI内容分发自动化助手评测",
@@ -73,7 +79,8 @@
         "效率提升",
         "评测"
       ],
-      "excerpt": "### 1.1 评测范围\n\n本轮手工基线共覆盖 8 篇文章，输入方式分布如下：\n\n- 本地 Obsidian：4 篇\n- 飞书链接：2 篇\n- 带外链 Markdown：2 篇\n\n所有样本均以\"博客可"
+      "excerpt": "### 1.1 评测范围\n\n本轮手工基线共覆盖 8 篇文章，输入方式分布如下：\n\n- 本地 Obsidian：4 篇\n- 飞书链接：2 篇\n- 带外链 Markdown：2 篇\n\n所有样本均以\"博客可",
+      "description": "本文评测了AI内容分发自动化助手，通过与手工基线的对比，展示了自动化工具在减少重复劳动方面的优势。评测结果表明，自动化工具显著降低了内容发布的时间成本，但仍需解决环境依赖和流程脆弱性等问题。"
     },
     {
       "title": "AI基础知识：从n-grams到Transformer",
@@ -86,14 +93,16 @@
         "神经网络",
         "Transformer"
       ],
-      "excerpt": "## 基于统计方法的语言模型\n\n**n-grams 语言模型**基于马尔可夫假设和离散变量的极大似然估计给出词元的预测概率。\n\n$$P\\text {n-}grams(w_{1}:N)=\\prod _{"
+      "excerpt": "## 基于统计方法的语言模型\n\n**n-grams 语言模型**基于马尔可夫假设和离散变量的极大似然估计给出词元的预测概率。\n\n$$P\\text {n-}grams(w_{1}:N)=\\prod _{",
+      "description": "本文介绍了AI语言模型的发展历程，从基于统计方法的n-grams模型到神经网络模型，再到现代的Transformer模型。文章详细分析了各类模型的原理、优缺点及其在自然语言处理中的应用。通过对比不同模型的泛化能力和计算复杂度，读者可以更好地理解AI语言模型的演变及其在实际应用中的选择依据。"
     },
     {
       "title": "Bom&&Dom",
       "url": "https://zyydgrbk.top/2023/05/20/bom-dom/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "{% pdf /pdf/dom&bom-day1.pdf %}\n\n{% pdf /pdf/dom&bom-day2.pdf %}\n\n{% pdf /pdf/dom&bom-day3.pdf %}\n\n{"
+      "excerpt": "{% pdf /pdf/dom&bom-day1.pdf %}\n\n{% pdf /pdf/dom&bom-day2.pdf %}\n\n{% pdf /pdf/dom&bom-day3.pdf %}\n\n{",
+      "description": null
     },
     {
       "title": "Chain-of-Thought Prompting 论文详读",
@@ -106,7 +115,8 @@
         "Prompting",
         "NeurIPS 2022"
       ],
-      "excerpt": "## 论文信息\n\n- 标题：**Chain-of-Thought Prompting Elicits Reasoning in Large Language Models**\n- 中文可粗译为：**思"
+      "excerpt": "## 论文信息\n\n- 标题：**Chain-of-Thought Prompting Elicits Reasoning in Large Language Models**\n- 中文可粗译为：**思",
+      "description": "本文详细分析了Chain-of-Thought Prompting（CoT）方法，该方法通过在提示中加入中间推理步骤，显著提升了大语言模型在复杂推理任务中的表现。CoT不需要重新训练模型，只需改变提示格式，尤其在数学、常识和符号推理任务中效果显著。研究表明，CoT的有效性与模型规模密切相关，尤其在大模型上表现突出。"
     },
     {
       "title": "CNN for sentence classification",
@@ -115,7 +125,8 @@
       "tags": [
         "论文 kimCNN"
       ],
-      "excerpt": "# Convolutional Neural Networks for Sentence Classification\n\n2014年"
+      "excerpt": "# Convolutional Neural Networks for Sentence Classification\n\n2014年",
+      "description": null
     },
     {
       "title": "CNN解读",
@@ -124,7 +135,8 @@
       "tags": [
         "论文 cnn"
       ],
-      "excerpt": "### 作用\n\n将图片分割成不同的区域，对于每个小区域，它对应的特征是不一样的，选择一种计算方法，对每个小区域，它应该的特征值是等于多少的。\n\n图像颜色通道\n\nRGB（3 channel）所以一般来说"
+      "excerpt": "### 作用\n\n将图片分割成不同的区域，对于每个小区域，它对应的特征是不一样的，选择一种计算方法，对每个小区域，它应该的特征值是等于多少的。\n\n图像颜色通道\n\nRGB（3 channel）所以一般来说",
+      "description": null
     },
     {
       "title": "express",
@@ -133,7 +145,8 @@
       "tags": [
         "前端 框架"
       ],
-      "excerpt": "# Express\n\n一、服务端网页编程\n\n1、什么是一个web服务器\n\n前面已经记录，看笔记，如果不太好记得再来整理一下\n\n[什么是 web 服务器？ - 学习 Web 开发 | MDN (mozi"
+      "excerpt": "# Express\n\n一、服务端网页编程\n\n1、什么是一个web服务器\n\n前面已经记录，看笔记，如果不太好记得再来整理一下\n\n[什么是 web 服务器？ - 学习 Web 开发 | MDN (mozi",
+      "description": null
     },
     {
       "title": "Figma智能批量产图平台产品设计",
@@ -146,14 +159,16 @@
         "批量处理",
         "素材生成"
       ],
-      "excerpt": "### 1.1 需求说明\n\n业务侧素材生产需求增长，尤其在商品单元、活动素材大量扩张后，同一套设计版式经常需要替换不同商品图、价格、利益点、标题和活动信息，生成大量近似但内容不同的图片。\n\n传统流程通"
+      "excerpt": "### 1.1 需求说明\n\n业务侧素材生产需求增长，尤其在商品单元、活动素材大量扩张后，同一套设计版式经常需要替换不同商品图、价格、利益点、标题和活动信息，生成大量近似但内容不同的图片。\n\n传统流程通",
+      "description": "本文介绍了一种基于Figma的自动化素材生成方案，旨在通过系统化的方式降低设计师与素材团队的协作成本，提高图片素材的产量。文章详细描述了项目目标、用户需求、产品结构及技术架构，并对多种实现方案进行了调研和比较，最终选择了Sloth D2C工具。"
     },
     {
       "title": "github新建仓库并push本地代码过程",
       "url": "https://zyydgrbk.top/2023/08/10/github-xin-jian-cang-ku-bing-push-ben-di-dai-ma-guo-cheng/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "一、初始化\n\n在项目的根目录下git bash\n\n```\ngit init\n```\n\n二、github上新建仓库\n\n直接new一个新的仓库 添加url以及描述 不添加readme\n\n获取远程仓库的链接"
+      "excerpt": "一、初始化\n\n在项目的根目录下git bash\n\n```\ngit init\n```\n\n二、github上新建仓库\n\n直接new一个新的仓库 添加url以及描述 不添加readme\n\n获取远程仓库的链接",
+      "description": "详细描述了一个github仓库的建立始末以及使用过程"
     },
     {
       "title": "http接口平台开发",
@@ -162,14 +177,16 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "## 一、框架搭建\n\n前端vue\n\n```\n// 基本框架\n// 安装vue-cli\nnpm install -g @vue/cli\n// 创建项目\n// vue create http-fronte"
+      "excerpt": "## 一、框架搭建\n\n前端vue\n\n```\n// 基本框架\n// 安装vue-cli\nnpm install -g @vue/cli\n// 创建项目\n// vue create http-fronte",
+      "description": "对http接口开发平台的所有开发过程记录其中"
     },
     {
       "title": "transformers库以及pytorch的安装与使用",
       "url": "https://zyydgrbk.top/2023/06/24/huggingface-transformers-ku-de-shi-yong/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "## 卸载包\n\nconda remove package-name\n\nconda uninstall 库名（该库以及依赖库一起删除）\n\nconda uninstall 库名 --force （仅卸载该"
+      "excerpt": "## 卸载包\n\nconda remove package-name\n\nconda uninstall 库名（该库以及依赖库一起删除）\n\nconda uninstall 库名 --force （仅卸载该",
+      "description": "这一篇讲述了huggingface中的transformers库的使用"
     },
     {
       "title": "js深入-ife.baidu.com",
@@ -178,7 +195,8 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "## 闭包和IIFE\n\n- 高阶函数\n\n参数或者返回值为函数的函数\n\n- 头等函数\n\n当一门编程语言的函数可以被当作变量一样用时，则称这门语言拥有**头等函数**。在这门语言中，函数可以被当作参数传递"
+      "excerpt": "## 闭包和IIFE\n\n- 高阶函数\n\n参数或者返回值为函数的函数\n\n- 头等函数\n\n当一门编程语言的函数可以被当作变量一样用时，则称这门语言拥有**头等函数**。在这门语言中，函数可以被当作参数传递",
+      "description": "百度前端技术学园中js内容的理解和部分练习"
     },
     {
       "title": "js补充",
@@ -187,14 +205,16 @@
       "tags": [
         "前端 javascript"
       ],
-      "excerpt": "# 前端知识补充\n\n听的内容是B站里面的课程——javascript李立超，之前直接看的javascript高级（第四版）虽然看的还是比较仔细了，但是有些内容可能直接看书有没有理解的地方，现在听下课会"
+      "excerpt": "# 前端知识补充\n\n听的内容是B站里面的课程——javascript李立超，之前直接看的javascript高级（第四版）虽然看的还是比较仔细了，但是有些内容可能直接看书有没有理解的地方，现在听下课会",
+      "description": "this作用域和js的遗漏方面的补充"
     },
     {
       "title": "linux命令",
       "url": "https://zyydgrbk.top/2023/06/18/linux-ming-ling/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "### 查看服务器CUDA最高版本\n\nnvidia-smi\n\n可以查看到我的服务器CUDA Version: 11.7"
+      "excerpt": "### 查看服务器CUDA最高版本\n\nnvidia-smi\n\n可以查看到我的服务器CUDA Version: 11.7",
+      "description": "对于用学校服务器跑代码使用到的服务器指令归纳"
     },
     {
       "title": "neuralcoref的安装与使用",
@@ -203,7 +223,8 @@
       "tags": [
         "论文"
       ],
-      "excerpt": "## neuralcoref安装\n\n版本\n\nspacy 2.1.0\n\nneuralcoref 4.0\n\nen_core_web_sm-2.1.0\n\npython 3.7\n\n1、新建conda 虚拟环境"
+      "excerpt": "## neuralcoref安装\n\n版本\n\nspacy 2.1.0\n\nneuralcoref 4.0\n\nen_core_web_sm-2.1.0\n\npython 3.7\n\n1、新建conda 虚拟环境",
+      "description": "对neuralcoref的理解安装和使用，主要用其获取到docred数据集中mention与代词之间的关系，进行指代消解"
     },
     {
       "title": "nodejs",
@@ -212,7 +233,8 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "Nodejs内容\n\n博客笔记：[01 【nodejs简介】 | dselegent-blog](https://blog.dselegent.cf/back_end/nodeJs/01.html)\n\n"
+      "excerpt": "Nodejs内容\n\n博客笔记：[01 【nodejs简介】 | dselegent-blog](https://blog.dselegent.cf/back_end/nodeJs/01.html)\n\n",
+      "description": "尚硅谷中nodejs的课程内容，内含之前的express和mongoDB内容"
     },
     {
       "title": "openclaw安装及简单了解",
@@ -221,7 +243,8 @@
       "tags": [
         "openclaw AI实践 AI应用 AI辅助工具"
       ],
-      "excerpt": "## 简介\n\nOpenClaw是一个开源、可本地部署的自主AI Agent框架，相当于机器人的操作系统与躯体，让机器人拥有长期记忆、操作本地文件并在设备上持续运行的能力。"
+      "excerpt": "## 简介\n\nOpenClaw是一个开源、可本地部署的自主AI Agent框架，相当于机器人的操作系统与躯体，让机器人拥有长期记忆、操作本地文件并在设备上持续运行的能力。",
+      "description": "本文对openclaw进行了简要的介绍，包括它的适用场景，win11系统上的安装和使用教程，核心概念和常用命令等。"
     },
     {
       "title": "Perplexity产品研究与分析方法总结",
@@ -234,14 +257,16 @@
         "用户体验",
         "技术核心"
       ],
-      "excerpt": "# Perplexity产品研究与分析方法总结\n\n以下内容是个人使用后得到的结论，目前没有任何别的参考，基于纯体验思考和官网信息等得出。\n\n文章主要分为两部分：前半部分是对 Perplexity 产品"
+      "excerpt": "# Perplexity产品研究与分析方法总结\n\n以下内容是个人使用后得到的结论，目前没有任何别的参考，基于纯体验思考和官网信息等得出。\n\n文章主要分为两部分：前半部分是对 Perplexity 产品",
+      "description": "本文总结了对Perplexity产品的研究与分析方法，涵盖产品定位、用户群体、商业定价及其核心功能。通过对产品的深度使用和竞品分析，探讨了Perplexity在AI搜索问答领域的优势及其商业模式。文章还分享了产品调研的思考与方法论，为从事产品分析的人员提供了实用的指导。"
     },
     {
       "title": "Promise理论及手写",
       "url": "https://zyydgrbk.top/2023/06/10/promise-li-lun-ji-shou-xie/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "### 错误的类型\n\nError：所有错误的父类型\n\nReferenceError：引用的变量不存在\n\nTypeError：数据类型不正确\n\n```js\nlet b\nconsole.log(b.xxx"
+      "excerpt": "### 错误的类型\n\nError：所有错误的父类型\n\nReferenceError：引用的变量不存在\n\nTypeError：数据类型不正确\n\n```js\nlet b\nconsole.log(b.xxx",
+      "description": null
     },
     {
       "title": "Prompt工程完全指南",
@@ -254,7 +279,23 @@
         "自然语言处理",
         "技术指南"
       ],
-      "excerpt": "## Prompt的组成要素\n\n一个完整的Prompt通常包含以下四个核心部分：\n\n- **任务说明** - 具体的任务要求\n- **上下文** - 任务的相关背景，包括知识前提、受众、任务示例或有助"
+      "excerpt": "## Prompt的组成要素\n\n一个完整的Prompt通常包含以下四个核心部分：\n\n- **任务说明** - 具体的任务要求\n- **上下文** - 任务的相关背景，包括知识前提、受众、任务示例或有助",
+      "description": "本文详细介绍了Prompt工程的概念、组成要素、分词与向量化技术，以及如何编写规范的Prompt。通过设计与优化Prompt，可以利用生成式人工智能模型的固有能力执行新任务，而无需额外训练。文章还探讨了上下文学习的定义、分类及其影响因素，强调了Prompt在提升模型性能中的重要性。"
+    },
+    {
+      "title": "Python-1-基础",
+      "url": "https://zyydgrbk.top/2026/07/29/python-1-ji-chu/",
+      "doc_type": "post",
+      "tags": [
+        "Python",
+        "Type Hints",
+        "Pydantic",
+        "数据校验",
+        "LLM",
+        "BaseModel"
+      ],
+      "excerpt": "### 知识点 0：`from ... import ...` 语法——怎么把工具搬进来\n\nPython 的模块就是一个\"工具箱\"，你写代码时需要从工具箱里拿工具出来。",
+      "description": "本文系统讲解Python类型标注（Type Hints）与Pydantic数据校验的核心知识点，涵盖import语法、函数类型标注、嵌套数据类型（如list[dict[str,str]]）、竖线|语法、Literal限定值、TypedDict与Pydantic BaseModel的对比、Field字段约束，以及LLM输出校验的完整实战流程。强调Pydantic在运行时真正拦截类型错误，而TypedDict仅做声明不校验。"
     },
     {
       "title": "RAG 检索增强生成技术详解",
@@ -267,7 +308,8 @@
         "大语言模型",
         "个性化知识库"
       ],
-      "excerpt": "## 定义\n\n**检索增强生成**（Retrieval-Augmented Generation，RAG）是一种从外部数据库检索出相关信息来辅助改善LLM生成质量的系统。"
+      "excerpt": "## 定义\n\n**检索增强生成**（Retrieval-Augmented Generation，RAG）是一种从外部数据库检索出相关信息来辅助改善LLM生成质量的系统。",
+      "description": "本文详细介绍了RAG（检索增强生成）技术，通过从外部数据库检索相关信息来改善大语言模型的生成质量。文章探讨了RAG的组成、架构以及在构建个人知识库中的应用，特别是如何通过DeepSeek和RAGFlow实现个性化知识库的构建。"
     },
     {
       "title": "react学习",
@@ -276,7 +318,8 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "# react学习路径\n\n一份很好的前后端学习笔记：个人博客，react笔记是尚硅谷中的笔记 但不是很详细\n\n[React应用(基于React脚手架) (gitee.io)](https://brig"
+      "excerpt": "# react学习路径\n\n一份很好的前后端学习笔记：个人博客，react笔记是尚硅谷中的笔记 但不是很详细\n\n[React应用(基于React脚手架) (gitee.io)](https://brig",
+      "description": "是对react学习路程的笔记总结"
     },
     {
       "title": "react学习二",
@@ -285,7 +328,8 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "## 引言\n\n在了解了 Antd 组件库之后，我们现在开始学习了 Redux ，在我们之前写的案例当中，例如：todolist 案例，GitHub 搜索案例当中，我们对于状态的管理，都是通过 stat"
+      "excerpt": "## 引言\n\n在了解了 Antd 组件库之后，我们现在开始学习了 Redux ，在我们之前写的案例当中，例如：todolist 案例，GitHub 搜索案例当中，我们对于状态的管理，都是通过 stat",
+      "description": "前面笔记的延续"
     },
     {
       "title": "react脚手架配置代理总结",
@@ -294,7 +338,8 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "## 方法一\n\n> 在package.json中追加如下配置\n\n```json\n\"proxy\":\"http://localhost:5000\"\n```\n\n说明：\n\n1. 优点：配置简单，前端请求资源时"
+      "excerpt": "## 方法一\n\n> 在package.json中追加如下配置\n\n```json\n\"proxy\":\"http://localhost:5000\"\n```\n\n说明：\n\n1. 优点：配置简单，前端请求资源时",
+      "description": "对代理配置的总结"
     },
     {
       "title": "ReAct：语言模型中合成推理和行动的创新架构",
@@ -307,14 +352,16 @@
         "知识密集型任务",
         "决策任务"
       ],
-      "excerpt": "## Abstract\n\n语言模型中的**reasoning**（例如CoT等）和**acting**（action plan等）作为了单独的研究课题。本文探索LLM以交错的方式生成**推理轨迹**（"
+      "excerpt": "## Abstract\n\n语言模型中的**reasoning**（例如CoT等）和**acting**（action plan等）作为了单独的研究课题。本文探索LLM以交错的方式生成**推理轨迹**（",
+      "description": "本文介绍了ReAct架构，通过交替生成推理轨迹和特定任务的动作，提升语言模型在复杂任务中的表现。ReAct结合推理和行动，增强了模型的可靠性和可解释性，并在知识密集型推理和决策任务中取得了显著效果。通过与外部环境交互，ReAct有效减少了幻觉问题，并在多跳问答和事实核查任务中实现了SOTA结果。"
     },
     {
       "title": "typescript-李立超老师",
       "url": "https://zyydgrbk.top/2023/06/05/typescript-li-li-chao-lao-shi/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "## **TypeScript中的基本类型**\n\n- 类型声明\n\n  - 类型声明是TS非常重要的一个特点；\n\n  - 通过类型声明可以指定TS中变量（参数、形参）的类型；\n\n  - 指定类型后，当为"
+      "excerpt": "## **TypeScript中的基本类型**\n\n- 类型声明\n\n  - 类型声明是TS非常重要的一个特点；\n\n  - 通过类型声明可以指定TS中变量（参数、形参）的类型；\n\n  - 指定类型后，当为",
+      "description": null
     },
     {
       "title": "Vue.js源码解析一",
@@ -323,14 +370,16 @@
       "tags": [
         "Vue 前端"
       ],
-      "excerpt": "# 依赖追踪\n\n前三章主要讲解的是响应式系统，vue侦测数据的变化，当数据变化时，会通知视图进行响应的更新。\n\n侦测一个对象的变化 Object.defineProperty(后面会使用ES6的Pro"
+      "excerpt": "# 依赖追踪\n\n前三章主要讲解的是响应式系统，vue侦测数据的变化，当数据变化时，会通知视图进行响应的更新。\n\n侦测一个对象的变化 Object.defineProperty(后面会使用ES6的Pro",
+      "description": "这系列文章的内容主要结合书籍《深入浅出Vue.js》和B站上尤雨溪本人讲解的课程+题目练习来学习Vue框架"
     },
     {
       "title": "Vue.js设计与实现",
       "url": "https://zyydgrbk.top/2023/04/21/vue-js-she-ji-yu-shi-xian/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "### 第一章：权衡的艺术\n\n框架的设计，本身就是一种权衡的艺术。\n\n命令式与声明式\n\n命令式：关注过程\n\n```js\nconst div = document.querySelector('#app"
+      "excerpt": "### 第一章：权衡的艺术\n\n框架的设计，本身就是一种权衡的艺术。\n\n命令式与声明式\n\n命令式：关注过程\n\n```js\nconst div = document.querySelector('#app",
+      "description": null
     },
     {
       "title": "webpack5",
@@ -339,7 +388,8 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "为什么引入webpack\n\n必须了解ES6的模块化语法\n\n[ES6的模块化语法 - 掘金 (juejin.cn)](https://juejin.cn/post/6844903810549170190"
+      "excerpt": "为什么引入webpack\n\n必须了解ES6的模块化语法\n\n[ES6的模块化语法 - 掘金 (juejin.cn)](https://juejin.cn/post/6844903810549170190",
+      "description": null
     },
     {
       "title": "一文多发产品调研",
@@ -351,7 +401,8 @@
         "内容分发",
         "产品设计"
       ],
-      "excerpt": "### 1. 产品定位\n\n面向知识型长文创作者的一文多发 Agent，输入 word 笔记，**内容增强**、自动适配不同平台并自动分发。"
+      "excerpt": "### 1. 产品定位\n\n面向知识型长文创作者的一文多发 Agent，输入 word 笔记，**内容增强**、自动适配不同平台并自动分发。",
+      "description": null
     },
     {
       "title": "一文多发助手2.0产品设计",
@@ -364,7 +415,8 @@
         "Markdown",
         "Obsidian"
       ],
-      "excerpt": "### 1.1 产品定位与价值主张\n\n**产品定位**\n\n面向个人知识型创作者的内容分发自动化工具，支持从飞书链接、带外链的Markdown文档、本地Obsidian文档三种来源输入，自动完成内容解析"
+      "excerpt": "### 1.1 产品定位与价值主张\n\n**产品定位**\n\n面向个人知识型创作者的内容分发自动化工具，支持从飞书链接、带外链的Markdown文档、本地Obsidian文档三种来源输入，自动完成内容解析",
+      "description": "本文介绍了一文多发助手2.0的产品设计，旨在为个人知识型创作者提供高效的内容分发工具。通过支持多种输入源和自动化处理，解决了图片管理混乱、格式差异等痛点，提升了创作效率。新版本扩展了输入源，增强了功能，并升级了平台能力，使得内容发布更加便捷和自动化。"
     },
     {
       "title": "一文多发助手2.0开发全记录",
@@ -377,7 +429,8 @@
         "自动化",
         "工具选型"
       ],
-      "excerpt": "### 1.1 浏览器插件方案\n\n最初调研过 `wechatsync` 这类浏览器插件方案。它的思路是在浏览器层拦截内容，再一键同步到多个平台。\n\n**优点**\n\n- 轻量，安装后即可使用，无需额外搭"
+      "excerpt": "### 1.1 浏览器插件方案\n\n最初调研过 `wechatsync` 这类浏览器插件方案。它的思路是在浏览器层拦截内容，再一键同步到多个平台。\n\n**优点**\n\n- 轻量，安装后即可使用，无需额外搭",
+      "description": "本文详细记录了一文多发助手2.0的开发过程，包括从浏览器插件方案到基于API的工作流方案的演变，以及在工具选型、平台迁移、图片处理、公众号发布等方面的具体实施和遇到的问题。通过对比不同工具和平台的优缺点，最终选择了Obsidian作为核心写作工具，并成功实现了更灵活的内容适配和发布流程。"
     },
     {
       "title": "一文多发助手2.0技术实现详解",
@@ -390,7 +443,8 @@
         "自动化发布",
         "架构设计"
       ],
-      "excerpt": "### 1.1 整体架构\n\n2.0版本采用\"Dify workflow + Node.js客户端\"的双层架构：\n\n```text\n用户\n  ↓\nNode.js（本地）\n  ↓ HTTP API调用\nD"
+      "excerpt": "### 1.1 整体架构\n\n2.0版本采用\"Dify workflow + Node.js客户端\"的双层架构：\n\n```text\n用户\n  ↓\nNode.js（本地）\n  ↓ HTTP API调用\nD",
+      "description": "本文详细介绍了一文多发助手2.0的技术实现，包括其双层架构设计、Dify工作流的具体流程以及Node.js CLI项目的核心模块。通过采用Dify workflow和Node.js客户端的双层架构，提升了工作流编排能力和插件生态的丰富性，实现了更复杂的处理逻辑和自动化发布功能。"
     },
     {
       "title": "一文多发助手MVP实践报告",
@@ -403,7 +457,8 @@
         "多平台发布",
         "MVP实践"
       ],
-      "excerpt": "### 一、文档信息\n\n- **版本**：v0.1 MVP\n- **状态**：已验证跑通（个人博客、微信公众号）\n- **撰写人**：邹阳\n- **日期**：2026-04-23"
+      "excerpt": "### 一、文档信息\n\n- **版本**：v0.1 MVP\n- **状态**：已验证跑通（个人博客、微信公众号）\n- **撰写人**：邹阳\n- **日期**：2026-04-23",
+      "description": "本文详细介绍了一文多发助手的MVP实践，包括产品背景、痛点分析、竞品对比及核心功能实现。通过兼容OneNote导出的Word文档，实现了图片上传、格式转换及多平台发布的自动化流程，解决了图片迁移和格式适配的难题。"
     },
     {
       "title": "为什么广度优先遍历得到的是最短路径",
@@ -412,7 +467,8 @@
       "tags": [
         "leetcode刷题"
       ],
-      "excerpt": "为什么广度优先遍历得到的是最短路径\t\t\t\n\n假设我们需要找到从A到G的最短路径：\n\n<img src=\"https://img-blog.csdnimg.cn/20200310114505306.gi"
+      "excerpt": "为什么广度优先遍历得到的是最短路径\t\t\t\n\n假设我们需要找到从A到G的最短路径：\n\n<img src=\"https://img-blog.csdnimg.cn/20200310114505306.gi",
+      "description": null
     },
     {
       "title": "健身第一课：背部训练指南",
@@ -425,7 +481,8 @@
         "健身教程",
         "肌肉锻炼"
       ],
-      "excerpt": "### 动作一：直臂下压\n\n**训练参数**\n- 15个/组，每次4-5组\n- 目前力量三片，后续随着力量增加进行调配\n\n**姿势讲解**\n\n掌根握住手柄，拉绳索与肩平齐时后退两步，做好准备姿势。\n\n"
+      "excerpt": "### 动作一：直臂下压\n\n**训练参数**\n- 15个/组，每次4-5组\n- 目前力量三片，后续随着力量增加进行调配\n\n**姿势讲解**\n\n掌根握住手柄，拉绳索与肩平齐时后退两步，做好准备姿势。\n\n",
+      "description": "本文详细介绍了背部肌群的训练方法，包括直臂下压、单臂哑铃划船、剪刀下拉和T杆胸托划船等动作。每个动作都配有详细的训练参数和姿势讲解，强调动作标准和发力部位的重要性。文章还提供了训练原则和配套安排，帮助读者有效进行背部肌肉的锻炼。"
     },
     {
       "title": "健身第七课",
@@ -439,7 +496,8 @@
         "力量训练",
         "动作教学"
       ],
-      "excerpt": "# 健身第七课\n\n锻炼部位：臀腿\n\n动作一：坐姿髋外展\n\n动作二：哈克深蹲\n\n- 姿势讲解\n\n**腰背打直**，核心收紧，双脚分开，与肩同宽，略微外八，踩在踏板中间\n下蹲至大腿与地面平行，保持**背部"
+      "excerpt": "# 健身第七课\n\n锻炼部位：臀腿\n\n动作一：坐姿髋外展\n\n动作二：哈克深蹲\n\n- 姿势讲解\n\n**腰背打直**，核心收紧，双脚分开，与肩同宽，略微外八，踩在踏板中间\n下蹲至大腿与地面平行，保持**背部",
+      "description": "本文为臀腿训练课程，包含四个动作：坐姿髋外展、哈克深蹲、罗马尼亚硬拉和坐姿腿弯曲。详细讲解了每个动作的标准姿势要点，如哈克深蹲需腰背打直、下蹲至大腿与地面平行；罗马尼亚硬拉需感受臀部发力、哑铃沿大腿下滑至膝盖下方；坐姿腿弯曲需固定骨盆、脚尖勾起等，强调动作规范与发力感。"
     },
     {
       "title": "健身第九课",
@@ -453,7 +511,8 @@
         "侧平举",
         "力量训练"
       ],
-      "excerpt": "# 健身第九课\n\n训练部位：肩\n\n动作一：绳索面拉\n\n- 姿势讲解\n训练部位：三角肌后束\n起始姿势：\n退后一步，绳索绷紧，双脚与肩同宽\n发力过程：\n肩胛骨后缩，双手向耳后水平拉\n顶峰收缩1秒，感受肩后"
+      "excerpt": "# 健身第九课\n\n训练部位：肩\n\n动作一：绳索面拉\n\n- 姿势讲解\n训练部位：三角肌后束\n起始姿势：\n退后一步，绳索绷紧，双脚与肩同宽\n发力过程：\n肩胛骨后缩，双手向耳后水平拉\n顶峰收缩1秒，感受肩后",
+      "description": "本文为健身训练第九课，聚焦肩部三角肌训练。包含四个动作：绳索面拉（三角肌后束）、坐姿俯身反向飞鸟（三角肌后束）、固定推肩（三角肌前中束）、侧平举（三角肌中束）。每个动作详细讲解了起始姿势、发力过程、呼吸节奏及注意事项，强调顶峰收缩、控制节奏和保持身体稳定等训练要点。"
     },
     {
       "title": "健身第八课",
@@ -467,7 +526,8 @@
         "背阔肌",
         "力量训练"
       ],
-      "excerpt": "## 动作一：辅助引体向上\n\n**姿势讲解**\n\n握距大约1.5倍肩宽，沉肩收紧核心。保持身体在一个平面上。肩胛下沉，用背部力量向上拉起，大臂向内收，不要展开。形成与高位下拉基本一致，控制匀速回落。\n"
+      "excerpt": "## 动作一：辅助引体向上\n\n**姿势讲解**\n\n握距大约1.5倍肩宽，沉肩收紧核心。保持身体在一个平面上。肩胛下沉，用背部力量向上拉起，大臂向内收，不要展开。形成与高位下拉基本一致，控制匀速回落。\n",
+      "description": "本文为健身背部训练课程，包含四个动作：辅助引体向上（1.5倍肩宽握距，沉肩核心收紧，背部发力拉起）、俯身杠铃划船（前倾45度，背阔肌拉杠铃至肚脐高度）、剪刀单侧下拉（侧重背阔肌上部，保持肩胛下沉稳定）、直臂下压。每个动作详细讲解了姿势要点和发力技巧，强调控制匀速、保持肌肉张力和肩胛稳定。"
     },
     {
       "title": "健身第六课",
@@ -481,7 +541,23 @@
         "上斜卧推",
         "力量训练"
       ],
-      "excerpt": "### 动作一：蝴蝶机飞鸟\n\n- 姿势讲解\n\n需要有**胸部拉伸到较大，然后合拢**的过程，找胸部发力\n\n![](https://zyydgrbk.oss-cn-chengdu.aliyuncs.co"
+      "excerpt": "### 动作一：蝴蝶机飞鸟\n\n- 姿势讲解\n\n需要有**胸部拉伸到较大，然后合拢**的过程，找胸部发力\n\n![](https://zyydgrbk.oss-cn-chengdu.aliyuncs.co",
+      "description": "本文为健身训练课程第六课，聚焦胸部训练。介绍了四个主要动作：蝴蝶机飞鸟（强调胸部拉伸与合拢发力）、史密斯卧推（背部弓起夹紧，控制速度感受胸肌）、上斜卧推（挺胸沉肩，肩胛骨后缩下沉贴靠背）、史密斯上斜卧推（肘部自然展开）。建议每两周循环一次，胸部训练频率不宜过高。"
+    },
+    {
+      "title": "健身第十一课",
+      "url": "https://zyydgrbk.top/2026/07/24/jian-shen-di-shi-yi-ke/",
+      "doc_type": "post",
+      "tags": [
+        "健身",
+        "背部训练",
+        "杠铃俯身划船",
+        "单臂坐姿划船",
+        "T杆俯身划船",
+        "双手剪刀下拉"
+      ],
+      "excerpt": "### 动作一：杠铃俯身划船\n\n- 姿势讲解\n\n> 💡 重要：下意识感受发力部位，否则白练\n\n站姿与握距：双脚与肩同宽，脚尖微外展\n反手全握杠铃，手肘靠近身体 手臂不要放松，锻炼外部肌肉+一点内部\n屈",
+      "description": "本文为健身背部训练课程，介绍了四个背部锻炼动作：杠铃俯身划船（锻炼外部+内部肌肉，强调屈膝微蹲、背部挺直）、单臂坐姿划船（锻炼外部肌肉，手肘紧贴身体）、T杆俯身划船（锻炼内部肌肉，夹背、稍挺胸）和双手剪刀下拉（宽握，锻炼外部肌肉，缓慢节奏）。每个动作均强调感受发力部位的重要性。"
     },
     {
       "title": "全面肩部训练指南：提升肩部力量与形态",
@@ -494,7 +570,8 @@
         "动作指导",
         "健身技巧"
       ],
-      "excerpt": "### 姿势讲解\n\n- 手臂放下时绷紧沉肩，大臂小臂间些微弯曲\n- 手臂向外展时与肩平齐，感受肩部发力\n- 打造肩宽，帮助塑造 **直角肩** 视觉\n- 匀速上下\n\n> 💡 这个动作主要针对三角肌中束"
+      "excerpt": "### 姿势讲解\n\n- 手臂放下时绷紧沉肩，大臂小臂间些微弯曲\n- 手臂向外展时与肩平齐，感受肩部发力\n- 打造肩宽，帮助塑造 **直角肩** 视觉\n- 匀速上下\n\n> 💡 这个动作主要针对三角肌中束",
+      "description": "本文提供了一套全面的肩部训练指南，涵盖侧平举、史密斯坐姿推肩、分动式坐姿推肩和蝴蝶机反向飞鸟四个动作。每个动作都详细讲解了姿势要点和注意事项，帮助读者有效提升肩部力量和塑造理想的肩部形态。"
     },
     {
       "title": "写练手项目时遇见的问题",
@@ -503,14 +580,16 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "## github搜索页面\n\n1、端口号没有设为3000默认端口 然后axios连接数据时获取不到\n\n疑问：默认端口转换之后 webpack server中间代理服务器的端口号是否改变\n\n2、项目第二"
+      "excerpt": "## github搜索页面\n\n1、端口号没有设为3000默认端口 然后axios连接数据时获取不到\n\n疑问：默认端口转换之后 webpack server中间代理服务器的端口号是否改变\n\n2、项目第二",
+      "description": "写一些小项目时遇到的问题"
     },
     {
       "title": "刷题掌握的技能",
       "url": "https://zyydgrbk.top/2023/04/26/shua-ti-zhang-wo-de-ji-neng/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "## 1、输入\n\n```java\nScanner sc = new Scanner(System.in);\n// 获取字符串\nString str = sc.nextLine();\n// 获取整数\ni"
+      "excerpt": "## 1、输入\n\n```java\nScanner sc = new Scanner(System.in);\n// 获取字符串\nString str = sc.nextLine();\n// 获取整数\ni",
+      "description": null
     },
     {
       "title": "前端巩固",
@@ -519,21 +598,24 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "## 防抖\n\n```js\nconst debounce = (fn,delay) => {\n    let timeout = null\n        return function(...args"
+      "excerpt": "## 防抖\n\n```js\nconst debounce = (fn,delay) => {\n    let timeout = null\n        return function(...args",
+      "description": "前端各种手撕题目总结，笔试题目总结，面试经验总结等"
     },
     {
       "title": "博客优化一",
       "url": "https://zyydgrbk.top/2023/05/16/bo-ke-you-hua/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "### gitcalendar中提交次数不显示\n\n原因：github中url传回来的数据count里面为空，且为object对象\n\n解决：在gitcalendar.pug和gitcalendar-js"
+      "excerpt": "### gitcalendar中提交次数不显示\n\n原因：github中url传回来的数据count里面为空，且为object对象\n\n解决：在gitcalendar.pug和gitcalendar-js",
+      "description": "优化内容为修改gitcalendar中提交次数不显示以及数据不对的情况，添加简易运行sh脚本，添加自定义文章封面、主页顶部图片的更改以及修改过程中遇到的小bug"
     },
     {
       "title": "博客优化二",
       "url": "https://zyydgrbk.top/2026/03/27/bo-ke-you-hua-er/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "### 搭建流程如下\n\ngithub + hexo  \n教程链接：(20 封私信 / 20 条消息) 从零开始搭建个人博客（超详细） - 知乎\n\n1、拥有自己的github账号<br>\n<img sr"
+      "excerpt": "### 搭建流程如下\n\ngithub + hexo  \n教程链接：(20 封私信 / 20 条消息) 从零开始搭建个人博客（超详细） - 知乎\n\n1、拥有自己的github账号<br>\n<img sr",
+      "description": "记录博客的创建过程，以及后期维护时需要了解的内容，避免长时间后忘记"
     },
     {
       "title": "图与图学习",
@@ -542,21 +624,24 @@
       "tags": [
         "论文"
       ],
-      "excerpt": "### 图的定义\n\n图表示物件与物件之间的关系的数学对象，是图论的基本研究对象。  \n图可用于表示:  \n\n- 社交网络  \n- 网页  \n- 生物网络  \n- …  \n\n我们可以在图上执行怎样的分析"
+      "excerpt": "### 图的定义\n\n图表示物件与物件之间的关系的数学对象，是图论的基本研究对象。  \n图可用于表示:  \n\n- 社交网络  \n- 网页  \n- 生物网络  \n- …  \n\n我们可以在图上执行怎样的分析",
+      "description": "这里是图神经网络训练营中的前置教程，对图有更加深入的了解"
     },
     {
       "title": "基础算法题的归纳总结",
       "url": "https://zyydgrbk.top/2023/10/09/ji-chu-suan-fa-ti-de-gui-na-zong-jie/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "### 简单排序\n\n每次都找到最小值放置到对应的数组位置上即可\n\n```java\n// 这里需要找n-1趟就可以了 因为最后一个默认已经到了最后的位置\nfor(int i = 0;i<arr.leng"
+      "excerpt": "### 简单排序\n\n每次都找到最小值放置到对应的数组位置上即可\n\n```java\n// 这里需要找n-1趟就可以了 因为最后一个默认已经到了最后的位置\nfor(int i = 0;i<arr.leng",
+      "description": "这里是对基础算法题的归纳和总结，便于之后的回顾"
     },
     {
       "title": "屏幕、窗口、文档之间的区别",
       "url": "https://zyydgrbk.top/2023/05/16/ping-mu-chuang-kou-wen-dang-zhi-jian-de-qu-bie/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "#### 屏幕\n\n> 屏幕尺寸是屏幕的宽度和高度：显示器或移动屏幕。window.screen是保存屏幕尺寸信息的对象。\n\n- **screen.width**：屏幕的宽。\n- **screen.he"
+      "excerpt": "#### 屏幕\n\n> 屏幕尺寸是屏幕的宽度和高度：显示器或移动屏幕。window.screen是保存屏幕尺寸信息的对象。\n\n- **screen.width**：屏幕的宽。\n- **screen.he",
+      "description": null
     },
     {
       "title": "手写数字识别：从图像到神经网络",
@@ -569,7 +654,8 @@
         "机器学习",
         "深度学习"
       ],
-      "excerpt": "# 手写数字识别\n\n数据集MNIST\n\n图片：28*28像素 灰度值：0~255之间 每张图片带有一个标记，就是该图片的真实值\n\n训练集：6万张\n\n测试集：1万张\n\n**思考**：通过不同的神经网络进"
+      "excerpt": "# 手写数字识别\n\n数据集MNIST\n\n图片：28*28像素 灰度值：0~255之间 每张图片带有一个标记，就是该图片的真实值\n\n训练集：6万张\n\n测试集：1万张\n\n**思考**：通过不同的神经网络进",
+      "description": "本文详细介绍了如何使用神经网络进行手写数字识别，特别是通过将28x28像素的灰度图像转换为向量输入到神经网络中。文章涵盖了FNN的识别过程、激活函数的选择、损失函数的应用以及图像转换为张量的步骤，为读者提供了一个全面的理解框架。"
     },
     {
       "title": "掌控习惯阅读笔记",
@@ -578,7 +664,8 @@
       "tags": [
         "读书笔记"
       ],
-      "excerpt": "# 掌控习惯：如何养成好习惯并戒除坏习惯\n\n先说说看这本书的缘由，由于种种原因，我从2023年7月15号到北京，到今天8月15号整整一个月的时间，并没有做多少重要的事情，但是这是一个很关键的时间节点，"
+      "excerpt": "# 掌控习惯：如何养成好习惯并戒除坏习惯\n\n先说说看这本书的缘由，由于种种原因，我从2023年7月15号到北京，到今天8月15号整整一个月的时间，并没有做多少重要的事情，但是这是一个很关键的时间节点，",
+      "description": "这篇博文记录了阅读本书的一些书籍引用语句和自己的读后感等"
     },
     {
       "title": "数据库与ODM/ORM",
@@ -587,7 +674,8 @@
       "tags": [
         "前端 数据库"
       ],
-      "excerpt": "### 基础知识\n\nC++编写 \n\n基于**分布式文件**存储的开源数据库系统\n\n将数据存储为一个文档， 数据结构由键值对组成，MongoDB文档类似于JSON对象\n\n数据库分类\n\n- 关系型 RDB"
+      "excerpt": "### 基础知识\n\nC++编写 \n\n基于**分布式文件**存储的开源数据库系统\n\n将数据存储为一个文档， 数据结构由键值对组成，MongoDB文档类似于JSON对象\n\n数据库分类\n\n- 关系型 RDB",
+      "description": "主要介绍Mongodb数据库和它的ODM：Mongoose"
     },
     {
       "title": "深入理解现代浏览器",
@@ -596,14 +684,16 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "# 深入理解现代浏览器\n\n转载，非原创，最后连接在结尾。\n\n好了，言归正传。本文分4个部分，对应上述4篇文章（原文链接附后）。\n\n- 架构：以Chrome为例，介绍现代浏览器的实现架构。\n- 导航：从"
+      "excerpt": "# 深入理解现代浏览器\n\n转载，非原创，最后连接在结尾。\n\n好了，言归正传。本文分4个部分，对应上述4篇文章（原文链接附后）。\n\n- 架构：以Chrome为例，介绍现代浏览器的实现架构。\n- 导航：从",
+      "description": "从架构、导航、渲染、交互4个部分介绍现代浏览器"
     },
     {
       "title": "硅谷甄选平台",
       "url": "https://zyydgrbk.top/2023/08/24/huo-gu-zhen-xuan-ping-tai/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "# 硅谷甄选运营平台\n\n此次教学课程为硅谷甄选运营平台项目,包含运营平台项目模板从0到1开发，以及数据大屏幕、权限等业务。\n\n此次教学课程涉及到技术栈包含***:vue3+TypeScript+vue"
+      "excerpt": "# 硅谷甄选运营平台\n\n此次教学课程为硅谷甄选运营平台项目,包含运营平台项目模板从0到1开发，以及数据大屏幕、权限等业务。\n\n此次教学课程涉及到技术栈包含***:vue3+TypeScript+vue",
+      "description": "甄选平台"
     },
     {
       "title": "离职一年后的自我反思：从迷茫到自律的心路历程",
@@ -616,14 +706,16 @@
         "心路历程",
         "职场反思"
       ],
-      "excerpt": "# 离职一年的思考：从迷茫到自律的心路历程\n\n从去年5月30号离职那天，到如今已经一年零一个月，时间很长，我经历了几个时期：离职前规划、前期执行一部分、到迷茫、到无序、到执行、到些微自律。\n\n期间有段"
+      "excerpt": "# 离职一年的思考：从迷茫到自律的心路历程\n\n从去年5月30号离职那天，到如今已经一年零一个月，时间很长，我经历了几个时期：离职前规划、前期执行一部分、到迷茫、到无序、到执行、到些微自律。\n\n期间有段",
+      "description": "本文记录了一位职场人士在离职一年后的心路历程，从最初的迷茫到逐渐实现自律。作者分享了在职业探索中的困境与自我发现，强调执行力和自主性的重要性，并重新理解了自由、快乐、痛苦和自律的核心概念。最终，作者认识到愿力和主动性是克服长期困难的关键。"
     },
     {
       "title": "第10章 函数",
       "url": "https://zyydgrbk.top/2023/04/23/di-10-zhang-han-shu/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "## 函数定义\n\n```js\n// 函数声明式定义\nfunction sum(num1, num2) {\n\treturn num1 + num2;\t\n}\n// 函数表达式定义 注意：这里函数末尾是有分"
+      "excerpt": "## 函数定义\n\n```js\n// 函数声明式定义\nfunction sum(num1, num2) {\n\treturn num1 + num2;\t\n}\n// 函数表达式定义 注意：这里函数末尾是有分",
+      "description": null
     },
     {
       "title": "第11章 期约与异步函数",
@@ -632,7 +724,8 @@
       "tags": [
         "javaScript高级程序设计"
       ],
-      "excerpt": "# 第十一章：期约和异步函数\n\njs的异步行为会推入一个队列中，当前同步代码执行完毕之后，会执行队列中的异步代码，ES6之前多用回调完成异步操作。"
+      "excerpt": "# 第十一章：期约和异步函数\n\njs的异步行为会推入一个队列中，当前同步代码执行完毕之后，会执行队列中的异步代码，ES6之前多用回调完成异步操作。",
+      "description": "第十一章主要讲述了期约promise、异步函数async，await等操作"
     },
     {
       "title": "第12章 BOM",
@@ -641,7 +734,8 @@
       "tags": [
         "javaScript高级程序设计"
       ],
-      "excerpt": "# 第12章：BOM\n\n语法糖含义：相当于汉语里面的成语，即用更加简练的言语表达较复杂的含义，在得到广泛接受的情况下，可以提升交流的效率。"
+      "excerpt": "# 第12章：BOM\n\n语法糖含义：相当于汉语里面的成语，即用更加简练的言语表达较复杂的含义，在得到广泛接受的情况下，可以提升交流的效率。",
+      "description": null
     },
     {
       "title": "第14章 DOM",
@@ -650,7 +744,8 @@
       "tags": [
         "javaScript高级程序设计"
       ],
-      "excerpt": "## 节点层级\n\n任何HTML或XML文档都可以用DOM表示为一个由节点构成的层级结构。document节点表示每个文档的根节点。根节点的唯一子节点是html元素，我们称之为文档元素（document"
+      "excerpt": "## 节点层级\n\n任何HTML或XML文档都可以用DOM表示为一个由节点构成的层级结构。document节点表示每个文档的根节点。根节点的唯一子节点是html元素，我们称之为文档元素（document",
+      "description": "第十四章主要讲述了DOM等操作"
     },
     {
       "title": "第15章 DOM扩展",
@@ -659,7 +754,8 @@
       "tags": [
         "javaScript高级程序设计"
       ],
-      "excerpt": "### querySelector()\n\n接受CSS选择符参数，返回匹配该模式的第一个后代元素。\n\n```js\n// 获取body元素\nlet body = document.querySelecto"
+      "excerpt": "### querySelector()\n\n接受CSS选择符参数，返回匹配该模式的第一个后代元素。\n\n```js\n// 获取body元素\nlet body = document.querySelecto",
+      "description": "第十五章主要讲述了DOM等操作"
     },
     {
       "title": "第16章 DOM2和DOM3",
@@ -668,7 +764,8 @@
       "tags": [
         "javaScript高级程序设计"
       ],
-      "excerpt": "## 样式\n\nhtml的样式有3中定义方式：外部样式表<link&gt;、文档样式表<style&gt;、元素特定样式（使用style属性）"
+      "excerpt": "## 样式\n\nhtml的样式有3中定义方式：外部样式表<link&gt;、文档样式表<style&gt;、元素特定样式（使用style属性）",
+      "description": "DOM2到DOM3的变化，操作样式的DOM API，DOM遍历与范围"
     },
     {
       "title": "第17章 事件",
@@ -677,14 +774,16 @@
       "tags": [
         "javaScript高级程序设计"
       ],
-      "excerpt": "### 事件冒泡\n\nIE事件流被称为事件冒泡，事件冒泡中事件被定义为从最具体的元素（文档树中最深的节点）开始触发，然后向上传播至没有那么具体的元素（文档）。"
+      "excerpt": "### 事件冒泡\n\nIE事件流被称为事件冒泡，事件冒泡中事件被定义为从最具体的元素（文档树中最深的节点）开始触发，然后向上传播至没有那么具体的元素（文档）。",
+      "description": null
     },
     {
       "title": "第25章 客户端存储",
       "url": "https://zyydgrbk.top/2023/05/19/di-25-zhang-ke-hu-duan-cun-chu/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "# 第25章 客户端存储\n\nWeb应用程序的出现，直接在客户端存储用户信息的需求也随之出现，无论是登录信息、个人偏好还是其它数据，与特定用户相关的信息应该保存在用户的机器上。"
+      "excerpt": "# 第25章 客户端存储\n\nWeb应用程序的出现，直接在客户端存储用户信息的需求也随之出现，无论是登录信息、个人偏好还是其它数据，与特定用户相关的信息应该保存在用户的机器上。",
+      "description": null
     },
     {
       "title": "第3章 语言基础",
@@ -693,7 +792,8 @@
       "tags": [
         "javaScript高级程序设计"
       ],
-      "excerpt": "##### 语法\n\n区分大小写，ECMAScript中一切都区分大小写\n\n标识符：变量、函数、属性或者函数参数的名称，可以由一个或者多个下列字符组成：\n\n第一个字符必须是一个字母、下划线或者美元符号\n"
+      "excerpt": "##### 语法\n\n区分大小写，ECMAScript中一切都区分大小写\n\n标识符：变量、函数、属性或者函数参数的名称，可以由一个或者多个下列字符组成：\n\n第一个字符必须是一个字母、下划线或者美元符号\n",
+      "description": null
     },
     {
       "title": "第4章 变量、作用域与内存",
@@ -702,7 +802,8 @@
       "tags": [
         "javaScript高级程序设计"
       ],
-      "excerpt": "##### 基本类型与引用类型\n\n存储位置不同：基本类型（存储在栈中的实际值）引用类型(保存在内存中的对象)\n\n复制值：\n\n- 把一个原始值赋值给另一个变量时，原始值会被复制到新变量的位置。\n\n  `"
+      "excerpt": "##### 基本类型与引用类型\n\n存储位置不同：基本类型（存储在栈中的实际值）引用类型(保存在内存中的对象)\n\n复制值：\n\n- 把一个原始值赋值给另一个变量时，原始值会被复制到新变量的位置。\n\n  `",
+      "description": null
     },
     {
       "title": "第5章 基本引用类型",
@@ -711,7 +812,8 @@
       "tags": [
         "javaScript高级程序设计"
       ],
-      "excerpt": "## Date\n\n```js\nlet now = new Date(); // Fri Apr 14 2023 13:51:39 GMT+0800 (中国标准时间)\nlet someDate = ne"
+      "excerpt": "## Date\n\n```js\nlet now = new Date(); // Fri Apr 14 2023 13:51:39 GMT+0800 (中国标准时间)\nlet someDate = ne",
+      "description": null
     },
     {
       "title": "第6章 集合引用类型",
@@ -720,28 +822,32 @@
       "tags": [
         "javaScript高级程序设计"
       ],
-      "excerpt": "## Object\n\n显示地创建Object的实例由两种方式\n\n```js\n// 使用new 操作符和Object构造函数\nlet person = new Object(); \nperson.nam"
+      "excerpt": "## Object\n\n显示地创建Object的实例由两种方式\n\n```js\n// 使用new 操作符和Object构造函数\nlet person = new Object(); \nperson.nam",
+      "description": null
     },
     {
       "title": "第7章 迭代器与生成器",
       "url": "https://zyydgrbk.top/2023/04/16/di-7-zhang-die-dai-qi-yu-sheng-cheng-qi/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "## 迭代器模式\n\n```js\ninterface IteratorResult {\n    // 表示是否还有更多值可以访问\n\tdone: boolean;\n    // 包含迭代器返回的当前值\n\t"
+      "excerpt": "## 迭代器模式\n\n```js\ninterface IteratorResult {\n    // 表示是否还有更多值可以访问\n\tdone: boolean;\n    // 包含迭代器返回的当前值\n\t",
+      "description": null
     },
     {
       "title": "第8章 对象、类与面向对象编程",
       "url": "https://zyydgrbk.top/2023/04/16/di-8-zhang-dui-xiang-lei-yu-mian-xiang-dui-xiang-bian-cheng/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "## 理解对象\n\n可以通过Object的实例创建，或者直接通过字面量创建\n\n```js\n// 通过Object构造函数创建\nlet person = new Object();\nperson.name"
+      "excerpt": "## 理解对象\n\n可以通过Object的实例创建，或者直接通过字面量创建\n\n```js\n// 通过Object构造函数创建\nlet person = new Object();\nperson.name",
+      "description": null
     },
     {
       "title": "第9章 代理与反射",
       "url": "https://zyydgrbk.top/2023/04/23/di-9-zhang-dai-li-yu-fan-she/",
       "doc_type": "post",
       "tags": [],
-      "excerpt": "## 代理基础\n\n代理是目标对象的抽象，目标对象可以通过代理来操作，并施加行为。\n\n```js\nconst target = {\n  id: 'target'\n}\nconst handler = {}"
+      "excerpt": "## 代理基础\n\n代理是目标对象的抽象，目标对象可以通过代理来操作，并施加行为。\n\n```js\nconst target = {\n  id: 'target'\n}\nconst handler = {}",
+      "description": null
     },
     {
       "title": "给n8n的本地访问链接配置成公网访问",
@@ -750,7 +856,8 @@
       "tags": [
         "AI实践"
       ],
-      "excerpt": "# 给n8n的本地访问链接配置成公网访问\n\n指导链接：Cloudflare Tunnel 内网穿透工具（Windows + 自定义域名）\\_内网穿透自定义域名\\-CSDN博客\n\nWindows 使用 "
+      "excerpt": "# 给n8n的本地访问链接配置成公网访问\n\n指导链接：Cloudflare Tunnel 内网穿透工具（Windows + 自定义域名）\\_内网穿透自定义域名\\-CSDN博客\n\nWindows 使用 ",
+      "description": null
     },
     {
       "title": "网络部分复习",
@@ -759,7 +866,8 @@
       "tags": [
         "前端 计算机网络"
       ],
-      "excerpt": "### TCP与UDP的区别\n\n**连接性**\n**TCP是面向连接的协议**，在收发数据前必须和对方建立可靠的连接，建立连接的3次握手、断开连接的4次挥手，为数据传输打下可靠基础;**UDP是一个面"
+      "excerpt": "### TCP与UDP的区别\n\n**连接性**\n**TCP是面向连接的协议**，在收发数据前必须和对方建立可靠的连接，建立连接的3次握手、断开连接的4次挥手，为数据传输打下可靠基础;**UDP是一个面",
+      "description": null
     },
     {
       "title": "背部肌群锻炼指南：高效动作解析",
@@ -772,7 +880,8 @@
         "动作指导",
         "健身教程"
       ],
-      "excerpt": "### 姿势讲解\n\n- 双手宽于肩宽握住横杠\n- 掌心朝向身体外侧\n- 保持脊柱自然曲线，**核心收紧**\n- **沉肩**，下拉前手臂微曲\n- 下拉到下巴或胸部高度\n- 尽量让背部肌肉充分收缩\n\n!"
+      "excerpt": "### 姿势讲解\n\n- 双手宽于肩宽握住横杠\n- 掌心朝向身体外侧\n- 保持脊柱自然曲线，**核心收紧**\n- **沉肩**，下拉前手臂微曲\n- 下拉到下巴或胸部高度\n- 尽量让背部肌肉充分收缩\n\n!",
+      "description": "本文详细介绍了四种背部锻炼动作，包括高位下拉、单臂坐姿划船、悍马划船和直臂下压。通过正确的姿势和技巧指导，帮助读者有效锻炼背部肌群，提升力量和肌肉线条。每个动作都附有详细的姿势讲解和注意事项，适合健身爱好者参考。"
     },
     {
       "title": "臀腿训练指南：四个高效健身动作",
@@ -785,7 +894,8 @@
         "腿举",
         "箭步蹲"
       ],
-      "excerpt": "## 动作一：坐姿髋外展\n\n**姿势讲解**\n\n- 坐姿稳定，坐2/3，无背部支撑\n- 上身保持直立，微微前倾\n- 膝盖发力：主动向外推开，不要靠惯性\n- 动作幅度：**打开到臀外侧明显发力**即可\n"
+      "excerpt": "## 动作一：坐姿髋外展\n\n**姿势讲解**\n\n- 坐姿稳定，坐2/3，无背部支撑\n- 上身保持直立，微微前倾\n- 膝盖发力：主动向外推开，不要靠惯性\n- 动作幅度：**打开到臀外侧明显发力**即可\n",
+      "description": "本文介绍了四个针对臀腿的高效健身动作，包括坐姿髋外展、史密斯杠铃深蹲、倒蹬机腿举和行走箭步蹲。每个动作都详细讲解了姿势要点和注意事项，帮助读者在锻炼中提高效率和安全性。此外，还提供了训练后的拉伸建议，以帮助肌肉恢复。"
     },
     {
       "title": "远程连接服务器",
@@ -794,7 +904,8 @@
       "tags": [
         "服务器 winSCP finalShell VSCode Linux windows"
       ],
-      "excerpt": "## 生成本地公钥\n\n打开windows PowerShell，输入命令\n\n```\nssh-keygen -t rsa -C:\\Users\\邹阳\n```\n\n一直enter，最后生成.ssh文件，其中含"
+      "excerpt": "## 生成本地公钥\n\n打开windows PowerShell，输入命令\n\n```\nssh-keygen -t rsa -C:\\Users\\邹阳\n```\n\n一直enter，最后生成.ssh文件，其中含",
+      "description": "因为要开始在服务器上跑论文代码，所以需要配置服务器然后远程实验"
     },
     {
       "title": "青训营前期笔记",
@@ -803,7 +914,8 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "## 如何写好Javascript\n\n一个好的js代码需要遵守：\n\n1、各司其职：即HTML负责网页结构 CSS负责元素样式 JS负责交互和行为\n\n2、组件封装：组件是指Web页面上抽出来一个个包含模"
+      "excerpt": "## 如何写好Javascript\n\n一个好的js代码需要遵守：\n\n1、各司其职：即HTML负责网页结构 CSS负责元素样式 JS负责交互和行为\n\n2、组件封装：组件是指Web页面上抽出来一个个包含模",
+      "description": "前期的笔记整理，包括每一期小的内容以及延申知识，还有自己之前的基础部分也涉及。"
     },
     {
       "title": "青训营后期笔记",
@@ -812,7 +924,8 @@
       "tags": [
         "前端"
       ],
-      "excerpt": "## Vite知识体系\n\n前端构建工具：\n\n提供模块化加载方案、兼容不同的模块规范\n\n高级语法转译+资源加载解析\n\n输出压缩，TreeShaking（无用代码删除），语法降级\n\n提升开发效率 HMR "
+      "excerpt": "## Vite知识体系\n\n前端构建工具：\n\n提供模块化加载方案、兼容不同的模块规范\n\n高级语法转译+资源加载解析\n\n输出压缩，TreeShaking（无用代码删除），语法降级\n\n提升开发效率 HMR ",
+      "description": "后期青训营笔记整理"
     },
     {
       "title": "面经",
@@ -821,7 +934,8 @@
       "tags": [
         "前端 面经"
       ],
-      "excerpt": "### Webpack\n\nwebpack是一个用于现代js应用程序的静态模块打包工具，当webpack处理应用程序时，它会在内部从一个或者多个入口点构建一个依赖图（dependency graph），"
+      "excerpt": "### Webpack\n\nwebpack是一个用于现代js应用程序的静态模块打包工具，当webpack处理应用程序时，它会在内部从一个或者多个入口点构建一个依赖图（dependency graph），",
+      "description": null
     },
     {
       "title": "项目演进与关键问题分析",
@@ -834,7 +948,8 @@
         "自动化",
         "渲染"
       ],
-      "excerpt": "### 前司版本核心价值\n\n前司版本验证了 Figma 可以作为素材模板入口，也验证了\"模板定义 + 数据替换 + 批量渲染\"的业务闭环。\n\n它的核心能力包括：\n\n- Figma 插件内完成变量绑定\n"
+      "excerpt": "### 前司版本核心价值\n\n前司版本验证了 Figma 可以作为素材模板入口，也验证了\"模板定义 + 数据替换 + 批量渲染\"的业务闭环。\n\n它的核心能力包括：\n\n- Figma 插件内完成变量绑定\n",
+      "description": "本文详细分析了项目从前司版本到当前版本的演进过程，解决了开发成本高和渲染质量差的问题。通过解耦工具链和简化协作流程，提升了系统的灵活性和可维护性。同时，探讨了自动变量识别和SVG尝试的关键问题，提出了未来的优化方向。"
     }
   ]
 }
