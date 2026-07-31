@@ -51,9 +51,10 @@ app.add_middleware(CORSMiddleware, allow_origins=s.allowed_origins_list, allow_m
 
 @app.get("/health")
 def health() -> dict: return {"status": "ok"}
+
 def _cache_key(req: SearchRequest) -> str:
-    history = "\x1e".join(turn.content for turn in req.history)
-    return f"rag\x1f{req.query}\x1f{req.top_k}\x1f{history}"
+    return f"rag\x1f{req.query}\x1f{req.top_k}"
+
 def _sse(event: str, data: dict) -> str: return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 def verify_admin(request: Request) -> None:

@@ -48,7 +48,7 @@ def _slug_hash(chunks) -> str:
     """
     norm = []
     for c in sorted(chunks, key=lambda x: x.chunk_index):
-        norm.append(f"{c.title}\n{c.tags}\n{c.section}\n{c.content}")
+        norm.append(f"{c.title}\n{c.url}\n{c.tags}\n{c.section}\n{c.content}")
     return hashlib.sha256("\n===\n".join(norm).encode("utf-8")).hexdigest()
 
 def _load_state() -> dict:

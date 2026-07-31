@@ -46,12 +46,13 @@ curl -X POST http://localhost:8000/api/search \
 把 Hexo **源码仓**（Markdown + 内嵌 PDF 本地仓库）灌进 Qdrant：
 
 ```bash
-python -m api.ingest --repo D:/Blog
+python -m api.ingest --repo D:/Blog [--recreate --summarize --incremental]
 ```
-
+summarize：表示使用LLM进行description的构造（缺失的才调用
+recreate：重建数据库向量
+incremental: 数据库增量（只给变化的slug重新生成，复用旧摘要）
 - Markdown 用 frontmatter 构造文章 URL；PDF 抽取文本（无文本层标记 `ocr`）。
 - 幂等：point id = `slug:chunk_index`，可重复运行。
-- 当前仅在源码仓有内容时入库；CI 触发见 `scripts/ingest_ci.sh`。
 
 ## 3. 部署到 Vercel
 vercel站点托管平台：支持部署serverless接口，不仅可以部署静态网站，还可以部署动态网站，只需要自己写函数/接口，Vercel在请求来时临时拉起运行环境执行
@@ -208,6 +209,22 @@ python -m scripts.verify_ingest --repo D:/Blog
 
 # 只验数量和字段，不调嵌入 API（省钱）
 python -m scripts.verify_ingest --repo D:/Blog --skip-retrieval
+### 端到端 RAGAS 评估
+
+检索评估只回答“相关文章是否被召回”；端到端评估会使用线上同一条 RAG 链路生成回答，并把实际注入模型的 chunk 与回答一起交给 RAGAS。
+
+```bash
+# 先用 3 条问题验证模型、Qdrant 与 RAGAS 配置
+python -m eval.eval_ragas --limit 3 --tag smoke
+
+# 运行完整集；结果写入 eval/results/ragas_results_*.json
+python -m eval.eval_ragas --tag baseline
+
+# 只生成可复查的答案和上下文，不调用 RAGAS 评审
+python -m eval.eval_ragas --generate-only --tag trace_only
+```
+
+默认计算无参考答案的 `Faithfulness`、`ResponseRelevancy` 与 `ContextPrecision`。当前 `eval/eval_queries.json` 没有标准答案；为每条参与评估的数据增加 `reference_answer` 后，脚本还会启用上下文召回和回答正确性指标。结果的 `per_query` 保留答案、完整上下文、来源 slug、延迟和逐条 RAGAS 分数；`chat`、`out_of_scope`、`free`、`error` 等非 RAG 行会跳过评分。
 脚本输出四个部分：
 
 数量对比 — 本地解析 N 条 vs Qdrant 存了 N 条，差值显示是否有漏写

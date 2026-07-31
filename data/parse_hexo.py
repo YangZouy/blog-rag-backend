@@ -9,13 +9,13 @@ from __future__ import annotations
 
 import os
 import re
+import logging
 from dataclasses import dataclass, field
 from typing import List, Optional
-
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-
 from core.config import get_settings
 
+logger = logging.getLogger("blog-rag")
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 100
 
@@ -48,8 +48,9 @@ class DocumentChunk:
     title: str
     url: str
     content: str
-    # 按照内容来源/类型分
-    doc_type: str = "post"  # "post" | "pdf" | "web"
+    # 相对路径 /YYYY/MM/DD/slug/
+    path: Optional[str] = None
+    doc_type: str = "post"
     date: Optional[str] = None
     tags: List[str] = field(default_factory=list)
     chunk_index: int = 0
@@ -63,7 +64,7 @@ class DocumentChunk:
 
     def embed_text(self) -> str:
         """用于生成向量的组合文本：标题 / 标签 / 章节 / 正文一起嵌入，
-        避免只嵌入孤立正文导致语义漂移（例如 Hyper-V 片段被误判为 RAG）。"""
+        避免只嵌入孤立正文导致语义漂移"""
         parts = []
         if self.title:
             parts.append(f"文章标题：{self.title}")
@@ -81,6 +82,7 @@ class DocumentChunk:
             "title": self.title,
             "url": self.url,
             "content": self.content,
+            "path": self.path,
             "doc_type": self.doc_type,
             "date": self.date,
             "tags": self.tags,
@@ -100,6 +102,7 @@ class DocumentChunk:
             title=p["title"],
             url=p["url"],
             content=p["content"],
+            path=p.get("path"),
             doc_type=p.get("doc_type", "post"),
             date=p.get("date"),
             tags=p.get("tags", []),
@@ -116,39 +119,49 @@ def _norm_title(t: str) -> str:
     Hexo search.xml 的标题与 frontmatter title 理应一致，归一化只为容错。"""
     return re.sub(r"\s+", " ", (t or "").strip()).lower()
 
+def _strip_origin(url: str, base: str) -> str:
+    """把绝对 URL 归一成相对路径（/xxx/）。已是相对则原样返回。"""
+    if url.startswith("/"):
+        return url
+    base = (base or "").rstrip("/")
+    if base and url.startswith(base):
+        rel = url[len(base):]
+        return rel if rel.startswith("/") else "/" + rel
+    return url  # 其它域名兜底原样
 
-# search.xml（hexo-generator-search 产物）里 title→真实 URL 的映射，按 repo_path 缓存。
-_SEARCH_URL_CACHE: dict[str, dict[str, str]] = {}
-
-
-def _load_search_url_map(repo_path: str) -> dict[str, str]:
-    """从 Hexo 生成的 search.xml 读取「标题 → 真实相对 URL」映射。
-
-    这是 URL 的权威来源：Hexo 用 hexo-permalink-pinyin 生成的 slug 才是线上
-    真实路由。后端自己用 pypinyin 猜拼音会因多音字（自律 zi-lu vs zi-lv、
-    离职 chi-zhi vs li-zhi）和全角符号残留字节导致 slug 不一致 → 推荐阅读 404。
-    优先查这张表，猜拼音仅作兜底。
-
-    在 repo_path 下按优先级查找：public/search.xml（hexo generate 产物）→
-    .deploy_git/search.xml（hexo deploy 产物）。找不到或解析失败返回空表。
-    """
-    if repo_path in _SEARCH_URL_CACHE:
-        return _SEARCH_URL_CACHE[repo_path]
-
-    mapping: dict[str, str] = {}
-    candidates = [
-        os.path.join(repo_path, "public", "search.xml"),
-        os.path.join(repo_path, ".deploy_git", "search.xml"),
-    ]
-    xml_path = next((p for p in candidates if os.path.isfile(p)), None)
-    if xml_path is None:
-        _SEARCH_URL_CACHE[repo_path] = mapping
+def _fetch_live_search_xml(site_url: str) -> dict[str, str]:
+    """在线拉取 {SITE_URL}/search.xml → 标题→相对URL 映射。失败(离线/未部署)返回空。"""
+    if not site_url:
+        return {}
+    xml_url = site_url.rstrip("/") + "/search.xml"
+    try:
+        import urllib.request
+        import xml.etree.ElementTree as ET
+        req = urllib.request.Request(xml_url, headers={"User-Agent": "blog-rag-ingest/1.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = resp.read()
+        root = ET.fromstring(data)
+        mapping: dict[str, str] = {}
+        for entry in root.findall("entry"):
+            t = entry.find("title")
+            u = entry.find("url")
+            url = None
+            if u is not None and (u.text or "").strip():
+                url = u.text.strip()
+            elif entry.find("link") is not None:
+                url = (entry.find("link").get("href") or "").strip() or None
+            if t is not None and t.text and url:
+                mapping[_norm_title(t.text)] = _strip_origin(url, site_url)
         return mapping
+    except Exception:
+        return {}
 
+def _parse_search_xml(xml_path: str, site_url: str) -> dict[str, str]:
+    """解析 search.xml → 标题→相对URL 映射。失败返回空 dict。"""
     try:
         import xml.etree.ElementTree as ET
-
         tree = ET.parse(xml_path)
+        mapping: dict[str, str] = {}
         for entry in tree.getroot().findall("entry"):
             title_el = entry.find("title")
             url_el = entry.find("url")
@@ -160,60 +173,78 @@ def _load_search_url_map(repo_path: str) -> dict[str, str]:
                 if link_el is not None:
                     url = (link_el.get("href") or "").strip() or None
             if title_el is not None and title_el.text and url:
-                mapping[_norm_title(title_el.text)] = url
+                mapping[_norm_title(title_el.text)] = _strip_origin(url, site_url)
+        return mapping
     except Exception:
-        # 解析失败不应阻断建索引，退回拼音兜底。
-        mapping = {}
+        return {}
 
-    _SEARCH_URL_CACHE[repo_path] = mapping
-    return mapping
+# search.xml（hexo-generator-search 产物）里 title→真实 URL 的映射，按 repo_path 缓存。
+_SEARCH_URL_CACHE: dict[str, dict[str, str]] = {}
 
+def _load_search_url_map(repo_path: str) -> dict[str, str]:
+    """标题→相对URL 映射，权威来源优先级：
 
-def _pinyin_slug(text: str) -> str:
-    """复刻 hexo-permalink-pinyin：中文转拼音、空格转连字符、整体小写。
-    多音字可能与 Hexo 有细微差异；若文章 frontmatter 显式写了 permalink，
-    则优先使用 permalink，不依赖此函数。"""
-    try:
-        from pypinyin import slug as _fn
+    ① 在线 {SITE_URL}/search.xml  —— 唯一权威源。用户真正访问的是线上站点，
+       线上路由才是"真的"；本地 `hexo g` 产物只是预览态，可能因构建机时区不同而分叉。
+    ② 本地 public/search.xml      —— 离线兜底（刚 hexo g 的产物，可能与线上不一致）。
+    ③ 本地 .deploy_git/search.xml —— 最后兜底（历史部署快照，可能陈旧）。
 
-        value = _fn(text, separator="-", strict=False).lower()
-    except Exception:
-        value = text.lower()
-    value = re.sub(r"\s+", "-", value)
-    # 只保留 [a-z0-9-]：清理全角符号（：、）经拼音转换后残留的非 ASCII 字节，
-    # 与 hexo-permalink-pinyin 剥符号的行为对齐。仅兜底用，主路径走 search.xml。
-    value = re.sub(r"[^a-z0-9-]+", "-", value)
-    return re.sub(r"-+", "-", value).strip("-")
+    ⚠️ 已知分叉源：Hexo permalink 含 :year/:month/:day 时，生成结果依赖构建机系统时区。
+       若 CI（UTC）与本地（UTC+8）不一致，凌晨 0-8 点发布的文章会差一天。
+       根治方式是在 CI workflow 里设 job 级 `env: TZ: Asia/Shanghai`，而非改这里的优先级。
+    """
+    if repo_path in _SEARCH_URL_CACHE:
+        return _SEARCH_URL_CACHE[repo_path]
 
+    s = get_settings()
+
+    # ① 在线 search.xml（权威：线上真实路由）
+    live = _fetch_live_search_xml(s.SITE_URL)
+    if live:
+        logger.info("URL 源 = 在线 search.xml (%s)，%d 条", s.SITE_URL, len(live))
+        _SEARCH_URL_CACHE[repo_path] = live
+        return live
+
+    # ②③ 本地文件兜底
+    for rel, note in (
+        (os.path.join("public", "search.xml"), "本地 hexo g 产物，可能与线上不一致"),
+        (os.path.join(".deploy_git", "search.xml"), "历史部署快照，可能陈旧"),
+    ):
+        xml_path = os.path.join(repo_path, rel)
+        if os.path.isfile(xml_path):
+            mapping = _parse_search_xml(xml_path, s.SITE_URL)
+            if mapping:
+                logger.warning("在线 search.xml 不可用，改用 %s（%s），%d 条", rel, note, len(mapping))
+                _SEARCH_URL_CACHE[repo_path] = mapping
+                return mapping
+
+    logger.error("所有 search.xml 源均不可用 —— 本次入库的文章将全部没有链接")
+    _SEARCH_URL_CACHE[repo_path] = {}
+    return {}
 
 def _build_url(meta: dict, date, url_slug: str, is_post: bool,
                title: str = "", repo_path: str = "") -> str:
+    """返回文章绝对 URL。无权威来源时返回 ""（宁可没链接，也不给 404 链接）。
+
+    date 参数保留仅为兼容调用方签名，已不参与 URL 推导。
+    """
     s = get_settings()
     base = s.SITE_URL.rstrip("/")
-    # 0) Hexo search.xml 权威 URL（线上真实路由，规避拼音猜测偏差）最优先。
+    # ① Hexo search.xml 权威 URL（线上真实路由）
     if title and repo_path:
         real = _load_search_url_map(repo_path).get(_norm_title(title))
         if real:
             return real if real.startswith("http") else f"{base}{real}"
-    # 1) frontmatter 显式 permalink 次优先（精确，避免拼音多音字偏差）
+    # ② frontmatter 显式 permalink
     permalink = meta.get("permalink") or meta.get("url")
     if permalink:
         return permalink if permalink.startswith("http") else f"{base}{permalink}"
-    # 2) 文章(post)：Hexo 默认 /YYYY/MM/DD/title/ 路由
-    if is_post and date is not None:
-        y = m = day = None
-        if hasattr(date, "year"):
-            y, m, day = date.year, date.month, date.day
-        else:
-            # frontmatter date 常被读成字符串 '2026-07-20 17:10:14'，提取 Y/M/D
-            match = re.match(r"\s*(\d{4})-(\d{1,2})-(\d{1,2})", str(date))
-            if match:
-                y, m, day = (int(g) for g in match.groups())
-        if y is not None:
-            return f"{base}/{y:04d}/{m:02d}/{day:02d}/{url_slug}/"
-    # 3) 页面(page) 及其它：直接用目录路径 /slug/（如 /about/、/projects/.../）
-    return f"{base}/{url_slug}/"
-
+    # ③ index.md 页面：目录即路由（about/index.md → /about/），确定性规则非猜测
+    if not is_post and url_slug:
+        return f"{base}/{url_slug}/"
+    # ④ 无权威来源 → 空 URL。chunk 仍入库参与检索，只是不出现在「推荐阅读」
+    logger.warning("no authoritative URL for %r (not in search.xml, no permalink)", title)
+    return ""
 
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 _IMG_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
@@ -267,17 +298,20 @@ def _split_post_into_chunks(slug, title, url, date, tags, body, doc_type="post",
     return out
 
 def _make_chunk(slug, title, url, date, tags, section, content, idx, doc_type="post", desc=None):
+    s = get_settings()
+    path = _strip_origin(url, s.SITE_URL) if url else None
     return DocumentChunk(
         slug=slug,
         title=title,
         url=url,
         content=content,
+        path=path,
         doc_type=doc_type,
         date=date,
         tags=tags or [],
         chunk_index=idx,
         section=section,
-        description=desc
+        description=desc,
     )
 
 
@@ -327,15 +361,14 @@ def parse_hexo_repo(repo_path: str) -> List[DocumentChunk]:
             else:
                 tags = [str(t).strip() for t in raw_tags if str(t).strip()]
 
-            # URL 段：index.md 页面用其所在目录（如 about、projects/ai-content-distribution）；
-            # 普通文章/页面用标题拼音
             base_name = os.path.splitext(fname)[0].lower()
-            if base_name == "index":
+            is_index_page = base_name == "index"
+            if is_index_page:
+                # index.md 的路由 = 所在目录（about/index.md → /about/），确定性可靠
                 url_slug = rel_noext.rsplit("/", 1)[0] if "/" in rel_noext else rel_noext
             else:
-                url_slug = _pinyin_slug(title)
-            # slug：index.md 页面用目录路径（如 about），其余用相对路径，均保证唯一
-            slug = url_slug if base_name == "index" else rel_noext
+                url_slug = ""   # 不再猜测；URL 只能来自 search.xml 或 permalink
+            slug = url_slug if is_index_page else rel_noext
             doc_type = "post" if is_post else "page"
             url = _build_url(meta, raw_date, url_slug, is_post,
                              title=title, repo_path=repo_path)
@@ -343,4 +376,12 @@ def parse_hexo_repo(repo_path: str) -> List[DocumentChunk]:
             chunks.extend(
                 _split_post_into_chunks(slug, title, url, date_str, tags, body, doc_type, desc)
             )
+    missing = sorted({c.title for c in chunks if not c.url})
+    if missing:
+        logger.warning(
+            "以下 %d 篇未在 search.xml 中匹配到，已入库但无链接"
+            "（多半是刚 push、GitHub Actions 还没部署完，等 1~2 分钟后重跑即可）：\n%s",
+            len(missing), "\n".join("  - " + t for t in missing),
+        )
     return chunks
+

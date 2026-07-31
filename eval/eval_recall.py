@@ -17,7 +17,6 @@ from core.config import get_settings          # noqa: E402
 from core.embeddings import get_embeddings     # noqa: E402
 from core.qdrant_client import get_qdrant      # noqa: E402
 from data.parse_hexo import DocumentChunk      # noqa: E402
-from api.retriever import retrieve as retrieve_prod_impl  # noqa: E402
 from api.retriever import retrieve_hybrid, retrieve_with_rerank  # noqa: E402
 
 KS = [3, 5, 10, 12, 50]
@@ -25,13 +24,11 @@ CANDIDATE_POOL = 50
 RESULTS_DIR = os.path.join(ROOT, "eval", "results")
 QUERIES_PATH = os.path.join(ROOT, "eval", "eval_queries.json")
 
-
+# 纯余弦计算相似度检索
 def retrieve_raw(query: str, limit: int = CANDIDATE_POOL):
-    """?????,???????? [(slug, cosine), ...],? slug ??????"""
     qvec = get_embeddings().embed_query(query)
     s = get_settings()
     client = get_qdrant()
-    # Qdrant?cosine?????,????50?chunk
     resp = client.query_points(
         collection_name=s.QDRANT_COLLECTION,
         query=qvec,
@@ -47,27 +44,12 @@ def retrieve_raw(query: str, limit: int = CANDIDATE_POOL):
             continue
         c = DocumentChunk.from_payload(chunk_raw)
         slug = (c.slug or "").replace("\\", "/")
-        # ?slug??
         if slug in seen:
             continue
         seen.add(slug)
         doc_rank.append((slug, float(p.score)))
     return doc_rank
 
-
-def retrieve_prod(query: str, limit: int = CANDIDATE_POOL):
-    """线上真实 retriever：向量检索与 about 注入。"""
-    chunks = retrieve_prod_impl(query, top_k=limit, candidate_k=limit)
-    doc_rank = []
-    seen = set()
-    for chunk in chunks:
-        slug = (chunk.slug or "").replace("\\", "/")
-        if slug in seen:
-            continue
-        seen.add(slug)
-        doc_rank.append((slug, float(chunk.score or 0.0)))
-    return doc_rank
-# ??slug??
 
 def retrieve_hybrid_eval(query: str, limit: int = CANDIDATE_POOL):
     """Production vector retrieval fused with BM25 by reciprocal-rank fusion."""
@@ -94,23 +76,23 @@ def retrieve_rerank_eval(query: str, limit: int = CANDIDATE_POOL):
         seen.add(slug)
         doc_rank.append((slug, float(chunk.score or 0.0)))
     return doc_rank
+
+# 路径归一
 def norm(slug: str) -> str:
     return (slug or "").replace("\\", "/").strip()
 
-# ????query
+# 计算单条query的评估数值：recall@k MRR(首个命中排第几) Δ分离度（相关文档余弦分数 判断扁平/rerank/召回）
 def eval_one(q, retrieve_fn):
     expected = {norm(s) for s in q["expected_slugs"]}
     doc_rank = retrieve_fn(q["query"])
     slugs = [norm(s) for s, _ in doc_rank]
 
-    # recall@k:?query???????????topK???
-    # ??????
+    # recall
     recalls = {}
     for k in KS:
         recalls[k] = 1.0 if (set(slugs[:k]) & expected) else 0.0
 
-    # MRR:??????????????????
-    # ???????????
+    # MRR
     rr = 0.0
     first_rank = None
     for i, s in enumerate(slugs, start=1):
@@ -119,9 +101,7 @@ def eval_one(q, retrieve_fn):
             first_rank = i
             break
 
-    # ???:top1???cosine?? ? ?????????cosine ??
-    # ????0.05 ????,????????
-    # 0.05-1?? ????? rerank???
+    # Δ
     top1_cos = doc_rank[0][1] if doc_rank else None
     rel_cos = None
     for s, cos in doc_rank:
@@ -154,7 +134,7 @@ def eval_one(q, retrieve_fn):
         "top5": [(s, round(c, 4)) for s, c in doc_rank[:5]],
     }
 
-# ?????
+# 汇总诊断
 def aggregate(rows):
     n = len(rows)
     overall = {f"recall@{k}": round(sum(r["recall"][k] for r in rows) / n, 4) for k in KS}
@@ -191,7 +171,7 @@ def aggregate(rows):
         "separation": sep,
     }
 
-
+# 找旧文件对比
 def latest_prev_result(exclude_path):
     files = sorted(glob.glob(os.path.join(RESULTS_DIR, "eval_results_*.json")))
     files = [f for f in files if os.path.abspath(f) != os.path.abspath(exclude_path)]
@@ -204,8 +184,8 @@ def main():
         "--tag", default="run", help="本次运行标签，如 baseline / after_bm25"
     )
     ap.add_argument(
-        "--mode", default="raw", choices=["raw", "prod", "hybrid", "rerank"],
-        help="raw=纯向量; prod=线上真实retriever; hybrid=prod+BM25; rerank=hybrid+精排",
+        "--mode", default="raw", choices=["raw", "hybrid", "rerank"],
+        help="raw=纯向量; hybrid=prod+BM25; rerank=hybrid+精排",
     )
     args = ap.parse_args()
 
@@ -217,7 +197,6 @@ def main():
     s = get_settings()
     retrieve_fn = {
         "raw": retrieve_raw,
-        "prod": retrieve_prod,
         "hybrid": retrieve_hybrid_eval,
         "rerank": retrieve_rerank_eval,
     }[args.mode]

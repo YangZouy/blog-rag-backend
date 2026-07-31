@@ -1,8 +1,6 @@
 """Pydantic request / response models for the RAG API."""
 from __future__ import annotations
-
-from typing import Literal
-
+from typing import Optional, Literal
 from pydantic import BaseModel, Field
 
 
@@ -20,6 +18,7 @@ class ConversationTurn(BaseModel):
 class Citation(BaseModel):
     title: str
     url: str
+    path: Optional[str] = None
     snippet: str = ""
     source: Literal["post", "page", "pdf", "web"] = "post"
     # rerank 相关性分数（0~1）。用于前端按置信度展示/排序，也作为
