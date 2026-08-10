@@ -43,10 +43,10 @@ async def lifespan(_: FastAPI):
     warm_vector_store()
     if s.WARMUP_ON_START:
         logger.info("warming up bm25 index and reranker model...")
-        warm_bm25()
+        bm25_ready = warm_bm25()
         # cross-encoder模型加载预热
         warm_reranker()
-        logger.info("startup preload complete: faiss=ok bm25=ok reranker=ok")
+        logger.info("startup preload complete: faiss=ok bm25=%s reranker=ok", "ok" if bm25_ready else "failed")
     else:
         logger.info("startup preload skipped (WARMUP_ON_START=false); first request will load on demand")
     yield

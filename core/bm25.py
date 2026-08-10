@@ -14,6 +14,8 @@ from core.config import get_settings
 from core.vector_store import get_vector_store
 from data.parse_hexo import DocumentChunk
 
+logger = logging.getLogger("blog-rag")
+
 
 def tokenize(text: str) -> List[str]:
     """Tokenize mixed Chinese and English retrieval text."""
@@ -52,13 +54,13 @@ def search(query: str, limit: int) -> List[Tuple[DocumentChunk, float]]:
     return [(chunks[position], float(score)) for position, score in ranked[:limit] if score > 0]
 
 
-# 耗时2-5s
-def warm_bm25() -> None:
+def warm_bm25() -> bool:
     """Pre-build the BM25 index so the first request does not pay the cost."""
-    logger = logging.getLogger("blog-rag")
     try:
         t0 = time.perf_counter()
         get_bm25_index()
         logger.info("bm25 index warmed (total %.1fms)", (time.perf_counter() - t0) * 1000)
+        return True
     except Exception:
         logger.warning("bm25 warmup failed; first request will build on demand", exc_info=True)
+        return False
