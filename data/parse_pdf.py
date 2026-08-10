@@ -10,6 +10,8 @@ from __future__ import annotations
 import os
 import re
 from typing import List, Tuple
+import fitz  # PyMuPDF；运行时硬依赖，缺失应在模块导入时即报错
+import pdfplumber  # 兜底提取器；同上
 
 from data.parse_hexo import DocumentChunk, _splitter
 
@@ -63,19 +65,15 @@ def _extract_text(path: str) -> Tuple[str, bool]:
     """Return (text, needs_ocr). Empty text + needs_ocr=True means image-only."""
     text = ""
     try:
-        import fitz  # fitz是PyMuPDF的导入名，用其提取文本
-
         doc = fitz.open(path)
         # get_text仅针对文字有效，如果是拍照扫描版pdf，无法提取出的内容
         text = "\n".join(page.get_text() for page in doc)
     except Exception:
-        pass
+        pass  # fitz 提取失败（损坏/扫描件）→ 回退 pdfplumber
 
     # pdfplumber兜底
     if not text.strip():
         try:
-            import pdfplumber
-
             with pdfplumber.open(path) as pdf:
                 text = "\n".join((p.extract_text() or "") for p in pdf.pages)
         except Exception:

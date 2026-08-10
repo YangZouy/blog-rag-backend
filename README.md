@@ -18,7 +18,10 @@
 ```bash
 python -m venv .venv
 # Windows: .venv\Scripts\activate  / macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
+# 自托管 / 本地开发需安装 dev 依赖集：在 requirements.txt（API 运行时）基础上，
+# 额外包含入库所需依赖（python-frontmatter / pymupdf / pdfplumber / pypinyin / requests）。
+# 仅纯 Vercel 部署才只用 requirements.txt（它不运行入库）。
+pip install -r requirements-dev.txt
 cp .env.example .env   # 填入 智谱 / DeepSeek 密钥（Faiss 本地存储，无需向量库账号）
 python -m uvicorn api.serve:app --reload --port 8000
 ```
@@ -121,7 +124,10 @@ curl -X POST http://localhost:8000/admin/reload \
 # 服务器端
 cd /opt/blog-rag-backend
 git pull
-.venv/bin/pip install -r requirements.txt   # 依赖无变更时秒过，有变更才真正安装
+# 自托管服务器既 serve 又运行 api.ingest 入库，必须安装 dev 依赖集：
+# python-frontmatter / pymupdf / pdfplumber 等入库依赖均在 requirements-dev.txt，
+# requirements.txt 是 Vercel 最小集，不含这些。漏装会导致入库静默 0 chunk。
+.venv/bin/pip install -r requirements-dev.txt   # 依赖无变更时秒过，有变更才真正安装
 systemctl restart blog-rag                  # 必须重启：systemd 常驻进程启动即把代码载入内存，git pull 只改磁盘文件
 ```
 systemd 配置实现常驻运行 + 开机自启 + 崩溃自动拉起，Nginx 反向代理转发 `/api/*` 到 `127.0.0.1:8000`。

@@ -12,6 +12,7 @@ import re
 import logging
 from dataclasses import dataclass, field
 from typing import List, Optional
+import frontmatter  # 运行时硬依赖：缺失应在模块导入时即报 ModuleNotFoundError，而非静默 0 chunk
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from core.config import get_settings
 
@@ -327,13 +328,11 @@ def parse_hexo_repo(repo_path: str) -> List[DocumentChunk]:
                 continue
             path = os.path.join(root, fname)
             try:
-                # 第三方库：python-frontmatter
-                import frontmatter
-
                 with open(path, encoding="utf-8") as fh:
                     # 读整个md文件 把头部元数据解析出来 把正文内容分离出来
                     post = frontmatter.load(fh)
             except Exception:
+                logger.warning("跳过无法解析的 Markdown：%s", path)
                 continue
 
             meta = post.metadata
