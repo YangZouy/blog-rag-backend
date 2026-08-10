@@ -13,6 +13,7 @@ import json
 import logging
 import os
 import threading
+import time
 from functools import lru_cache
 from typing import Dict, List, Optional, Tuple
 
@@ -52,6 +53,7 @@ class LocalVectorStore:
             raise RuntimeError("faiss 未安装，请先 `pip install faiss-cpu`")
         if os.path.isfile(self.index_path) and os.path.isfile(self.meta_path):
             try:
+                t0 = time.perf_counter()
                 self.index = faiss.read_index(self.index_path)
                 with open(self.meta_path, encoding="utf-8") as f:
                     self.metadata = json.load(f)
@@ -62,7 +64,8 @@ class LocalVectorStore:
                     ).astype("float32")
                 else:
                     self._vecs = np.empty((0, self.dim), dtype="float32")
-                logger.info("loaded faiss index: %d vectors", n)
+                load_ms = (time.perf_counter() - t0) * 1000
+                logger.info("loaded faiss index: %d vectors (load %.1fms)", n, load_ms)
                 return
             except Exception:
                 logger.warning("加载 faiss 索引失败，将以空索引启动", exc_info=True)

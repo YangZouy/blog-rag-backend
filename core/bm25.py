@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import re
+import time
 from functools import lru_cache
 from typing import List, Tuple
 
@@ -33,10 +34,14 @@ def get_bm25_index() -> Tuple[BM25Okapi, Tuple[DocumentChunk, ...]]:
     """Build a process-local index; restart after recreating the vector store."""
     # 全量加载整个集合 不按照查询过滤，把整个集合导出一遍，
     # 在内存里建BM25索引，靠lru_cache缓存
+    t0 = time.perf_counter()
     chunks = _load_chunks()
     # jieba全量分词
     corpus = [tokenize(chunk.embed_text()) for chunk in chunks]
-    return BM25Okapi(corpus), tuple(chunks)
+    index = BM25Okapi(corpus)
+    build_ms = (time.perf_counter() - t0) * 1000
+    logger.info("bm25 index built: %d chunks (build %.1fms)", len(chunks), build_ms)
+    return index, tuple(chunks)
 
 
 def search(query: str, limit: int) -> List[Tuple[DocumentChunk, float]]:
@@ -52,7 +57,8 @@ def warm_bm25() -> None:
     """Pre-build the BM25 index so the first request does not pay the cost."""
     logger = logging.getLogger("blog-rag")
     try:
+        t0 = time.perf_counter()
         get_bm25_index()
-        logger.info("bm25 index warmed")
+        logger.info("bm25 index warmed (total %.1fms)", (time.perf_counter() - t0) * 1000)
     except Exception:
         logger.warning("bm25 warmup failed; first request will build on demand", exc_info=True)

@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
+import time
 from collections.abc import Iterator
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +27,7 @@ from core.bm25 import warm_bm25
 from core.config import get_settings
 from core.vector_store import warm_vector_store
 from core.rerank import warm_reranker
+from core.observability import request_type
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, status
 from core.bm25 import get_bm25_index, warm_bm25
 from api.ingest import run_ingest
@@ -37,13 +39,16 @@ s = get_settings(); logger = logging.getLogger(__name__); logging.getLogger("blo
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     s = get_settings()
+    logger.info("startup: WARMUP_ON_START=%s, loading faiss index...", s.WARMUP_ON_START)
     warm_vector_store()
     if s.WARMUP_ON_START:
         logger.info("warming up bm25 index and reranker model...")
         warm_bm25()
         # cross-encoder模型加载预热
         warm_reranker()
-        logger.info("warmup done")
+        logger.info("startup preload complete: faiss=ok bm25=ok reranker=ok")
+    else:
+        logger.info("startup preload skipped (WARMUP_ON_START=false); first request will load on demand")
     yield
 
 # 将lifespan挂给fastapi，它会在正确时机自动调用
@@ -109,26 +114,48 @@ async def admin_reload(req: AdminReloadRequest, background: BackgroundTasks) -> 
 
 @app.post("/search", response_model=SearchResponse, dependencies=[Depends(verify_api_key), Depends(rate_limit)])
 def search(req: SearchRequest, request: Request) -> SearchResponse:
-    key = _cache_key(req); cached = cache_get(key)
-    if cached is not None: return cached
-    try: response = run_rag(req.query, top_k=req.top_k, history=req.history)
+    key = _cache_key(req)
+    t0 = time.perf_counter()
+    cached = cache_get(key)
+    if cached is not None:
+        logger.info(
+            "rag_stage stage=total duration_ms=%.1f query=%r cache_hit=%s request_type=%s",
+            (time.perf_counter() - t0) * 1000, req.query, True, "cache_hit",
+        )
+        return cached
+    try:
+        response = run_rag(req.query, top_k=req.top_k, history=req.history)
     except Exception:
         logger.exception("RAG search failed for query=%r", req.query)
         return SearchResponse(answer="Search failed. Please try again later.", fallback=True, mode="error")
+    logger.info(
+        "rag_stage stage=total duration_ms=%.1f query=%r cache_hit=%s request_type=%s",
+        (time.perf_counter() - t0) * 1000, req.query, False, request_type(),
+    )
     cache_set(key, response); return response
 
 @app.post("/search/stream", dependencies=[Depends(verify_api_key), Depends(rate_limit)])
 def search_stream(req: SearchRequest, request: Request) -> StreamingResponse:
     key = _cache_key(req)
+    t0 = time.perf_counter()
     def events() -> Iterator[str]:
         cached = cache_get(key)
         if isinstance(cached, SearchResponse):
             yield _sse("sources", {"citations": [citation.model_dump() for citation in cached.citations], "mode": cached.mode})
             if cached.answer: yield _sse("token", {"text": cached.answer})
-            yield _sse("done", cached.model_dump()); return
+            yield _sse("done", cached.model_dump())
+            logger.info(
+                "rag_stage stage=total duration_ms=%.1f query=%r cache_hit=%s request_type=%s stream=true",
+                (time.perf_counter() - t0) * 1000, req.query, True, "cache_hit",
+            )
+            return
         for event, data in stream_rag(req.query, req.top_k, req.history):
             yield _sse(event, data)
             if event == "done": cache_set(key, SearchResponse.model_validate(data))
+        logger.info(
+            "rag_stage stage=total duration_ms=%.1f query=%r cache_hit=%s request_type=%s stream=true",
+            (time.perf_counter() - t0) * 1000, req.query, False, request_type(),
+        )
     return StreamingResponse(events(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 # 清除BM25缓存
