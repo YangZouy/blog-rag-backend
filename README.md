@@ -48,6 +48,10 @@ curl -X POST http://localhost:8000/api/search \
 ## 2. 入库
 
 把 Hexo **源码仓**（Markdown + PDF）灌进本地 Faiss：
+Faiss是用于高效相似性搜索和稠密向量聚类的算法库，不是数据库，无法提供数据持久化，CRUD操作，元数据过滤和权限管理等，通过索引和压缩解决高维空间下暴力搜索速度过慢的问题。
+持久化：faiss.write_index() 生成的 .bin 文件
+数据加载：faiss.read_index() 读到内存
+增删改查：修改元数据表，向量库需重建
 
 ```bash
 # 全量重建
