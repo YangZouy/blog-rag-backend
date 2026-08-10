@@ -66,14 +66,46 @@ python -m api.ingest --repo D:/Blog --incremental --summarize
 
 ### 线上热重载
 
-无需重启服务即可同步最新文章：
+无需重启服务即可同步最新文章。`/admin/reload` 会先 `git pull` 博客仓库，再增量入库并刷新 BM25：
 
 ```bash
-curl -X POST http://localhost:8000/api/admin/reload \
+# 直连 uvicorn 无 /api 前缀（root_path 只影响文档 URL）；经 Nginx 则是 /api/admin/reload
+# repo 可省略，缺省读配置里的 BLOG_REPO_PATH
+curl -X POST http://localhost:8000/admin/reload \
   -H "x-admin-token: $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"repo":"/opt/blog","incremental":true,"summarize":true}'
+  -d '{"incremental":true,"summarize":true}'
 ```
+
+### 文章发布 → 自动入库链路
+
+内容真值在 GitHub 博客仓库，向量库真值在服务器。本地只负责写文章并 push，服务器持有一份克隆副本自行入库，**不传二进制索引**。
+
+```
+本地写 md ──push──> GitHub 博客仓库 ──Actions──> hexo generate + 部署站点
+                                                        │
+                                          部署完成后 curl 通知
+                                                        v
+                          服务器 /admin/reload：git pull → 增量入库 → 刷新 BM25
+                                                        ^
+                                   cron 每 10 分钟兜底（scripts/sync_blog.sh）
+```
+
+**为什么通知放在部署之后**：文章 URL 取自线上 `search.xml`，由 Actions 构建生成。若在部署前入库，新文章会「能检索但没有阅读链接」。等部署完再通知，URL 天然齐全；即使某次早了，URL 变化会让内容 hash 变，下一轮增量自动重嵌补全。
+
+一次性配置：
+
+| 位置 | 配置 |
+|------|------|
+| 服务器 | `git clone git@github.com:<user>/<blog>.git <博客目录>`（私有仓库用 SSH key；目录任选，与下面 `BLOG_REPO_PATH` 一致即可） |
+| 服务器 `.env` | `BLOG_REPO_PATH=<博客目录>` 与 `ADMIN_TOKEN=<令牌>` |
+| 服务器 cron | `*/10 * * * * <后端目录>/scripts/sync_blog.sh >> /var/log/rag-sync.log 2>&1` |
+| 博客仓库 Secret | `RAG_ADMIN_TOKEN` = 服务器 admin 令牌（Settings → Secrets and variables → Actions） |
+| 博客仓库 Variable（可选） | `RAG_API_BASE`，默认 `https://rag.zyydgrbk.top/api` |
+
+`sync_blog.sh` 会自定位后端仓库根目录并读取同级 `.env` 里的 `BLOG_REPO_PATH` / `ADMIN_TOKEN`，**因此 cron 行里不需要写令牌**（写进 crontab 会被 `crontab -l`、`ps` 看到）。需要临时覆盖时，仍可用环境变量：`BLOG_REPO=... BACKEND_URL=... ADMIN_TOKEN=... ./scripts/sync_blog.sh`（优先级：环境变量 > `.env` > 内置默认）。
+
+博客仓库 `.github/workflows/autodeploy.yml` 末尾已加「通知 RAG 增量入库」步骤，标了 `continue-on-error`，通知失败不影响站点部署。
 
 ---
 
@@ -245,6 +277,7 @@ python -m eval.eval_ragas --tag baseline           # 完整 50 条
 | 变量 | 说明 | 默认 |
 |------|------|------|
 | `FAISS_INDEX_PATH` / `FAISS_META_PATH` | 本地 Faiss 索引与元数据路径 | data/vector_store.* |
+| `BLOG_REPO_PATH` | 服务器侧博客仓库克隆路径，`/admin/reload` 缺省从这里 pull 并入库 | — |
 | `ZHIPU_API_KEY` | 智谱 API（embedding + 意图分类） | — |
 | `DEEPSEEK_API_KEY` | DeepSeek API（生成） | — |
 | `ADMIN_TOKEN` | `/admin/reload` 鉴权令牌 | — |

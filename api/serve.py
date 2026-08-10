@@ -13,6 +13,7 @@ Vercel 把这个容器冻结/销毁（scale-to-zero = 没流量时缩到 0 个�
 from __future__ import annotations
 import json
 import logging
+import subprocess
 from collections.abc import Iterator
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -67,17 +68,36 @@ def verify_admin(request: Request) -> None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="invalid admin token")
 
 
+def _git_pull(repo: str) -> None:
+    """best-effort：拉取博客仓库最新内容再入库。失败仅告警，不阻断入库
+    （离线 / 非 git 目录 / 本地有改动时，用当前文件入库也够用）。"""
+    try:
+        subprocess.run(
+            ["git", "-C", repo, "pull", "--ff-only"],
+            check=True, capture_output=True, text=True, timeout=120,
+        )
+        logger.info("git pull %s ok", repo)
+    except Exception as e:  # noqa: BLE001 - 同步是尽力而为，绝不让入库失败
+        logger.warning("git pull failed (ignored): %s", e)
+
+
 @app.post("/admin/reload", dependencies=[Depends(verify_admin)])
 async def admin_reload(req: AdminReloadRequest, background: BackgroundTasks) -> dict:
-    """热重载：增量入库 + 清 BM25 缓存，无需重启服务。
+    """热重载：git pull 博客仓库 + 增量入库 + 清 BM25 缓存，无需重启服务。
 
-    用 BackgroundTasks 把耗时（嵌向量）放到后台线程跑，HTTP 立即返回 accepted，
-    避免请求超时；BM25 的 lru_cache 在同一进程内存里被清掉，下次检索自动重建。
+    用 BackgroundTasks 把耗时（git pull + 嵌向量）放到后台线程跑，HTTP 立即返回
+    accepted，避免请求超时；BM25 的 lru_cache 在同一进程内存里被清掉，下次检索
+    自动重建。repo 为空时回退到服务端的 BLOG_REPO_PATH。
     """
 
     def _job() -> None:
         try:
-            n = run_ingest(req.repo, incremental=req.incremental, summarize=req.summarize)
+            repo = (req.repo or "").strip() or get_settings().BLOG_REPO_PATH
+            if not repo:
+                logger.error("admin reload: 未提供 repo 且 BLOG_REPO_PATH 为空")
+                return
+            _git_pull(repo)
+            n = run_ingest(repo, incremental=req.incremental, summarize=req.summarize)
             get_bm25_index.cache_clear()  # ← 核心：让线上 BM25 立刻读到新文章
             logger.info("admin reload done, upserted %d chunks", n)
         except Exception:

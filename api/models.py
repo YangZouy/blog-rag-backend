@@ -34,6 +34,6 @@ class SearchResponse(BaseModel):
     mode: str = "rag"  # "rag" | "web" | "not_found" | "error"
 
 class AdminReloadRequest(BaseModel):
-    repo: str # 博客源仓库路径
+    repo: str = "" # 博客源仓库路径；为空则用服务端的 BLOG_REPO_PATH
     incremental: bool = True # 默认增量；设为 False 走全量
     summarize: bool = False # 是否重新生成摘要
