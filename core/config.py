@@ -51,7 +51,10 @@ class Settings(BaseSettings):
     # query+doc 拼接后的最大 token 长度。
     RERANK_MAX_LENGTH: int = 256
     # 进入 rerank 的候选池大小。
-    RERANK_CANDIDATE_K: int = 20
+    # 从 20 降到 10：rerank 耗时与候选数近似线性，砍半约省一半 rerank 时间
+    # （弱机可省 ~6s）；eval 显示 hybrid recall 已 1.000，rerank 仅提升排序(MRR 0.803→0.871)，
+    # 小库里 top-8 结果几乎不受影响。
+    RERANK_CANDIDATE_K: int = 10
 
     # 意图识别模型
     INTENT_LLM_MODEL: str = "glm-4-flash"

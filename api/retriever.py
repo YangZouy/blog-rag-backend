@@ -7,6 +7,7 @@ from functools import lru_cache
 from api.models import SearchRequest  # noqa: F401  (kept for symmetry)
 from core.config import get_settings
 from core.embeddings import get_embeddings
+from core.observability import timed_stage
 from core.vector_store import get_vector_store
 from data.parse_hexo import DocumentChunk
 
@@ -57,7 +58,8 @@ def retrieve(
         candidate_k = s.RETRIEVAL_CANDIDATE_K
     limit = max(top_k, candidate_k)
 
-    qvec = list(_embed_query_cached(query))
+    with timed_stage("embed_query", query=query):
+        qvec = list(_embed_query_cached(query))
     # 本地 Faiss 检索：零网络、零重试；doc_type/tags 过滤在 store.search 内完成。
     # 返回 [(DocumentChunk, score), ...]，chunk.score 已写入向量相似度分数。
     return [c for c, _ in get_vector_store().search(qvec, limit, doc_type=doc_type, tags=tags)]
@@ -124,4 +126,5 @@ def retrieve_with_rerank(
         tags=tags,
         candidate_k=max(limit, settings.RERANK_CANDIDATE_K),
     )
-    return rerank(query, candidates, limit)
+    with timed_stage("rerank", query=query):
+        return rerank(query, candidates, limit)

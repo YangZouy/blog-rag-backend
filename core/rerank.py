@@ -77,8 +77,12 @@ class _OnnxReranker:
       self.tokenizer.enable_padding()
 
       so = ort.SessionOptions()
-      # 限制线程数，避免与 uvicorn worker 抢核
-      so.intra_op_num_threads = max(1, (os.cpu_count() or 2) - 1)
+      # 用满本机所有 CPU 核做 intra-op 并行。
+      # 注意：之前写成 cpu_count()-1，在 2 核机器上会变成 1 线程，
+      # 导致 bge-reranker-base(2.78亿参数) 单线程跑 20 个候选要 ~13s。
+      # 本服务是单进程单 uvicorn worker，rerank 在后台线程里同步执行，
+      # 用满核不会饿死其它请求，反而能把 rerank 耗时砍掉近一半。
+      so.intra_op_num_threads = os.cpu_count() or 2
       self.session = ort.InferenceSession(
           model_path, sess_options=so, providers=["CPUExecutionProvider"]
       )
