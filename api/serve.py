@@ -23,7 +23,7 @@ from core.auth import rate_limit, verify_api_key
 from core.cache import cache_get, cache_set
 from core.bm25 import warm_bm25
 from core.config import get_settings
-from core.qdrant_client import warm_qdrant
+from core.vector_store import warm_vector_store
 from core.rerank import warm_reranker
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request, status
 from core.bm25 import get_bm25_index, warm_bm25
@@ -36,7 +36,7 @@ s = get_settings(); logger = logging.getLogger(__name__); logging.getLogger("blo
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     s = get_settings()
-    warm_qdrant()
+    warm_vector_store()
     if s.WARMUP_ON_START:
         logger.info("warming up bm25 index and reranker model...")
         warm_bm25()

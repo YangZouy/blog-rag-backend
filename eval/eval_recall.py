@@ -15,7 +15,7 @@ if ROOT not in sys.path:
 
 from core.config import get_settings          # noqa: E402
 from core.embeddings import get_embeddings     # noqa: E402
-from core.qdrant_client import get_qdrant      # noqa: E402
+from core.vector_store import get_vector_store      # noqa: E402
 from data.parse_hexo import DocumentChunk      # noqa: E402
 from api.retriever import retrieve_hybrid, retrieve_with_rerank  # noqa: E402
 
@@ -27,27 +27,15 @@ QUERIES_PATH = os.path.join(ROOT, "eval", "eval_queries.json")
 # 纯余弦计算相似度检索
 def retrieve_raw(query: str, limit: int = CANDIDATE_POOL):
     qvec = get_embeddings().embed_query(query)
-    s = get_settings()
-    client = get_qdrant()
-    resp = client.query_points(
-        collection_name=s.QDRANT_COLLECTION,
-        query=qvec,
-        limit=limit,
-        with_payload=True,
-        timeout=s.QDRANT_READ_TIMEOUT,
-    )
+    store = get_vector_store()
     doc_rank = []
     seen = set()
-    for p in resp.points:
-        chunk_raw = (p.payload or {}).get("chunk")
-        if not chunk_raw:
-            continue
-        c = DocumentChunk.from_payload(chunk_raw)
-        slug = (c.slug or "").replace("\\", "/")
+    for chunk, score in store.search(qvec, limit):
+        slug = (chunk.slug or "").replace("\\", "/")
         if slug in seen:
             continue
         seen.add(slug)
-        doc_rank.append((slug, float(p.score)))
+        doc_rank.append((slug, float(score)))
     return doc_rank
 
 
@@ -215,7 +203,7 @@ def main():
         "config": {
             "model": getattr(s, "EMBED_MODEL", "?"),
             "dim": getattr(s, "EMBED_DIM", "?"),
-            "collection": s.QDRANT_COLLECTION,
+            "vector_store": "local-faiss",
             "candidate_pool": CANDIDATE_POOL,
             "retrieve": args.mode,
         },

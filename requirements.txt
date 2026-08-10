@@ -10,7 +10,7 @@ uvicorn[standard]>=0.29
 # LLM / RAG（远程 OpenAI 兼容客户端 + 文本切分 + 向量库）
 langchain-openai>=0.1
 langchain-text-splitters>=0.3
-qdrant-client>=1.9
+faiss-cpu>=1.7
 
 # Hybrid 检索的 BM25 全文侧（纯 Python，体积小）
 rank-bm25>=0.2.2

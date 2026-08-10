@@ -119,7 +119,7 @@ def _route_and_retrieve(query: str, top_k: int) -> tuple[Intent, List[DocumentCh
     return Intent.RAG, retrieved, "rag"
 
 # 对retrieve_with_rerank进行生产安全包装
-# 1、异常兜底：Qdrant抖动、embedding API超时，rerank加载失败时
+# 1、异常兜底：向量检索/embedding API超时，rerank加载失败时
 # 因为包裹了try catch，所以返回空列表，上层走到free-answer
 # 2、观测性：timed_stage把检索耗时打点到core.observability
 

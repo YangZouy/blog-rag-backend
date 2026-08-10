@@ -11,3 +11,5 @@ __pycache__/
 eval/results/
 models/
 data/ingest_state.json
+data/vector_store.faiss
+data/vector_store_meta.json

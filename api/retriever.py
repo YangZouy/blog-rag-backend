@@ -4,17 +4,15 @@ import concurrent.futures
 import time
 from typing import List, Optional
 from functools import lru_cache
-from qdrant_client.models import FieldCondition, Filter, MatchAny, MatchValue
-
 from api.models import SearchRequest  # noqa: F401  (kept for symmetry)
 from core.config import get_settings
 from core.embeddings import get_embeddings
-from core.qdrant_client import get_qdrant
+from core.vector_store import get_vector_store
 from data.parse_hexo import DocumentChunk
 
 def _retry_network(fn, attempts: int = 3, base_delay: float = 0.5, label: str = "network"):
     """瞬时网络抖动（如经代理的 TLS 连接被对端重置 -> SSL: UNEXPECTED_EOF_WHILE_READING）
-    重试封装。与下方 Qdrant query 的已有重试保持同一策略：递增退避，最多 attempts 次。
+    重试封装。与下方 embedding 调用保持同一策略：递增退避，最多 attempts 次。
 
     fn 必须是无参可调用，且幂等（同一 query 重复调用结果一致）。
     """
@@ -35,7 +33,7 @@ def _embed_query_cached(query: str) -> tuple:
     """Query 向量缓存：同一问题（含追问拼接后的检索 query）只调一次智谱 API。
 
     实测 embed_query 是链路头号瓶颈（冷 4s+ / 热 300-600ms），且必须在
-    Qdrant 查询前串行完成。lru_cache 以 query 文本为 key，命中时耗时≈0。
+    检索前串行完成。lru_cache 以 query 文本为 key，命中时耗时≈0。
     返回 tuple（不可变）避免调用方意外修改缓存内容；用时转回 list。
     """
     vec = _retry_network(
@@ -45,17 +43,7 @@ def _embed_query_cached(query: str) -> tuple:
     )
     return tuple(vec)
 
-def _build_filter(doc_type: Optional[str], tags: Optional[List[str]]) -> Optional[Filter]:
-    conditions = []
-    if doc_type:
-        conditions.append(FieldCondition(key="doc_type", match=MatchValue(value=doc_type)))
-    if tags:
-        conditions.append(FieldCondition(key="tags", match=MatchAny(any=tags)))
-    if not conditions:
-        return None
-    return Filter(must=conditions)
-
-# 纯向量检索
+# 纯向量检索（本地 Faiss，零网络）
 def retrieve(
     query: str,
     top_k: int = 5,
@@ -64,51 +52,15 @@ def retrieve(
     candidate_k: Optional[int] = None,
 ) -> List[DocumentChunk]:
     s = get_settings()
-    # 先拉大候选池（top_k 与候选池取大者），再交给 LLM 筛选，避免漏掉长尾相关片段
+    # 先拉大候选池（top_k 与候选池取大者），再交给后续融合/重排，避免漏掉长尾相关片段
     if candidate_k is None:
         candidate_k = s.RETRIEVAL_CANDIDATE_K
     limit = max(top_k, candidate_k)
-    
-    qvec = list(_embed_query_cached(query))
-    client = get_qdrant()
-    """
-    query_filter表示在向量相似的搜索基础上，再加结构化过滤条件
-    collection中存储的是向量（文章chunk的embedding）
-    和payload（附加字段：文章标题、URL、内容、tags、doc_type等元数据）
 
-    resp返回 匹配到的向量点，每个点通常会包含
-    id score vector payload等
-    """
-    resp = None
-    last_error = None
-    for attempt in range(3):
-        try:
-            resp = client.query_points(
-                collection_name=s.QDRANT_COLLECTION,
-                query=qvec,
-                limit=limit,
-                query_filter=_build_filter(doc_type, tags),
-                with_payload=True,
-                timeout=s.QDRANT_READ_TIMEOUT,
-            )
-            break
-        except Exception as exc:
-            last_error = exc
-            if attempt == 2:
-                raise
-            time.sleep(0.5 * (attempt + 1))
-    if resp is None:
-        raise RuntimeError("Qdrant query returned no response") from last_error
-    chunks: List[DocumentChunk] = []
-    # resp.points：一组命中的向量点，包含id，score，payload等
-    for p in resp.points:
-        payload = p.payload or {}
-        chunk_raw = payload.get("chunk")
-        if chunk_raw:
-            c = DocumentChunk.from_payload(chunk_raw)
-            c.score = p.score  # 保留向量相似度分数，供后续阈值判断与排序
-            chunks.append(c)
-    return sorted(chunks, key=lambda chunk: chunk.score or 0.0, reverse=True)
+    qvec = list(_embed_query_cached(query))
+    # 本地 Faiss 检索：零网络、零重试；doc_type/tags 过滤在 store.search 内完成。
+    # 返回 [(DocumentChunk, score), ...]，chunk.score 已写入向量相似度分数。
+    return [c for c, _ in get_vector_store().search(qvec, limit, doc_type=doc_type, tags=tags)]
 
 # 向量+BM25融合
 # 使用RRF（K = 60）把两套排名融合成一个分数重排

@@ -1,34 +1,26 @@
-"""将 Hexo 源仓库导入 Qdrant 向量存储。
+"""将 Hexo 源仓库导入本地 Faiss 向量存储。
 
 本地运行：
     python -m api.ingest --repo /path/to/hexo-source
 
 CI 中（参见 scripts/ingest_ci.sh）：先检出源仓库，然后调用此脚本。
-写入操作是幂等的（点 ID = slug:chunk_index），因此重复运行是安全的。
+写入操作是幂等的（chunk key = slug:chunk_index），因此重复运行是安全的。
 """
 from __future__ import annotations
 
 import argparse
 import logging
 import sys
-import uuid
-from core.config import get_settings
-from core.embeddings import get_embeddings
-from core.qdrant_client import ensure_collection, get_qdrant
-from data.parse_hexo import parse_hexo_repo
-from data.parse_pdf import parse_pdfs
-from api.build_index import build_index
-# ===== 在文件顶部 import 区新增 =====
 import hashlib
 import json
 import os
 
-from qdrant_client.models import (
-    FieldCondition,
-    Filter,
-    MatchAny,
-    PointStruct,
-)
+from core.config import get_settings
+from core.embeddings import get_embeddings
+from core.vector_store import get_vector_store
+from data.parse_hexo import parse_hexo_repo
+from data.parse_pdf import parse_pdfs
+from api.build_index import build_index
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ingest")
@@ -70,19 +62,9 @@ def _save_state(hashes: dict) -> None:
     with open(p, "w", encoding="utf-8") as f:
         json.dump({"hashes": hashes}, f, ensure_ascii=False, indent=2)
 
-def _delete_by_slugs(client, slugs) -> None:
-    """按 slug 批量删除 Qdrant 点（用于"文章变了/删了"的清理）。"""
-    from core.config import get_settings
-    if not slugs:
-        return
-    s = get_settings()
-    client.delete(
-        collection_name=s.QDRANT_COLLECTION,
-        points_selector=Filter(
-            must=[FieldCondition(key="slug", match=MatchAny(any=list(slugs)))]
-        ),
-        timeout=s.QDRANT_WRITE_TIMEOUT,
-    )
+def _delete_by_slugs(store, slugs) -> None:
+    """按 slug 批量删除本地 Faiss 中的 chunk（用于"文章变了/删了"的清理）。"""
+    store.delete_by_slug(slugs)
 
 def run_ingest(
     repo_path: str,
@@ -91,8 +73,10 @@ def run_ingest(
     summarize: bool = False,
 ) -> int:
     s = get_settings()
-    ensure_collection(recreate=recreate)
-    client = get_qdrant()
+    store = get_vector_store()
+    if recreate:
+        # --recreate：清空本地索引，从头全量重建
+        store.reset()
     embed = get_embeddings()
 
     chunks = parse_hexo_repo(repo_path) + parse_pdfs(repo_path)
@@ -115,15 +99,15 @@ def run_ingest(
             len(changed), len(removed), len(current_hashes) - len(changed),
         )
         target = {sl: cs for sl, cs in grouped.items() if sl in changed}
-        # 关键：先删掉这些 slug 的全部旧点，避免文章变短残留尾部 chunk
-        _delete_by_slugs(client, list(changed) + removed)
+        # 关键：先删掉这些 slug 的全部旧 chunk，避免文章变短残留尾部 chunk
+        _delete_by_slugs(store, list(changed) + removed)
     else:
         # 非增量的全量：仍清掉"磁盘已删"的 slug，防止陈旧残留
         target = grouped
         if not recreate:
             prev = _load_state()
             removed = [sl for sl in prev if sl not in current_hashes]
-            _delete_by_slugs(client, removed)
+            _delete_by_slugs(store, removed)
 
     to_embed = [c for cs in target.values() for c in cs]
     if to_embed:
@@ -135,28 +119,8 @@ def run_ingest(
             [c.embed_text() for c in to_embed],
             chunk_size=s.EMBED_BATCH_SIZE,
         )
-        points = [
-            PointStruct(
-                id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{c.slug}:{c.chunk_index}")),
-                vector=v,
-                payload={
-                    "chunk": c.to_payload(),
-                    "doc_type": c.doc_type,
-                    "tags": c.tags,
-                    "slug": c.slug,
-                    "content_hash": current_hashes[c.slug],  # 可选：便于排查
-                },
-            )
-            for c, v in zip(to_embed, vectors)
-        ]
-        batch = s.QDRANT_UPSERT_BATCH_SIZE
-        for i in range(0, len(points), batch):
-            client.upsert(
-                collection_name=s.QDRANT_COLLECTION,
-                points=points[i : i + batch],
-                timeout=s.QDRANT_WRITE_TIMEOUT,
-            )
-        logger.info("upserted %d chunks", len(points))
+        store.upsert([(c, v) for c, v in zip(to_embed, vectors)])
+        logger.info("upserted %d chunks", len(to_embed))
     else:
         logger.info("nothing to embed")
 
@@ -174,12 +138,12 @@ def run_ingest(
     return len(to_embed)
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Ingest a Hexo repo into Qdrant")
+    parser = argparse.ArgumentParser(description="Ingest a Hexo repo into local Faiss")
     parser.add_argument("--repo", required=True, help="path to the Hexo repo root")
     parser.add_argument(
         "--recreate",
         action="store_true",
-        help="drop and recreate the collection before ingest",
+        help="drop and recreate the local index before ingest",
     )
     parser.add_argument(
         "--incremental",
@@ -191,10 +155,7 @@ def main() -> None:
         action="store_true",
         help="generate a one-line LLM summary per article into blog_index.json",
     )
-    parser.add_argument("--collection", default=None, help="override QDRANT_COLLECTION")
     args = parser.parse_args()
-    if args.collection:
-        get_settings().QDRANT_COLLECTION = args.collection
     n = run_ingest(
         args.repo,
         recreate=args.recreate,

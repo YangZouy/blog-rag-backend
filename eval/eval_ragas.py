@@ -85,7 +85,12 @@ def ragas_clients() -> tuple[Any, Any]:
     try:
         from ragas.embeddings import LangchainEmbeddingsWrapper
         from ragas.llms import LangchainLLMWrapper
-        return LangchainLLMWrapper(llm), LangchainEmbeddingsWrapper(embeddings)
+
+        # bypass_n=True: 你的 GEN_BASE_URL（智谱/DeepSeek 兼容端点）只支持 n=1，
+        # 而 ragas 的 Faithfulness/AnswerRelevancy 默认会以 n>1 发多候选采样请求，
+        # 端点返回 400 "Invalid n value"。开启后 ragas 改为发 n 个独立请求（每个 n=1），
+        # 兼容该端点，分数等价。
+        return LangchainLLMWrapper(llm, bypass_n=True), LangchainEmbeddingsWrapper(embeddings)
     except ImportError:
         return llm, embeddings
 
@@ -100,10 +105,17 @@ def score_with_ragas(rows: list[dict[str, Any]]) -> dict[str, Any]:
     except ImportError as exc:
         raise RuntimeError("RAGAS is not installed. Run `pip install -r requirements.txt` first.") from exc
 
-    selected = [metric(metrics, "Faithfulness", "faithfulness"), metric(metrics, "ResponseRelevancy", "AnswerRelevancy", "answer_relevancy"), metric(metrics, "ContextPrecision", "ContextPrecisionWithoutReference", "context_precision")]
+    # 无参考答案时只跑不依赖 reference 的指标（Faithfulness / AnswerRelevancy）。
+    # 注意：ragas 0.4.x 的 ContextPrecision 必须有 reference，不能放进无参考集合，
+    # 否则 evaluate() 会报 "requires the following additional columns ['reference']"。
+    selected = [metric(metrics, "Faithfulness", "faithfulness"), metric(metrics, "ResponseRelevancy", "AnswerRelevancy", "answer_relevancy")]
     use_reference = all((row.get("reference_answer") or "").strip() for row in eligible)
     if use_reference:
-        selected += [metric(metrics, "LLMContextRecall", "ContextRecall", "context_recall"), metric(metrics, "FactualCorrectness", "AnswerCorrectness", "answer_correctness")]
+        selected += [
+            metric(metrics, "ContextPrecision", "ContextPrecisionWithoutReference", "context_precision"),
+            metric(metrics, "LLMContextRecall", "ContextRecall", "context_recall"),
+            metric(metrics, "FactualCorrectness", "AnswerCorrectness", "answer_correctness"),
+        ]
     samples = [SingleTurnSample(user_input=row["query"], response=row["answer"], retrieved_contexts=row["contexts"], reference=row["reference_answer"] if use_reference else None) for row in eligible]
     llm, embeddings = ragas_clients()
     results = evaluate(EvaluationDataset(samples=samples), metrics=selected, llm=llm, embeddings=embeddings)
@@ -140,7 +152,7 @@ def main() -> None:
     os.makedirs(RESULTS_DIR, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     settings = get_settings()
-    result = {"tag": args.tag, "timestamp": timestamp, "elapsed_sec": round(time.perf_counter() - started, 2), "config": {"dataset": os.path.relpath(os.path.abspath(args.dataset), ROOT), "top_k": args.top_k, "generation_context_k": settings.GENERATION_CONTEXT_K, "collection": settings.QDRANT_COLLECTION, "generate_only": args.generate_only}, "summary": summary, "per_query": rows}
+    result = {"tag": args.tag, "timestamp": timestamp, "elapsed_sec": round(time.perf_counter() - started, 2), "config": {"dataset": os.path.relpath(os.path.abspath(args.dataset), ROOT), "top_k": args.top_k, "generation_context_k": settings.GENERATION_CONTEXT_K, "vector_store": "local-faiss", "generate_only": args.generate_only}, "summary": summary, "per_query": rows}
     filename = os.path.join(RESULTS_DIR, f"ragas_results_{timestamp}_{args.tag}.json")
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(safe_json(result), file, ensure_ascii=False, indent=2)

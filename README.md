@@ -5,7 +5,7 @@
 **架构链路**：`query → 规则快路(问候/实时零成本短路) → [LLM分类 ∥ 检索并行] → 向量+BM25(RRF融合) → 本地ONNX重排 → DeepSeek生成 → SSE流式输出`
 
 - 后端：FastAPI（systemd 托管，Nginx 反代）
-- 向量库：Qdrant Cloud（持久化，2048 维 COSINE）
+- 向量库：本地 Faiss（自托管，零网络，2048 维，内积=余弦）
 - Embedding：智谱 embedding-3 / 生成：DeepSeek-chat / 意图分类：glm-4-flash
 - 重排：bge-reranker-base ONNX int8 量化，CPU 本地推理，无网络依赖
 - 检索：Dense + BM25 (jieba) → RRF(k=60) 融合 → cross-encoder 重排
@@ -19,7 +19,7 @@
 python -m venv .venv
 # Windows: .venv\Scripts\activate  / macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # 填入 Qdrant / 智谱 / DeepSeek 密钥
+cp .env.example .env   # 填入 智谱 / DeepSeek 密钥（Faiss 本地存储，无需向量库账号）
 python -m uvicorn api.serve:app --reload --port 8000
 ```
 
@@ -47,7 +47,7 @@ curl -X POST http://localhost:8000/api/search \
 
 ## 2. 入库
 
-把 Hexo **源码仓**（Markdown + PDF）灌进 Qdrant：
+把 Hexo **源码仓**（Markdown + PDF）灌进本地 Faiss：
 
 ```bash
 # 全量重建
@@ -61,7 +61,7 @@ python -m api.ingest --repo D:/Blog --incremental --summarize
 ```
 
 - Markdown 解析 frontmatter 构造 URL；PDF 抽取文本（fitz）
-- 幂等 upsert：point id = `uuid5(slug:chunk_index)`，可重复运行
+- 幂等 upsert：以 `(slug, chunk_index)` 为键合并，已存在则覆盖，可重复运行
 - 增量模式按 slug 内容 hash 比对，无变更跳过重嵌
 
 ### 线上热重载
@@ -79,14 +79,15 @@ curl -X POST http://localhost:8000/api/admin/reload \
 
 ## 3. 部署到服务器
 
+### 3.1 基本发布流程（代码更新后）
+
 ```bash
 # 服务器端
 cd /opt/blog-rag-backend
 git pull
-.venv/bin/pip install -r requirements.txt
-systemctl restart blog-rag
+.venv/bin/pip install -r requirements.txt   # 依赖无变更时秒过，有变更才真正安装
+systemctl restart blog-rag                  # 必须重启：systemd 常驻进程启动即把代码载入内存，git pull 只改磁盘文件
 ```
-
 systemd 配置实现常驻运行 + 开机自启 + 崩溃自动拉起，Nginx 反向代理转发 `/api/*` 到 `127.0.0.1:8000`。
 
 常用运维命令：
@@ -96,6 +97,111 @@ journalctl -u blog-rag -f     # 实时日志
 systemctl status blog-rag     # 运行状态
 systemctl restart blog-rag    # 重启
 ```
+
+### 3.2 备案后上线
+
+国内服务器对外提供 Web 服务前必须完成 **ICP 备案**；备案通过后，才能把域名指向本服务器并启用 HTTPS。本项目的切流链路：
+
+```
+用户浏览器 → https://rag.zyydgrbk.top/api/search
+                ↓（Cloudflare DNS 仅解析 / 灰云）
+            Nginx（监听 443，终止 TLS + 反代）
+                ↓
+            本机 uvicorn（127.0.0.1:8000，FastAPI，root_path=/api）
+```
+
+### 3.3 DNS 托管（Cloudflare）
+
+- 域名 NS 已委派给 Cloudflare（`*.ns.cloudflare.com`），因此**阿里云云解析 DNS 的记录不生效**，所有子域记录都在 Cloudflare 后台添加。
+- 添加记录：类型 `A`、名称 `rag`、IPv4 `47.116.188.225`、代理状态 **灰色云朵（仅 DNS）**。
+  - 灰色云朵：用户直连阿里云服务器，路径最短、最稳，且符合备案要求。
+  - 橙色云朵（代理）：流量先经 Cloudflare 再回源，存在备案合规风险，且可能影响 SSE 流式响应；如坚持使用见 3.5 注。
+- 生效验证：`nslookup rag.zyydgrbk.top` 应返回 `47.116.188.225`。
+- 阿里云安全组（防火墙）放行 **80 / 443** 入站，否则证书申请与访问都会失败。
+
+### 3.4 Nginx 反代 + HTTPS 证书（certbot）
+
+Nginx 是服务器上独立运行的程序（非 Python 库），角色是 HTTPS 终止 + 反向代理。系统：Ubuntu 24.04。
+
+```bash
+# 1. 安装 Nginx + certbot
+sudo apt update && sudo apt install -y nginx certbot python3-certbot-nginx
+
+# 2. 删默认站点，写入「引导配置」（仅 80 端口，供 certbot 做 HTTP 验证）
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo tee /etc/nginx/sites-available/rag.zyydgrbk.top > /dev/null <<'EOF'
+server {
+    listen 80;
+    listen [::]:80;
+    server_name rag.zyydgrbk.top;
+    location /.well-known/acme-challenge/ { root /var/www/certbot; }
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_read_timeout 120s;
+    }
+    location / { return 301 https://$host$request_uri; }
+}
+EOF
+sudo ln -s /etc/nginx/sites-available/rag.zyydgrbk.top /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+
+# 3. 申请 Let's Encrypt 证书（把邮箱换成你自己的）
+sudo certbot certonly --nginx -d rag.zyydgrbk.top \
+  --non-interactive --agree-tos --email you@example.com --no-eff-email
+
+# 4. 覆盖为「最终配置」（443 + SSL + SSE 关缓冲）
+sudo tee /etc/nginx/sites-available/rag.zyydgrbk.top > /dev/null <<'EOF'
+server {
+    listen 80;
+    listen [::]:80;
+    server_name rag.zyydgrbk.top;
+    location /.well-known/acme-challenge/ { root /var/www/certbot; }
+    location / { return 301 https://$host$request_uri; }
+}
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name rag.zyydgrbk.top;
+    ssl_certificate     /etc/letsencrypt/live/rag.zyydgrbk.top/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/rag.zyydgrbk.top/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_set_header Connection "";
+        chunked_transfer_encoding on;
+        proxy_read_timeout 120s;
+        proxy_connect_timeout 10s;
+    }
+}
+EOF
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+### 3.5 验证与收尾
+
+```bash
+curl https://rag.zyydgrbk.top/api/health            # 应返回 {"status":"ok"}（证书受信任，无需 -k）
+curl -k -X POST https://rag.zyydgrbk.top/api/search \
+  -H "Content-Type: application/json" -d '{"query":"你的博客是怎么搭建的","top_k":3}'
+```
+
+- 前端 `rag-client.js` 生产端点指向 `https://rag.zyydgrbk.top/api/search`；若博客 `_config.butterfly.yml` 用 `window.RAG_SEARCH_ENDPOINT` 覆盖，**务必带 `/api`**，否则请求落不到 Nginx `/api/` 反代、CORS 预检失败。
+- 后端 `API_KEY` 留空即放行（前端不放密钥，靠 CORS + 限流防滥用）；`ALLOWED_ORIGINS` 建议收紧为 `https://zyydgrbk.top,http://localhost:4000`。
 
 ---
 
@@ -138,7 +244,7 @@ python -m eval.eval_ragas --tag baseline           # 完整 50 条
 
 | 变量 | 说明 | 默认 |
 |------|------|------|
-| `QDRANT_URL` / `QDRANT_API_KEY` | 向量库连接 | — |
+| `FAISS_INDEX_PATH` / `FAISS_META_PATH` | 本地 Faiss 索引与元数据路径 | data/vector_store.* |
 | `ZHIPU_API_KEY` | 智谱 API（embedding + 意图分类） | — |
 | `DEEPSEEK_API_KEY` | DeepSeek API（生成） | — |
 | `ADMIN_TOKEN` | `/admin/reload` 鉴权令牌 | — |

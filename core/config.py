@@ -16,13 +16,6 @@ class Settings(BaseSettings):
     )
 
     # ------------------------------------------------------------------
-    # Qdrant vector store
-    # ------------------------------------------------------------------
-    QDRANT_URL: str = ""
-    QDRANT_API_KEY: str = ""
-    QDRANT_COLLECTION: str = "blog_chunks"
-
-    # ------------------------------------------------------------------
     # Retrieval tuning
     # ------------------------------------------------------------------
     # 召回后交给 reranker 的候选数。eval 已验证 top5 可覆盖答案，8 保留余量。
@@ -45,12 +38,6 @@ class Settings(BaseSettings):
     EMBED_DIM: int = 2048
     EMBED_BATCH_SIZE: int = 64
     ZHIPU_API_KEY: str = ""
-    QDRANT_UPSERT_BATCH_SIZE: int = 32
-    QDRANT_WRITE_TIMEOUT: int = 120
-    # 单次 Qdrant 请求超时（秒）。云端 TLS 冷连接握手可能 >3s，过短会 SSL 握手超时；
-    # 30s 兼顾冷启动与正常请求，warm 后实际请求通常 <1s。
-    QDRANT_READ_TIMEOUT: int = 30
-    QDRANT_WARMUP_ENABLED: bool = True
     # 服务启动时预加载 BM25 索引与 reranker 模型，避免首次请求冷启动
     WARMUP_ON_START: bool = True
 
@@ -94,6 +81,13 @@ class Settings(BaseSettings):
     # data/ingest_state.json：保存slug→content_hash
     # 增量入库需要知道相对上次 哪些变化了
     INGEST_STATE_PATH: str = os.path.join(ROOT, "data", "ingest_state.json")
+
+    # ------------------------------------------------------------------
+    # 本地 Faiss 向量存储（自托管，零网络检索）
+    # ------------------------------------------------------------------
+    # faiss 索引二进制（向量）+ 元数据 JSON（chunk 字段），运行时生成应 gitignore
+    FAISS_INDEX_PATH: str = os.path.join(ROOT, "data", "vector_store.faiss")
+    FAISS_META_PATH: str = os.path.join(ROOT, "data", "vector_store_meta.json")
 
     # ------------------------------------------------------------------
     # Misc
