@@ -16,6 +16,7 @@ from typing import Iterator, List
 from api.models import Citation, ConversationTurn, SearchResponse
 from api.retriever import retrieve_with_rerank
 from core.config import get_settings
+from core.conversation import prepare_query
 from core.intent import Intent, rule_intent, classify_intent
 from core.llm import get_gen_llm
 from core.observability import timed_stage
@@ -218,7 +219,8 @@ def run_rag_with_trace(
     history: List[ConversationTurn] | None = None,
 ) -> tuple[SearchResponse, List[DocumentChunk]]:
     """运行生产 RAG 链路，并返回实际送入生成模型的上下文供离线评估。"""
-    intent, retrieved, _ = _route_and_retrieve(query, top_k)
+    retrieval_query, _ = prepare_query(query, history)
+    intent, retrieved, _ = _route_and_retrieve(retrieval_query, top_k)
     if intent == Intent.LIVE:
         return _live_data_response(), []
     if intent == Intent.CHAT:
@@ -246,7 +248,10 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
     """流式：先回传 stage（真实阶段）→ sources（推荐阅读）→ 逐 token 答案。"""
     yield "stage", {"stage": "routing"}
 
-    intent, retrieved, _ = _route_and_retrieve(query, top_k)
+    retrieval_query, rewritten = prepare_query(query, history)
+    if rewritten:
+        yield "stage", {"stage": "rewriting"}
+    intent, retrieved, _ = _route_and_retrieve(retrieval_query, top_k)
 
     if intent == Intent.LIVE:
         resp = _live_data_response()

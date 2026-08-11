@@ -59,7 +59,8 @@ app.add_middleware(CORSMiddleware, allow_origins=s.allowed_origins_list, allow_m
 def health() -> dict: return {"status": "ok"}
 
 def _cache_key(req: SearchRequest) -> str:
-    return f"rag\x1f{req.query}\x1f{req.top_k}"
+    history = "\x1e".join(turn.content.strip() for turn in req.history[-2:])
+    return f"rag\x1f{req.query.strip()}\x1f{req.top_k}\x1f{history}"
 
 def _sse(event: str, data: dict) -> str: return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
