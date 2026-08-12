@@ -26,6 +26,19 @@ def get_classify_llm() -> ChatOpenAI:
         max_tokens=8,
     )
 
+
+@lru_cache
+def get_planning_llm() -> ChatOpenAI:
+    """Short structured planning calls for complex-question decomposition."""
+    s = get_settings()
+    return ChatOpenAI(
+        model=s.INTENT_LLM_MODEL,
+        api_key=s.ZHIPU_API_KEY,
+        base_url=s.ZHIPU_BASE_URL,
+        temperature=0,
+        max_tokens=180,
+    )
+
 @lru_cache
 def get_summarize_llm() -> ChatOpenAI:
     """自动摘要用 glm-4-flash：一句话概括，temperature=0 保持简洁。"""

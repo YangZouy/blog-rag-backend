@@ -19,6 +19,8 @@ from core.config import get_settings
 from core.conversation import prepare_query
 from core.intent import Intent, rule_intent, classify_intent
 from core.llm import get_gen_llm
+from core.planning import RetrievalPlan, build_retrieval_plan
+from core.rerank import rerank
 from core.observability import timed_stage
 from data.parse_hexo import DocumentChunk
 
@@ -96,9 +98,10 @@ _CHAT_PROMPT = """你是「邹阳博客」的 AI 问答小助手。用户现在�
 
 
 # ---------------- 意图路由 + 检索调度 ----------------
-def _route_and_retrieve(query: str, top_k: int) -> tuple[Intent, List[DocumentChunk], str]:
+def _route_and_retrieve(plan: RetrievalPlan, top_k: int) -> tuple[Intent, List[DocumentChunk], str]:
     """前置意图路由：先规则快路短路，模糊问题再让 LLM 分类 ∥ 检索 并行。"""
     # 基于规则判定
+    query = plan.queries[0]
     ruled = rule_intent(query)
     # 实时数据
     if ruled == Intent.LIVE:
@@ -112,7 +115,7 @@ def _route_and_retrieve(query: str, top_k: int) -> tuple[Intent, List[DocumentCh
         # 一条worker判别意图
         f_cls = ex.submit(classify_intent, query)
         # 一条worker开始检索（候选数固定为 RETRIEVAL_CANDIDATE_K，见 _retrieve_docs）
-        f_ret = ex.submit(_retrieve_docs, query)
+        f_ret = ex.submit(_retrieve_plan, plan)
         intent = f_cls.result()
         retrieved = f_ret.result()
     if intent == Intent.CHAT:
@@ -133,6 +136,26 @@ def _retrieve_docs(query: str) -> List[DocumentChunk]:
     except Exception:
         logger.exception("retrieve failed; returning empty")
         return []
+
+
+def _retrieve_plan(plan: RetrievalPlan) -> List[DocumentChunk]:
+    """Run bounded sub-query retrieval in parallel and merge duplicate chunks."""
+    if len(plan.queries) == 1:
+        return _retrieve_docs(plan.queries[0])
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(plan.queries)) as executor:
+        groups = list(executor.map(_retrieve_docs, plan.queries))
+    merged: dict[tuple[str, int], DocumentChunk] = {}
+    for chunks in groups:
+        for chunk in chunks:
+            key = (chunk.slug, chunk.chunk_index)
+            if key not in merged or (chunk.score or 0.0) > (merged[key].score or 0.0):
+                merged[key] = chunk
+    candidates = list(merged.values())
+    # Per-sub-query scores are only locally comparable. Score the merged pool once
+    # against the original complex question before choosing generation context.
+    limit = get_settings().RETRIEVAL_CANDIDATE_K
+    with timed_stage("rerank_merged", query=plan.original_query, candidate_k=len(candidates), return_k=limit):
+        return rerank(plan.original_query, candidates, limit)
 
 @lru_cache(maxsize=1)
 def _blog_overview() -> str:
@@ -220,7 +243,8 @@ def run_rag_with_trace(
 ) -> tuple[SearchResponse, List[DocumentChunk]]:
     """运行生产 RAG 链路，并返回实际送入生成模型的上下文供离线评估。"""
     retrieval_query, _ = prepare_query(query, history)
-    intent, retrieved, _ = _route_and_retrieve(retrieval_query, top_k)
+    plan = build_retrieval_plan(retrieval_query)
+    intent, retrieved, _ = _route_and_retrieve(plan, top_k)
     if intent == Intent.LIVE:
         return _live_data_response(), []
     if intent == Intent.CHAT:
@@ -251,7 +275,10 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
     retrieval_query, rewritten = prepare_query(query, history)
     if rewritten:
         yield "stage", {"stage": "rewriting"}
-    intent, retrieved, _ = _route_and_retrieve(retrieval_query, top_k)
+    plan = build_retrieval_plan(retrieval_query)
+    if plan.is_complex:
+        yield "stage", {"stage": "decomposing", "sub_query_count": len(plan.queries)}
+    intent, retrieved, _ = _route_and_retrieve(plan, top_k)
 
     if intent == Intent.LIVE:
         resp = _live_data_response()
