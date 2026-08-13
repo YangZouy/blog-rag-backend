@@ -41,7 +41,7 @@ def test_pipeline_does_not_generate_when_evidence_is_insufficient(monkeypatch):
     plan = RetrievalPlan("simple", "不存在的项目", ("不存在的项目",))
     monkeypatch.setattr("api.rag_graph.prepare_query", lambda query, history: (query, False))
     monkeypatch.setattr("api.rag_graph.build_retrieval_plan", lambda query: plan)
-    monkeypatch.setattr("api.rag_graph._route_and_retrieve", lambda plan, top_k: ("rag", [chunk(0.1)], {plan.queries[0]: [chunk(0.1)]}, "rag"))
+    monkeypatch.setattr("api.rag_graph._route_and_retrieve", lambda plan, top_k, candidate_k=None: ("rag", [chunk(0.1)], {plan.queries[0]: [chunk(0.1)]}, "rag"))
     monkeypatch.setattr("api.rag_graph.get_gen_llm", lambda: (_ for _ in ()).throw(AssertionError("must not generate")))
     response, docs = run_rag_with_trace("不存在的项目")
     assert response.evidence_status == "insufficient"
@@ -54,7 +54,7 @@ def test_pipeline_reports_partial_complex_evidence(monkeypatch):
     reliable = chunk(0.8)
     monkeypatch.setattr("api.rag_graph.prepare_query", lambda query, history: (query, False))
     monkeypatch.setattr("api.rag_graph.build_retrieval_plan", lambda query: plan)
-    monkeypatch.setattr("api.rag_graph._route_and_retrieve", lambda plan, top_k: ("rag", [reliable], {"架构": [reliable], "评测": [chunk(0.1)]}, "rag"))
+    monkeypatch.setattr("api.rag_graph._route_and_retrieve", lambda plan, top_k, candidate_k=None: ("rag", [reliable], {"架构": [reliable], "评测": [chunk(0.1)]}, "rag"))
 
     class FakeLLM:
         def invoke(self, prompt):

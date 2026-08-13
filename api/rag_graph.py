@@ -22,6 +22,7 @@ from core.evidence import EvidenceAssessment, EvidenceStatus, assess_evidence
 from core.intent import Intent, rule_intent, classify_intent
 from core.llm import get_gen_llm
 from core.planning import RetrievalPlan, build_retrieval_plan
+from core.remediation import RemedyDecision, choose_remedy
 from core.rerank import rerank
 from core.observability import timed_stage
 from data.parse_hexo import DocumentChunk
@@ -101,7 +102,7 @@ _CHAT_PROMPT = """你是「邹阳博客」的 AI 问答小助手。用户现在�
 
 # ---------------- 意图路由 + 检索调度 ----------------
 def _route_and_retrieve(
-    plan: RetrievalPlan, top_k: int,
+    plan: RetrievalPlan, top_k: int, candidate_k: int | None = None,
 ) -> tuple[Intent, List[DocumentChunk], Mapping[str, List[DocumentChunk]], str]:
     """前置意图路由：先规则快路短路，模糊问题再让 LLM 分类 ∥ 检索 并行。"""
     # 基于规则判定
@@ -119,7 +120,7 @@ def _route_and_retrieve(
         # 一条worker判别意图
         f_cls = ex.submit(classify_intent, query)
         # 一条worker开始检索（候选数固定为 RETRIEVAL_CANDIDATE_K，见 _retrieve_docs）
-        f_ret = ex.submit(_retrieve_plan, plan)
+        f_ret = ex.submit(_retrieve_plan, plan, candidate_k)
         intent = f_cls.result()
         retrieved, chunks_by_query = f_ret.result()
     if intent == Intent.CHAT:
@@ -131,9 +132,9 @@ def _route_and_retrieve(
 # 因为包裹了try catch，所以返回空列表，上层走到free-answer
 # 2、观测性：timed_stage把检索耗时打点到core.observability
 
-def _retrieve_docs(query: str) -> List[DocumentChunk]:
+def _retrieve_docs(query: str, candidate_k: int | None = None) -> List[DocumentChunk]:
     """执行 hybrid + rerank 检索，返回重排后的候选 chunk 列表（固定取 RETRIEVAL_CANDIDATE_K=8 个）。"""
-    candidate_k = get_settings().RETRIEVAL_CANDIDATE_K
+    candidate_k = candidate_k or get_settings().RETRIEVAL_CANDIDATE_K
     try:
         with timed_stage("retrieve", query=query):
             return retrieve_with_rerank(query, top_k=candidate_k)
@@ -142,13 +143,18 @@ def _retrieve_docs(query: str) -> List[DocumentChunk]:
         return []
 
 
-def _retrieve_plan(plan: RetrievalPlan) -> tuple[List[DocumentChunk], Mapping[str, List[DocumentChunk]]]:
+def _retrieve_plan(
+    plan: RetrievalPlan, candidate_k: int | None = None,
+) -> tuple[List[DocumentChunk], Mapping[str, List[DocumentChunk]]]:
     """Run bounded sub-query retrieval in parallel and merge duplicate chunks."""
+    def retrieve_one(query: str) -> List[DocumentChunk]:
+        return _retrieve_docs(query) if candidate_k is None else _retrieve_docs(query, candidate_k)
+
     if len(plan.queries) == 1:
-        chunks = _retrieve_docs(plan.queries[0])
+        chunks = retrieve_one(plan.queries[0])
         return chunks, {plan.queries[0]: chunks}
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(plan.queries)) as executor:
-        groups = list(executor.map(_retrieve_docs, plan.queries))
+        groups = list(executor.map(retrieve_one, plan.queries))
     # The final rerank below mutates chunk.score in place. Preserve each
     # sub-query's own score for coverage assessment before merging candidates.
     chunks_by_query = {
@@ -164,9 +170,34 @@ def _retrieve_plan(plan: RetrievalPlan) -> tuple[List[DocumentChunk], Mapping[st
     candidates = list(merged.values())
     # Per-sub-query scores are only locally comparable. Score the merged pool once
     # against the original complex question before choosing generation context.
-    limit = get_settings().RETRIEVAL_CANDIDATE_K
+    limit = candidate_k or get_settings().RETRIEVAL_CANDIDATE_K
     with timed_stage("rerank_merged", query=plan.original_query, candidate_k=len(candidates), return_k=limit):
         return rerank(plan.original_query, candidates, limit), chunks_by_query
+
+
+def _retrieve_with_evidence(
+    plan: RetrievalPlan, top_k: int,
+) -> tuple[Intent, List[DocumentChunk], Mapping[str, List[DocumentChunk]], EvidenceAssessment, RemedyDecision | None]:
+    """Run at most two retrieval rounds; only code can authorize the retry."""
+    settings = get_settings()
+    candidate_k = settings.RETRIEVAL_CANDIDATE_K
+    intent, retrieved, chunks_by_query, _ = _route_and_retrieve(plan, top_k, candidate_k)
+    if intent != Intent.RAG:
+        return intent, retrieved, chunks_by_query, EvidenceAssessment(EvidenceStatus.SUFFICIENT), None
+
+    assessment = assess_evidence(plan, retrieved, chunks_by_query, settings.EVIDENCE_RELEVANCE_THRESHOLD)
+    if assessment.status is not EvidenceStatus.INSUFFICIENT or settings.MAX_RETRIEVAL_ROUNDS < 2:
+        return intent, retrieved, chunks_by_query, assessment, None
+
+    remedy = choose_remedy(candidate_k, settings.RETRIEVAL_REMEDY_CANDIDATE_K)
+    if remedy is None:
+        return intent, retrieved, chunks_by_query, assessment, None
+
+    intent, retrieved, chunks_by_query, _ = _route_and_retrieve(plan, top_k, remedy.candidate_k)
+    if intent != Intent.RAG:
+        return intent, retrieved, chunks_by_query, EvidenceAssessment(EvidenceStatus.SUFFICIENT), remedy
+    assessment = assess_evidence(plan, retrieved, chunks_by_query, settings.EVIDENCE_RELEVANCE_THRESHOLD)
+    return intent, retrieved, chunks_by_query, assessment, remedy
 
 @lru_cache(maxsize=1)
 def _blog_overview() -> str:
@@ -269,15 +300,12 @@ def run_rag_with_trace(
     """运行生产 RAG 链路，并返回实际送入生成模型的上下文供离线评估。"""
     retrieval_query, _ = prepare_query(query, history)
     plan = build_retrieval_plan(retrieval_query)
-    intent, retrieved, chunks_by_query, _ = _route_and_retrieve(plan, top_k)
+    intent, retrieved, chunks_by_query, assessment, _ = _retrieve_with_evidence(plan, top_k)
     if intent == Intent.LIVE:
         return _live_data_response(), []
     if intent == Intent.CHAT:
         return _chat_response(query), []
 
-    assessment = assess_evidence(
-        plan, retrieved, chunks_by_query, get_settings().EVIDENCE_RELEVANCE_THRESHOLD,
-    )
     if assessment.status is EvidenceStatus.INSUFFICIENT:
         return _insufficient_evidence_response(assessment), []
     retrieved = _filter_relevant_chunks(retrieved)
@@ -311,7 +339,7 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
     plan = build_retrieval_plan(retrieval_query)
     if plan.is_complex:
         yield "stage", {"stage": "decomposing", "sub_query_count": len(plan.queries)}
-    intent, retrieved, chunks_by_query, _ = _route_and_retrieve(plan, top_k)
+    intent, retrieved, chunks_by_query, assessment, remedy = _retrieve_with_evidence(plan, top_k)
 
     if intent == Intent.LIVE:
         resp = _live_data_response()
@@ -339,9 +367,8 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
 
     # ---- RAG 路径 ----
     yield "stage", {"stage": "retrieving"}
-    assessment = assess_evidence(
-        plan, retrieved, chunks_by_query, get_settings().EVIDENCE_RELEVANCE_THRESHOLD,
-    )
+    if remedy is not None:
+        yield "stage", {"stage": "remedy", "action": remedy.action.value, "candidate_k": remedy.candidate_k}
     if assessment.status is EvidenceStatus.INSUFFICIENT:
         response = _insufficient_evidence_response(assessment)
         yield "sources", {"citations": [], "mode": response.mode}

@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     # 召回后交给 reranker 的候选数。eval 已验证 top5 可覆盖答案，8 保留余量。
     RETRIEVAL_CANDIDATE_K: int = 8
+    # The only retry action currently enabled: one evidence-insufficient query
+    # may expand its candidate pool once, then the pipeline must terminate.
+    RETRIEVAL_REMEDY_CANDIDATE_K: int = 16
+    MAX_RETRIEVAL_ROUNDS: int = 2
     # 最终送入生成模型的上下文块数
     GENERATION_CONTEXT_K: int = 5
     # reranker 最高分低于此值时，视为没有足够相关的站内资料。
