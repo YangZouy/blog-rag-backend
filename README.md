@@ -308,3 +308,6 @@ python -m eval.eval_ragas --tag baseline           # 完整 50 条
 - **PDF 无文本层**：需 OCR，当前仅标记占位。
 - **缓存**：进程内 lru_cache（query embedding 256 / blog overview 1），多实例不共享。
 - **后端不可用时**：前端自动回退到博客本地字符搜索。
+
+受控Agentic RAG：
+模型负责理解和判断，程序负责执行边界、动作范围、循环次数和终止条件。

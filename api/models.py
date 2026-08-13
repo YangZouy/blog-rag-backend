@@ -32,6 +32,8 @@ class SearchResponse(BaseModel):
     # 表示前端是否需要回退，当后端无法给出回答时表示需要前端兜底了，true表示后端无RAG答案
     fallback: bool = False  # True when we could not produce a RAG answer
     mode: str = "rag"  # "rag" | "web" | "not_found" | "error"
+    evidence_status: Literal["sufficient", "partial", "insufficient"] | None = None
+    missing_aspects: list[str] = Field(default_factory=list)
 
 class AdminReloadRequest(BaseModel):
     repo: str = "" # 博客源仓库路径；为空则用服务端的 BLOG_REPO_PATH

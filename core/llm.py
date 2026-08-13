@@ -26,7 +26,7 @@ def get_classify_llm() -> ChatOpenAI:
         max_tokens=8,
     )
 
-
+# 专用于规划的轻量模型
 @lru_cache
 def get_planning_llm() -> ChatOpenAI:
     """Short structured planning calls for complex-question decomposition."""

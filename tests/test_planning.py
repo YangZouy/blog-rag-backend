@@ -55,7 +55,9 @@ def test_complex_retrieval_merges_deduplicates_and_reranks(monkeypatch):
     monkeypatch.setattr("api.rag_graph._retrieve_docs", fake_retrieve)
     monkeypatch.setattr("api.rag_graph.rerank", fake_rerank)
     plan = RetrievalPlan(query_type="complex", original_query="原始复杂问题", queries=("架构", "评测"))
-    result = _retrieve_plan(plan)
+    result, chunks_by_query = _retrieve_plan(plan)
     assert seen["query"] == "原始复杂问题"
     assert len(seen["chunks"]) == 2
     assert {chunk.slug for chunk in result} == {"a", "b"}
+    assert set(chunks_by_query) == {"架构", "评测"}
+    assert chunks_by_query["架构"][0] is not first

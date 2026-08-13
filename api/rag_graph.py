@@ -10,13 +10,15 @@ import logging
 import os
 import re
 import concurrent.futures
+from dataclasses import replace
 from functools import lru_cache
-from typing import Iterator, List
+from typing import Iterator, List, Mapping
 
 from api.models import Citation, ConversationTurn, SearchResponse
 from api.retriever import retrieve_with_rerank
 from core.config import get_settings
 from core.conversation import prepare_query
+from core.evidence import EvidenceAssessment, EvidenceStatus, assess_evidence
 from core.intent import Intent, rule_intent, classify_intent
 from core.llm import get_gen_llm
 from core.planning import RetrievalPlan, build_retrieval_plan
@@ -98,17 +100,19 @@ _CHAT_PROMPT = """你是「邹阳博客」的 AI 问答小助手。用户现在�
 
 
 # ---------------- 意图路由 + 检索调度 ----------------
-def _route_and_retrieve(plan: RetrievalPlan, top_k: int) -> tuple[Intent, List[DocumentChunk], str]:
+def _route_and_retrieve(
+    plan: RetrievalPlan, top_k: int,
+) -> tuple[Intent, List[DocumentChunk], Mapping[str, List[DocumentChunk]], str]:
     """前置意图路由：先规则快路短路，模糊问题再让 LLM 分类 ∥ 检索 并行。"""
     # 基于规则判定
     query = plan.queries[0]
     ruled = rule_intent(query)
     # 实时数据
     if ruled == Intent.LIVE:
-        return Intent.LIVE, [], "out_of_scope"
+        return Intent.LIVE, [], {}, "out_of_scope"
     # 问候/闲聊
     if ruled == Intent.CHAT:
-        return Intent.CHAT, [], "chat"
+        return Intent.CHAT, [], {}, "chat"
 
     # 模糊：LLM 分类 与 检索 并行，互不等待
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
@@ -117,10 +121,10 @@ def _route_and_retrieve(plan: RetrievalPlan, top_k: int) -> tuple[Intent, List[D
         # 一条worker开始检索（候选数固定为 RETRIEVAL_CANDIDATE_K，见 _retrieve_docs）
         f_ret = ex.submit(_retrieve_plan, plan)
         intent = f_cls.result()
-        retrieved = f_ret.result()
+        retrieved, chunks_by_query = f_ret.result()
     if intent == Intent.CHAT:
-        return Intent.CHAT, [], "chat"   # 判为闲聊，丢弃检索结果
-    return Intent.RAG, retrieved, "rag"
+        return Intent.CHAT, [], {}, "chat"   # 判为闲聊，丢弃检索结果
+    return Intent.RAG, retrieved, chunks_by_query, "rag"
 
 # 对retrieve_with_rerank进行生产安全包装
 # 1、异常兜底：向量检索/embedding API超时，rerank加载失败时
@@ -138,12 +142,19 @@ def _retrieve_docs(query: str) -> List[DocumentChunk]:
         return []
 
 
-def _retrieve_plan(plan: RetrievalPlan) -> List[DocumentChunk]:
+def _retrieve_plan(plan: RetrievalPlan) -> tuple[List[DocumentChunk], Mapping[str, List[DocumentChunk]]]:
     """Run bounded sub-query retrieval in parallel and merge duplicate chunks."""
     if len(plan.queries) == 1:
-        return _retrieve_docs(plan.queries[0])
+        chunks = _retrieve_docs(plan.queries[0])
+        return chunks, {plan.queries[0]: chunks}
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(plan.queries)) as executor:
         groups = list(executor.map(_retrieve_docs, plan.queries))
+    # The final rerank below mutates chunk.score in place. Preserve each
+    # sub-query's own score for coverage assessment before merging candidates.
+    chunks_by_query = {
+        query: [replace(chunk) for chunk in chunks]
+        for query, chunks in zip(plan.queries, groups)
+    }
     merged: dict[tuple[str, int], DocumentChunk] = {}
     for chunks in groups:
         for chunk in chunks:
@@ -155,7 +166,7 @@ def _retrieve_plan(plan: RetrievalPlan) -> List[DocumentChunk]:
     # against the original complex question before choosing generation context.
     limit = get_settings().RETRIEVAL_CANDIDATE_K
     with timed_stage("rerank_merged", query=plan.original_query, candidate_k=len(candidates), return_k=limit):
-        return rerank(plan.original_query, candidates, limit)
+        return rerank(plan.original_query, candidates, limit), chunks_by_query
 
 @lru_cache(maxsize=1)
 def _blog_overview() -> str:
@@ -228,12 +239,26 @@ def _select_generation_context(chunks: List[DocumentChunk], max_chunks: int) -> 
     return chunks[:max_chunks]
 
 
-def _build_prompt(docs: List[DocumentChunk], query: str) -> tuple[str, str]:
+def _build_prompt(docs: List[DocumentChunk], query: str, assessment: EvidenceAssessment) -> tuple[str, str]:
     overview = _blog_overview()
-    if not docs:
-        return _FREE_ANSWER_PROMPT.format(query=query, overview=overview), "free"
+    if assessment.status is EvidenceStatus.PARTIAL:
+        missing = "；".join(assessment.missing_aspects)
+        prefix = f"站内资料未直接覆盖以下方面：{missing}。只回答有证据支持的部分，并明确说明上述缺口。\n\n"
+    else:
+        prefix = ""
     context = "\n\n".join(f"### 《{d.title}》\n{d.content}" for d in docs)
-    return _GENERATE_PROMPT.format(context=context, query=query, overview=overview), "rag"
+    return prefix + _GENERATE_PROMPT.format(context=context, query=query, overview=overview), "rag"
+
+
+def _insufficient_evidence_response(assessment: EvidenceAssessment) -> SearchResponse:
+    detail = ""
+    if assessment.missing_aspects:
+        detail = "以下关注点缺少可靠站内证据：" + "；".join(assessment.missing_aspects) + "。"
+    return SearchResponse(
+        answer="站内资料不足以可靠回答这个问题。" + detail + "请补充具体文章、项目名称或希望确认的范围。",
+        citations=[], fallback=False, mode="not_found", evidence_status=assessment.status.value,
+        missing_aspects=list(assessment.missing_aspects),
+    )
 
 # ---------------- 对外接口 ----------------
 def run_rag_with_trace(
@@ -244,23 +269,31 @@ def run_rag_with_trace(
     """运行生产 RAG 链路，并返回实际送入生成模型的上下文供离线评估。"""
     retrieval_query, _ = prepare_query(query, history)
     plan = build_retrieval_plan(retrieval_query)
-    intent, retrieved, _ = _route_and_retrieve(plan, top_k)
+    intent, retrieved, chunks_by_query, _ = _route_and_retrieve(plan, top_k)
     if intent == Intent.LIVE:
         return _live_data_response(), []
     if intent == Intent.CHAT:
         return _chat_response(query), []
 
+    assessment = assess_evidence(
+        plan, retrieved, chunks_by_query, get_settings().EVIDENCE_RELEVANCE_THRESHOLD,
+    )
+    if assessment.status is EvidenceStatus.INSUFFICIENT:
+        return _insufficient_evidence_response(assessment), []
     retrieved = _filter_relevant_chunks(retrieved)
     docs = _select_generation_context(retrieved, get_settings().GENERATION_CONTEXT_K)
     citations = _dedupe_citations(docs, query)
-    prompt, mode = _build_prompt(docs, query)
+    prompt, mode = _build_prompt(docs, query, assessment)
     try:
         with timed_stage("generate", count=len(docs)):
             answer = get_gen_llm().invoke(prompt).content
     except Exception:
         logger.exception("generation failed")
         return SearchResponse(answer="回答生成失败，请稍后重试。", citations=citations, fallback=True, mode="error"), docs
-    return SearchResponse(answer=answer, citations=citations, fallback=False, mode=mode), docs
+    return SearchResponse(
+        answer=answer, citations=citations, fallback=False, mode=mode,
+        evidence_status=assessment.status.value, missing_aspects=list(assessment.missing_aspects),
+    ), docs
 
 
 def run_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | None = None) -> SearchResponse:
@@ -278,7 +311,7 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
     plan = build_retrieval_plan(retrieval_query)
     if plan.is_complex:
         yield "stage", {"stage": "decomposing", "sub_query_count": len(plan.queries)}
-    intent, retrieved, _ = _route_and_retrieve(plan, top_k)
+    intent, retrieved, chunks_by_query, _ = _route_and_retrieve(plan, top_k)
 
     if intent == Intent.LIVE:
         resp = _live_data_response()
@@ -306,10 +339,19 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
 
     # ---- RAG 路径 ----
     yield "stage", {"stage": "retrieving"}
+    assessment = assess_evidence(
+        plan, retrieved, chunks_by_query, get_settings().EVIDENCE_RELEVANCE_THRESHOLD,
+    )
+    if assessment.status is EvidenceStatus.INSUFFICIENT:
+        response = _insufficient_evidence_response(assessment)
+        yield "sources", {"citations": [], "mode": response.mode}
+        yield "token", {"text": response.answer}
+        yield "done", response.model_dump()
+        return
     retrieved = _filter_relevant_chunks(retrieved)
     docs = _select_generation_context(retrieved, get_settings().GENERATION_CONTEXT_K)
     citations = _dedupe_citations(docs, query)
-    prompt, mode = _build_prompt(docs, query)
+    prompt, mode = _build_prompt(docs, query, assessment)
 
     yield "stage", {"stage": "generating"}
     yield "sources", {"citations": [c.model_dump() for c in citations], "mode": mode}
@@ -328,4 +370,7 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
         yield "done", SearchResponse(answer="回答生成失败，请稍后重试。", citations=citations, fallback=True, mode="error").model_dump()
         return
 
-    yield "done", SearchResponse(answer="".join(parts), citations=citations, fallback=False, mode=mode).model_dump()
+    yield "done", SearchResponse(
+        answer="".join(parts), citations=citations, fallback=False, mode=mode,
+        evidence_status=assessment.status.value, missing_aspects=list(assessment.missing_aspects),
+    ).model_dump()

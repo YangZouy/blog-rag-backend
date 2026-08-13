@@ -1,4 +1,6 @@
-"""Bounded planning for complex blog-RAG questions.
+"""
+判断问题是否复杂，调用模型生成并校验子问题
+Bounded planning for complex blog-RAG questions.
 
 The model may suggest retrieval sub-queries, but code owns the trigger,
 maximum count, deduplication and fallback behaviour.
