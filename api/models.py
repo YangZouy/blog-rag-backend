@@ -26,6 +26,23 @@ class Citation(BaseModel):
     score: float = 0.0
 
 
+class TraceEvent(BaseModel):
+    name: str
+    data: dict[str, str | int | float | bool | list[str]] = Field(default_factory=dict)
+
+
+class RunTrace(BaseModel):
+    question_type: Literal["simple", "complex", "chat", "live"] = "simple"
+    rewritten: bool = False
+    sub_query_count: int = 1
+    retrieval_rounds: int = 0
+    evidence_statuses: list[Literal["sufficient", "partial", "insufficient"]] = Field(default_factory=list)
+    remedy_action: str | None = None
+    final_decision: Literal["answer", "partial_answer", "refuse", "chat", "out_of_scope", "error"] = "answer"
+    total_latency_ms: float = 0.0
+    events: list[TraceEvent] = Field(default_factory=list)
+
+
 class SearchResponse(BaseModel):
     answer: str
     citations: list[Citation] = Field(default_factory=list)
@@ -34,6 +51,7 @@ class SearchResponse(BaseModel):
     mode: str = "rag"  # "rag" | "web" | "not_found" | "error"
     evidence_status: Literal["sufficient", "partial", "insufficient"] | None = None
     missing_aspects: list[str] = Field(default_factory=list)
+    trace: RunTrace | None = None
 
 class AdminReloadRequest(BaseModel):
     repo: str = "" # 博客源仓库路径；为空则用服务端的 BLOG_REPO_PATH

@@ -10,11 +10,12 @@ import logging
 import os
 import re
 import concurrent.futures
+import time
 from dataclasses import replace
 from functools import lru_cache
 from typing import Iterator, List, Mapping
 
-from api.models import Citation, ConversationTurn, SearchResponse
+from api.models import Citation, ConversationTurn, RunTrace, SearchResponse, TraceEvent
 from api.retriever import retrieve_with_rerank
 from core.config import get_settings
 from core.conversation import prepare_query
@@ -177,27 +178,27 @@ def _retrieve_plan(
 
 def _retrieve_with_evidence(
     plan: RetrievalPlan, top_k: int,
-) -> tuple[Intent, List[DocumentChunk], Mapping[str, List[DocumentChunk]], EvidenceAssessment, RemedyDecision | None]:
+) -> tuple[Intent, List[DocumentChunk], Mapping[str, List[DocumentChunk]], list[EvidenceAssessment], RemedyDecision | None]:
     """Run at most two retrieval rounds; only code can authorize the retry."""
     settings = get_settings()
     candidate_k = settings.RETRIEVAL_CANDIDATE_K
     intent, retrieved, chunks_by_query, _ = _route_and_retrieve(plan, top_k, candidate_k)
     if intent != Intent.RAG:
-        return intent, retrieved, chunks_by_query, EvidenceAssessment(EvidenceStatus.SUFFICIENT), None
+        return intent, retrieved, chunks_by_query, [], None
 
     assessment = assess_evidence(plan, retrieved, chunks_by_query, settings.EVIDENCE_RELEVANCE_THRESHOLD)
     if assessment.status is not EvidenceStatus.INSUFFICIENT or settings.MAX_RETRIEVAL_ROUNDS < 2:
-        return intent, retrieved, chunks_by_query, assessment, None
+        return intent, retrieved, chunks_by_query, [assessment], None
 
     remedy = choose_remedy(candidate_k, settings.RETRIEVAL_REMEDY_CANDIDATE_K)
     if remedy is None:
-        return intent, retrieved, chunks_by_query, assessment, None
+        return intent, retrieved, chunks_by_query, [assessment], None
 
     intent, retrieved, chunks_by_query, _ = _route_and_retrieve(plan, top_k, remedy.candidate_k)
     if intent != Intent.RAG:
-        return intent, retrieved, chunks_by_query, EvidenceAssessment(EvidenceStatus.SUFFICIENT), remedy
+        return intent, retrieved, chunks_by_query, [assessment], remedy
     assessment = assess_evidence(plan, retrieved, chunks_by_query, settings.EVIDENCE_RELEVANCE_THRESHOLD)
-    return intent, retrieved, chunks_by_query, assessment, remedy
+    return intent, retrieved, chunks_by_query, [EvidenceAssessment(EvidenceStatus.INSUFFICIENT), assessment], remedy
 
 @lru_cache(maxsize=1)
 def _blog_overview() -> str:
@@ -291,6 +292,30 @@ def _insufficient_evidence_response(assessment: EvidenceAssessment) -> SearchRes
         missing_aspects=list(assessment.missing_aspects),
     )
 
+
+def _make_trace(
+    *, plan: RetrievalPlan | None, rewritten: bool, evidence_history: list[EvidenceAssessment],
+    remedy: RemedyDecision | None, decision: str, started: float, question_type: str | None = None,
+) -> RunTrace:
+    kind = question_type or (plan.query_type if plan else "simple")
+    sub_query_count = len(plan.queries) if plan else 0
+    events = [TraceEvent(name="classify_question", data={"question_type": kind})]
+    if rewritten:
+        events.append(TraceEvent(name="rewrite_query", data={"applied": True}))
+    if plan and plan.is_complex:
+        events.append(TraceEvent(name="decompose", data={"sub_query_count": sub_query_count}))
+    for round_index, assessment in enumerate(evidence_history, start=1):
+        events.append(TraceEvent(name="assess_evidence", data={"round": round_index, "status": assessment.status.value}))
+    if remedy is not None:
+        events.append(TraceEvent(name="remedy", data={"action": remedy.action.value, "candidate_k": remedy.candidate_k}))
+    events.append(TraceEvent(name="finalize", data={"decision": decision}))
+    return RunTrace(
+        question_type=kind, rewritten=rewritten, sub_query_count=sub_query_count,
+        retrieval_rounds=len(evidence_history), evidence_statuses=[item.status.value for item in evidence_history],
+        remedy_action=remedy.action.value if remedy else None, final_decision=decision,
+        total_latency_ms=round((time.perf_counter() - started) * 1000, 1), events=events,
+    )
+
 # ---------------- 对外接口 ----------------
 def run_rag_with_trace(
     query: str,
@@ -298,16 +323,24 @@ def run_rag_with_trace(
     history: List[ConversationTurn] | None = None,
 ) -> tuple[SearchResponse, List[DocumentChunk]]:
     """运行生产 RAG 链路，并返回实际送入生成模型的上下文供离线评估。"""
-    retrieval_query, _ = prepare_query(query, history)
+    started = time.perf_counter()
+    retrieval_query, rewritten = prepare_query(query, history)
     plan = build_retrieval_plan(retrieval_query)
-    intent, retrieved, chunks_by_query, assessment, _ = _retrieve_with_evidence(plan, top_k)
+    intent, retrieved, chunks_by_query, evidence_history, remedy = _retrieve_with_evidence(plan, top_k)
     if intent == Intent.LIVE:
-        return _live_data_response(), []
+        response = _live_data_response()
+        response.trace = _make_trace(plan=None, rewritten=False, evidence_history=[], remedy=None, decision="out_of_scope", started=started, question_type="live")
+        return response, []
     if intent == Intent.CHAT:
-        return _chat_response(query), []
+        response = _chat_response(query)
+        response.trace = _make_trace(plan=None, rewritten=False, evidence_history=[], remedy=None, decision="chat", started=started, question_type="chat")
+        return response, []
 
+    assessment = evidence_history[-1]
     if assessment.status is EvidenceStatus.INSUFFICIENT:
-        return _insufficient_evidence_response(assessment), []
+        response = _insufficient_evidence_response(assessment)
+        response.trace = _make_trace(plan=plan, rewritten=rewritten, evidence_history=evidence_history, remedy=remedy, decision="refuse", started=started)
+        return response, []
     retrieved = _filter_relevant_chunks(retrieved)
     docs = _select_generation_context(retrieved, get_settings().GENERATION_CONTEXT_K)
     citations = _dedupe_citations(docs, query)
@@ -317,11 +350,18 @@ def run_rag_with_trace(
             answer = get_gen_llm().invoke(prompt).content
     except Exception:
         logger.exception("generation failed")
-        return SearchResponse(answer="回答生成失败，请稍后重试。", citations=citations, fallback=True, mode="error"), docs
-    return SearchResponse(
+        response = SearchResponse(answer="回答生成失败，请稍后重试。", citations=citations, fallback=True, mode="error")
+        response.trace = _make_trace(plan=plan, rewritten=rewritten, evidence_history=evidence_history, remedy=remedy, decision="error", started=started)
+        return response, docs
+    response = SearchResponse(
         answer=answer, citations=citations, fallback=False, mode=mode,
         evidence_status=assessment.status.value, missing_aspects=list(assessment.missing_aspects),
-    ), docs
+    )
+    response.trace = _make_trace(
+        plan=plan, rewritten=rewritten, evidence_history=evidence_history, remedy=remedy,
+        decision="partial_answer" if assessment.status is EvidenceStatus.PARTIAL else "answer", started=started,
+    )
+    return response, docs
 
 
 def run_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | None = None) -> SearchResponse:
@@ -331,6 +371,7 @@ def run_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | None =
 
 def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | None = None) -> Iterator[tuple[str, dict]]:
     """流式：先回传 stage（真实阶段）→ sources（推荐阅读）→ 逐 token 答案。"""
+    started = time.perf_counter()
     yield "stage", {"stage": "routing"}
 
     retrieval_query, rewritten = prepare_query(query, history)
@@ -339,12 +380,14 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
     plan = build_retrieval_plan(retrieval_query)
     if plan.is_complex:
         yield "stage", {"stage": "decomposing", "sub_query_count": len(plan.queries)}
-    intent, retrieved, chunks_by_query, assessment, remedy = _retrieve_with_evidence(plan, top_k)
+    intent, retrieved, chunks_by_query, evidence_history, remedy = _retrieve_with_evidence(plan, top_k)
 
     if intent == Intent.LIVE:
         resp = _live_data_response()
+        resp.trace = _make_trace(plan=None, rewritten=False, evidence_history=[], remedy=None, decision="out_of_scope", started=started, question_type="live")
         yield "sources", {"citations": [], "mode": resp.mode}
         yield "token", {"text": resp.answer}
+        yield "trace", resp.trace.model_dump()
         yield "done", resp.model_dump()
         return
 
@@ -362,17 +405,23 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
                     yield "token", {"text": token}
         except Exception:
             yield "error", {"message": "回答生成失败，请稍后重试。"}
-        yield "done", SearchResponse(answer="".join(parts), citations=[], fallback=False, mode="chat").model_dump()
+        response = SearchResponse(answer="".join(parts), citations=[], fallback=False, mode="chat")
+        response.trace = _make_trace(plan=None, rewritten=False, evidence_history=[], remedy=None, decision="chat", started=started, question_type="chat")
+        yield "trace", response.trace.model_dump()
+        yield "done", response.model_dump()
         return
 
     # ---- RAG 路径 ----
     yield "stage", {"stage": "retrieving"}
     if remedy is not None:
         yield "stage", {"stage": "remedy", "action": remedy.action.value, "candidate_k": remedy.candidate_k}
+    assessment = evidence_history[-1]
     if assessment.status is EvidenceStatus.INSUFFICIENT:
         response = _insufficient_evidence_response(assessment)
+        response.trace = _make_trace(plan=plan, rewritten=rewritten, evidence_history=evidence_history, remedy=remedy, decision="refuse", started=started)
         yield "sources", {"citations": [], "mode": response.mode}
         yield "token", {"text": response.answer}
+        yield "trace", response.trace.model_dump()
         yield "done", response.model_dump()
         return
     retrieved = _filter_relevant_chunks(retrieved)
@@ -394,10 +443,19 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
     except Exception:
         logger.exception("stream generation failed")
         yield "error", {"message": "回答生成失败，请稍后重试。"}
-        yield "done", SearchResponse(answer="回答生成失败，请稍后重试。", citations=citations, fallback=True, mode="error").model_dump()
+        response = SearchResponse(answer="回答生成失败，请稍后重试。", citations=citations, fallback=True, mode="error")
+        response.trace = _make_trace(plan=plan, rewritten=rewritten, evidence_history=evidence_history, remedy=remedy, decision="error", started=started)
+        yield "trace", response.trace.model_dump()
+        yield "done", response.model_dump()
         return
 
-    yield "done", SearchResponse(
+    response = SearchResponse(
         answer="".join(parts), citations=citations, fallback=False, mode=mode,
         evidence_status=assessment.status.value, missing_aspects=list(assessment.missing_aspects),
-    ).model_dump()
+    )
+    response.trace = _make_trace(
+        plan=plan, rewritten=rewritten, evidence_history=evidence_history, remedy=remedy,
+        decision="partial_answer" if assessment.status is EvidenceStatus.PARTIAL else "answer", started=started,
+    )
+    yield "trace", response.trace.model_dump()
+    yield "done", response.model_dump()

@@ -39,11 +39,11 @@ def test_insufficient_first_round_retries_exactly_once(monkeypatch):
 
     monkeypatch.setattr("api.rag_graph.get_settings", controlled_settings)
     monkeypatch.setattr("api.rag_graph._route_and_retrieve", fake_route)
-    intent, docs, _, assessment, remedy = _retrieve_with_evidence(plan, 5)
+    intent, docs, _, evidence_history, remedy = _retrieve_with_evidence(plan, 5)
     assert intent == "rag"
     assert calls == [8, 16]
     assert docs[0].score == 0.8
-    assert assessment.status.value == "sufficient"
+    assert [assessment.status.value for assessment in evidence_history] == ["insufficient", "sufficient"]
     assert remedy is not None and remedy.action is RemedyAction.EXPAND_CANDIDATES
 
 
@@ -58,9 +58,9 @@ def test_second_insufficient_round_terminates_without_third_call(monkeypatch):
 
     monkeypatch.setattr("api.rag_graph.get_settings", controlled_settings)
     monkeypatch.setattr("api.rag_graph._route_and_retrieve", fake_route)
-    _, _, _, assessment, remedy = _retrieve_with_evidence(plan, 5)
+    _, _, _, evidence_history, remedy = _retrieve_with_evidence(plan, 5)
     assert calls == [8, 16]
-    assert assessment.status.value == "insufficient"
+    assert [assessment.status.value for assessment in evidence_history] == ["insufficient", "insufficient"]
     assert remedy is not None
 
 
@@ -75,7 +75,7 @@ def test_sufficient_first_round_does_not_remediate(monkeypatch):
 
     monkeypatch.setattr("api.rag_graph.get_settings", controlled_settings)
     monkeypatch.setattr("api.rag_graph._route_and_retrieve", fake_route)
-    _, _, _, assessment, remedy = _retrieve_with_evidence(plan, 5)
+    _, _, _, evidence_history, remedy = _retrieve_with_evidence(plan, 5)
     assert calls == [8]
-    assert assessment.status.value == "sufficient"
+    assert [assessment.status.value for assessment in evidence_history] == ["sufficient"]
     assert remedy is None
