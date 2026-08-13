@@ -311,6 +311,7 @@ def _make_trace(
     events.append(TraceEvent(name="finalize", data={"decision": decision}))
     return RunTrace(
         question_type=kind, rewritten=rewritten, sub_query_count=sub_query_count,
+        sub_queries=list(plan.queries) if plan else [],
         retrieval_rounds=len(evidence_history), evidence_statuses=[item.status.value for item in evidence_history],
         remedy_action=remedy.action.value if remedy else None, final_decision=decision,
         total_latency_ms=round((time.perf_counter() - started) * 1000, 1), events=events,

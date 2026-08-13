@@ -18,6 +18,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
+from api.models import ConversationTurn
 from api.rag_graph import run_rag_with_trace
 from core.config import get_settings
 from core.embeddings import get_embeddings
@@ -52,24 +53,100 @@ def generate_rows(queries: list[dict[str, Any]], top_k: int) -> list[dict[str, A
         started = time.perf_counter()
         print(f"[{index}/{len(queries)}] generating: {item['query']}", flush=True)
         try:
-            response, docs = run_rag_with_trace(item["query"], top_k=top_k)
+            history = [ConversationTurn.model_validate(turn) for turn in item.get("history", [])]
+            response, docs = run_rag_with_trace(item["query"], top_k=top_k, history=history)
             row = {
                 "id": item.get("id"), "query": item["query"], "type": item.get("type"),
                 "category": item.get("category"), "expected_slugs": item.get("expected_slugs", []),
                 "reference_answer": item.get("reference_answer"), "answer": response.answer,
                 "mode": response.mode, "fallback": response.fallback,
+                "expected_action": item.get("expected_action"), "expected_sub_queries": item.get("expected_sub_queries", []),
+                "should_refuse": bool(item.get("should_refuse", False)), "required_facts": item.get("required_facts", []),
+                "history": item.get("history", []), "evidence_status": response.evidence_status,
+                "missing_aspects": response.missing_aspects, "trace": response.trace.model_dump() if response.trace else None,
                 "contexts": [doc.content for doc in docs if doc.content],
                 "context_sources": [{"slug": doc.slug, "title": doc.title, "url": doc.url, "score": doc.score} for doc in docs],
                 "citations": [citation.model_dump() for citation in response.citations],
             }
         except Exception as exc:
-            row = {"id": item.get("id"), "query": item["query"], "type": item.get("type"),
-                   "category": item.get("category"), "expected_slugs": item.get("expected_slugs", []),
-                   "reference_answer": item.get("reference_answer"), "answer": "", "mode": "error",
-                   "fallback": True, "contexts": [], "context_sources": [], "citations": [], "error": str(exc)}
+            row = {
+                "id": item.get("id"), "query": item["query"], "type": item.get("type"),
+                "category": item.get("category"), "expected_slugs": item.get("expected_slugs", []),
+                "reference_answer": item.get("reference_answer"), "answer": "", "mode": "error", "fallback": True,
+                "expected_action": item.get("expected_action"), "expected_sub_queries": item.get("expected_sub_queries", []),
+                "should_refuse": bool(item.get("should_refuse", False)), "required_facts": item.get("required_facts", []),
+                "history": item.get("history", []), "evidence_status": None, "missing_aspects": [], "trace": None,
+                "contexts": [], "context_sources": [], "citations": [], "error": str(exc),
+            }
         row["latency_sec"] = round(time.perf_counter() - started, 3)
+        # Providers expose usage inconsistently across OpenAI-compatible APIs;
+        # use a transparent character-based proxy until provider usage is available.
+        row["estimated_token_cost"] = round((len(item["query"]) + len(row.get("answer", ""))) / 2, 1)
         output.append(row)
     return output
+
+
+def _mean(values: list[float]) -> float | None:
+    return round(sum(values) / len(values), 4) if values else None
+
+
+def _percentile(values: list[float], percentile: float) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    index = max(0, min(len(ordered) - 1, math.ceil(percentile * len(ordered)) - 1))
+    return round(ordered[index], 3)
+
+
+def _normalise(text: str) -> str:
+    return "".join((text or "").lower().split())
+
+
+def score_agentic(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Score trace-based behaviours without asking a judge model."""
+    multi_turn = [row for row in rows if row.get("history")]
+    complex_rows = [row for row in rows if row.get("expected_sub_queries")]
+    refusal_rows = [row for row in rows if row.get("should_refuse")]
+    action_rows = [row for row in rows if row.get("expected_action")]
+
+    rewrite_hits = [bool(row.get("trace", {}).get("rewritten")) for row in multi_turn]
+    sub_query_coverages = []
+    for row in complex_rows:
+        actual = [_normalise(query) for query in row.get("trace", {}).get("sub_queries", [])]
+        expected = [_normalise(query) for query in row.get("expected_sub_queries", [])]
+        if expected:
+            sub_query_coverages.append(sum(any(target in query or query in target for query in actual) for target in expected) / len(expected))
+
+    action_hits = [
+        row.get("trace", {}).get("final_decision") == row.get("expected_action")
+        for row in action_rows
+    ]
+    refusal_hits = [
+        row.get("trace", {}).get("final_decision") == "refuse"
+        for row in refusal_rows
+    ]
+    citation_support = []
+    for row in rows:
+        expected = set(row.get("expected_slugs", []))
+        if expected:
+            retrieved = {item.get("slug") for item in row.get("context_sources", [])}
+            citation_support.append(bool(expected & retrieved))
+
+    latencies = [float(row["latency_sec"]) for row in rows if isinstance(row.get("latency_sec"), (int, float))]
+    rounds = [float(row.get("trace", {}).get("retrieval_rounds", 0)) for row in rows]
+    costs = [float(row["estimated_token_cost"]) for row in rows if isinstance(row.get("estimated_token_cost"), (int, float))]
+    return {
+        "multi_turn_rewrite_accuracy": _mean([float(hit) for hit in rewrite_hits]),
+        "sub_query_coverage": _mean(sub_query_coverages),
+        "expected_action_accuracy": _mean([float(hit) for hit in action_hits]),
+        "no_answer_refusal_accuracy": _mean([float(hit) for hit in refusal_hits]),
+        "citation_support_rate": _mean([float(hit) for hit in citation_support]),
+        "average_retrieval_rounds": _mean(rounds),
+        "latency_p50_sec": _percentile(latencies, 0.5),
+        "latency_p95_sec": _percentile(latencies, 0.95),
+        "average_estimated_token_cost": _mean(costs),
+        "counts": {"multi_turn": len(multi_turn), "complex": len(complex_rows), "refusal": len(refusal_rows), "action": len(action_rows)},
+    }
 
 
 def metric(metrics_module: Any, *names: str) -> Any:
@@ -146,7 +223,11 @@ def main() -> None:
         raise ValueError("No queries selected for evaluation.")
     started = time.perf_counter()
     rows = generate_rows(queries, args.top_k)
-    summary: dict[str, Any] = {"generated_rows": len(rows), "mode_counts": {mode: sum(row["mode"] == mode for row in rows) for mode in sorted({row["mode"] for row in rows})}}
+    summary: dict[str, Any] = {
+        "generated_rows": len(rows),
+        "mode_counts": {mode: sum(row["mode"] == mode for row in rows) for mode in sorted({row["mode"] for row in rows})},
+        "agentic": score_agentic(rows),
+    }
     if not args.generate_only:
         summary["ragas"] = score_with_ragas(rows)
     os.makedirs(RESULTS_DIR, exist_ok=True)

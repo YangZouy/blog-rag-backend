@@ -35,6 +35,7 @@ class RunTrace(BaseModel):
     question_type: Literal["simple", "complex", "chat", "live"] = "simple"
     rewritten: bool = False
     sub_query_count: int = 1
+    sub_queries: list[str] = Field(default_factory=list)
     retrieval_rounds: int = 0
     evidence_statuses: list[Literal["sufficient", "partial", "insufficient"]] = Field(default_factory=list)
     remedy_action: str | None = None
