@@ -40,12 +40,14 @@ def test_agentic_summary_scores_trace_contracts():
         {
             "history": [{"role": "user", "content": "first"}], "expected_sub_queries": ["架构"],
             "expected_action": "answer", "should_refuse": False, "expected_slugs": ["a"],
-            "context_sources": [{"slug": "a"}], "latency_sec": 1.2, "estimated_token_cost": 10,
+            "context_sources": [{"slug": "a"}], "citations": [], "type": "multi_turn",
+            "latency_sec": 1.2, "estimated_token_cost": 10,
             "trace": {"rewritten": True, "sub_queries": ["架构设计"], "final_decision": "answer", "retrieval_rounds": 2},
         },
         {
             "history": [], "expected_sub_queries": [], "expected_action": "refuse", "should_refuse": True,
             "expected_slugs": [], "context_sources": [], "latency_sec": 2.4, "estimated_token_cost": 20,
+            "answer": "站内资料不足，无法可靠回答。", "citations": [], "type": "no_answer",
             "trace": {"rewritten": False, "sub_queries": [], "final_decision": "refuse", "retrieval_rounds": 1},
         },
     ]
@@ -55,7 +57,26 @@ def test_agentic_summary_scores_trace_contracts():
     assert result["expected_action_accuracy"] == 1.0
     assert result["no_answer_refusal_accuracy"] == 1.0
     assert result["citation_support_rate"] == 1.0
+    assert result["citation_coverage_rate"] == 1.0
+    assert result["refusal_behavior_accuracy"] == 1.0
+    assert result["macro_expected_action_accuracy"] == 1.0
+    assert result["planning_constraint_violation_rate"] == 0.0
     assert result["average_retrieval_rounds"] == 1.5
+
+
+def test_agentic_summary_detects_invented_planning_constraint():
+    rows = [{
+        "query": "如何搭建并观测 RAG 应用？",
+        "expected_sub_queries": ["RAG", "观测"],
+        "expected_action": "answer",
+        "type": "complex",
+        "trace": {
+            "sub_queries": ["如何搭建 RAG？", "生产 QPS 是多少？"],
+            "final_decision": "answer",
+            "retrieval_rounds": 1,
+        },
+    }]
+    assert score_agentic(rows)["planning_constraint_violation_rate"] == 1.0
 
 
 def test_pipeline_retrieval_scores_final_context_rank_and_deduplicates_slugs():
@@ -69,6 +90,19 @@ def test_pipeline_retrieval_scores_final_context_rank_and_deduplicates_slugs():
     assert result["recall@3"] == 0.5
     assert result["MRR"] == 0.25
     assert result["slug_hit_rate"] == 0.5
+
+
+def test_pipeline_retrieval_distinguishes_any_hit_from_document_coverage():
+    rows = [{
+        "expected_slugs": ["a", "b", "c"],
+        "context_sources": [{"slug": "a"}, {"slug": "wrong"}, {"slug": "b"}],
+    }]
+    result = score_pipeline_retrieval(rows)
+    assert result["hit@1"] == 1.0
+    assert result["recall@1"] == 1.0
+    assert result["coverage@1"] == 0.3333
+    assert result["coverage@3"] == 0.6667
+    assert result["all_hit@3"] == 0.0
 
 
 def test_compare_agentic_runs_reports_numeric_delta():

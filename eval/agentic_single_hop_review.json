@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "status": "confirmed",
+  "review_sources": [
+    "eval/reviews/单跳题人工确认表.md",
+    "eval/reviews/最终验证集人工确认表.md"
+  ],
+  "result": {
+    "confirmed": 43
+  },
+  "confirmed_ids": [
+    "qa-01", "qa-02", "qa-03", "qa-04", "qa-05", "qa-06", "qa-07",
+    "qa-08", "qa-09", "qa-10", "qa-11", "qa-12", "qa-13", "qa-14",
+    "qa-15", "qa-16", "qa-17", "qa-18", "qa-19", "qa-20", "qa-21",
+    "qa-22", "qa-23", "qa-24", "qa-25", "qa-26", "qa-27", "qa-28",
+    "qa-29", "qa-30", "qa-31", "qa-32", "qa-33", "qa-34", "qa-35",
+    "qa-36", "qa-37", "qa-38", "qa-39", "qa-40", "qa-41", "qa-42",
+    "qa-44"
+  ]
+}

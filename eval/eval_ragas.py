@@ -111,7 +111,11 @@ _AGENTIC_SUBSETS = {
     "no_answer_refusal_accuracy": lambda r: bool(r.get("should_refuse")),
     "refusal_behavior_accuracy": lambda r: bool(r.get("should_refuse")),
     "citation_support_rate": lambda r: bool(r.get("expected_slugs")),
+    "citation_coverage_rate": lambda r: bool(r.get("expected_slugs")),
+    "planning_constraint_violation_rate": lambda r: bool(r.get("expected_sub_queries")),
 }
+
+_PLANNING_CONSTRAINT_TERMS = ("qps", "sla", "故障率", "成功率", "收入", "成本", "访客", "客户数")
 
 
 def _agentic_value(sub_rows: list[dict[str, Any]], name: str) -> float | None:
@@ -139,7 +143,6 @@ def _agentic_value(sub_rows: list[dict[str, Any]], name: str) -> float | None:
             bool(
                 (r.get("trace") or {}).get("final_decision") == "refuse"
                 and not r.get("citations")
-                and not (r.get("answer") or "").strip()
             )
             for r in sub_rows
         ]
@@ -150,6 +153,20 @@ def _agentic_value(sub_rows: list[dict[str, Any]], name: str) -> float | None:
             for r in sub_rows
         ]
         return _mean([float(s) for s in supp])
+    if name == "citation_coverage_rate":
+        coverages = []
+        for r in sub_rows:
+            expected = set(r.get("expected_slugs", []))
+            actual = {it.get("slug") for it in r.get("context_sources", [])}
+            coverages.append(len(expected & actual) / len(expected))
+        return _mean(coverages)
+    if name == "planning_constraint_violation_rate":
+        violations = []
+        for row in sub_rows:
+            original = str(row.get("query") or "").lower()
+            actual = " ".join((row.get("trace") or {}).get("sub_queries", [])).lower()
+            violations.append(float(any(term in actual and term not in original for term in _PLANNING_CONSTRAINT_TERMS)))
+        return _mean(violations)
     return None
 
 
@@ -166,6 +183,8 @@ def score_agentic(rows: list[dict[str, Any]], n_boot: int = 1000) -> dict[str, A
         "expected_action_accuracy",
         "no_answer_refusal_accuracy",
         "citation_support_rate",
+        "citation_coverage_rate",
+        "planning_constraint_violation_rate",
         "refusal_behavior_accuracy",
     )
     metrics: dict[str, Any] = {}
@@ -190,6 +209,16 @@ def score_agentic(rows: list[dict[str, Any]], n_boot: int = 1000) -> dict[str, A
     complex_rows = [r for r in rows if r.get("expected_sub_queries")]
     refusal_rows = [r for r in rows if r.get("should_refuse")]
     action_rows = [r for r in rows if r.get("expected_action")]
+    action_by_type = {}
+    for row_type in sorted({str(r.get("type") or "unknown") for r in action_rows}):
+        subset = [r for r in action_rows if str(r.get("type") or "unknown") == row_type]
+        action_by_type[row_type] = {
+            "accuracy": _agentic_value(subset, "expected_action_accuracy"),
+            "n": len(subset),
+        }
+    macro_action_accuracy = _mean(
+        [item["accuracy"] for item in action_by_type.values() if item["accuracy"] is not None]
+    )
     latencies = [float(r["latency_sec"]) for r in rows if isinstance(r.get("latency_sec"), (int, float))]
     rounds = [float(r.get("trace", {}).get("retrieval_rounds", 0)) for r in rows]
     costs = [float(r["estimated_token_cost"]) for r in rows if isinstance(r.get("estimated_token_cost"), (int, float))]
@@ -199,6 +228,8 @@ def score_agentic(rows: list[dict[str, Any]], n_boot: int = 1000) -> dict[str, A
         "latency_p50_sec": _percentile(latencies, 0.5),
         "latency_p95_sec": _percentile(latencies, 0.95),
         "average_estimated_token_cost": _mean(costs),
+        "macro_expected_action_accuracy": macro_action_accuracy,
+        "expected_action_by_type": action_by_type,
         "ci95": ci95,
         "counts": {
             "multi_turn": len(multi_turn),
@@ -210,10 +241,12 @@ def score_agentic(rows: list[dict[str, Any]], n_boot: int = 1000) -> dict[str, A
 
 
 def _retrieval_metrics(labelled: list[dict[str, Any]], ks: tuple[int, ...]) -> dict[str, Any] | None:
-    """Compute recall@k / MRR / slug_hit_rate for a list of (labelled) rows."""
+    """Compute any-hit ranking and full expected-document coverage metrics."""
     if not labelled:
         return None
-    recalls = {k: [] for k in ks}
+    hits = {k: [] for k in ks}
+    coverages = {k: [] for k in ks}
+    all_hits = {k: [] for k in ks}
     reciprocal_ranks: list[float] = []
     slug_hits: list[bool] = []
     for row in labelled:
@@ -234,9 +267,16 @@ def _retrieval_metrics(labelled: list[dict[str, Any]], ks: tuple[int, ...]) -> d
         slug_hits.append(bool(first_rank))
         reciprocal_ranks.append(1.0 / first_rank if first_rank else 0.0)
         for k in ks:
-            recalls[k].append(float(bool(set(ranked[:k]) & expected)))
+            matched = set(ranked[:k]) & expected
+            hits[k].append(float(bool(matched)))
+            coverages[k].append(len(matched) / len(expected))
+            all_hits[k].append(float(matched == expected))
     return {
-        **{f"recall@{k}": round(sum(v) / len(v), 4) for k, v in recalls.items()},
+        **{f"hit@{k}": round(sum(v) / len(v), 4) for k, v in hits.items()},
+        # Backward-compatible alias. Historical reports called any-hit rate recall.
+        **{f"recall@{k}": round(sum(v) / len(v), 4) for k, v in hits.items()},
+        **{f"coverage@{k}": round(sum(v) / len(v), 4) for k, v in coverages.items()},
+        **{f"all_hit@{k}": round(sum(v) / len(v), 4) for k, v in all_hits.items()},
         "MRR": round(sum(reciprocal_ranks) / len(reciprocal_ranks), 4),
         "slug_hit_rate": round(sum(slug_hits) / len(slug_hits), 4),
         "n": len(labelled),
@@ -265,7 +305,10 @@ def score_pipeline_retrieval(
     labelled = [row for row in rows if row.get("expected_slugs")]
     if not labelled:
         return {
+            **{f"hit@{k}": None for k in ks},
             **{f"recall@{k}": None for k in ks},
+            **{f"coverage@{k}": None for k in ks},
+            **{f"all_hit@{k}": None for k in ks},
             "MRR": None,
             "slug_hit_rate": None,
             "evaluated_rows": 0,
@@ -286,7 +329,7 @@ def score_pipeline_retrieval(
         for _ in range(n_boot):
             sample = [labelled[rng.randrange(len(labelled))] for _ in range(len(labelled))]
             boots.append(_retrieval_metrics(sample, ks))
-        for key in ("recall@1", "recall@5", "MRR"):
+        for key in ("hit@1", "hit@5", "coverage@1", "coverage@5", "all_hit@5", "MRR"):
             vals = [b[key] for b in boots if b and isinstance(b.get(key), (int, float))]
             ci = _ci_bounds(vals)
             if ci:

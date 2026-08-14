@@ -46,6 +46,8 @@ def test_trace_records_remedy_and_two_evidence_rounds(monkeypatch):
     assert response.trace.sub_query_count == 2
     assert response.trace.retrieval_rounds == 2
     assert response.trace.evidence_statuses == ["insufficient", "sufficient"]
+    assert len(response.trace.evidence_aspects) == 2
+    assert all(item.supported for item in response.trace.evidence_aspects)
     assert response.trace.remedy_action == "expand_candidates"
     assert response.trace.final_decision == "answer"
 

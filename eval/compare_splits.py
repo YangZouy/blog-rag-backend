@@ -27,13 +27,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "eval" / "results"
 
-RETRIEVAL_METRICS = ["recall@1", "recall@3", "recall@5", "recall@10", "MRR", "slug_hit_rate"]
+RETRIEVAL_METRICS = [
+    "hit@1", "hit@3", "hit@5", "coverage@1", "coverage@3", "coverage@5",
+    "all_hit@5", "MRR", "slug_hit_rate",
+]
 AGENTIC_METRICS = [
     "multi_turn_rewrite_accuracy",
     "sub_query_coverage",
     "expected_action_accuracy",
     "no_answer_refusal_accuracy",
     "citation_support_rate",
+    "citation_coverage_rate",
+    "macro_expected_action_accuracy",
+    "planning_constraint_violation_rate",
     "refusal_behavior_accuracy",
 ]
 
@@ -120,19 +126,21 @@ def main() -> None:
         delta = (fv - dv) if isinstance(dv, (int, float)) and isinstance(fv, (int, float)) else None
         print(f"{m:30} {_fmt(dv, dc):>20} {_fmt(fv, fc):>20} {('' if delta is None else f'{delta:+.3f}'):>8} {_verdict(dc, fc):>8}")
 
-    print("\n=== Retrieval by type (recall@1 / MRR, n) ===")
+    print("\n=== Retrieval by type (hit@1 / coverage@5 / MRR, n) ===")
     types = sorted(set(dev_pr.get("by_type", {})) | set(final_pr.get("by_type", {})))
-    print(f"{'type':22} {'dev@1':>8} {'devMRR':>8} {'dev n':>6} | {'fin@1':>8} {'finMRR':>8} {'fin n':>6}")
+    print(f"{'type':22} {'devHit':>8} {'devCov':>8} {'devMRR':>8} {'dev n':>6} | {'finHit':>8} {'finCov':>8} {'finMRR':>8} {'fin n':>6}")
     for t in types:
         dm = dev_pr.get("by_type", {}).get(t)
         fm = final_pr.get("by_type", {}).get(t)
-        d1 = f"{dm['recall@1']:.2f}" if dm else "  - "
+        d1 = f"{dm.get('hit@1', dm.get('recall@1')):.2f}" if dm else "  - "
+        dC = f"{dm['coverage@5']:.2f}" if dm and dm.get("coverage@5") is not None else "  - "
         dM = f"{dm['MRR']:.2f}" if dm else "  - "
         dn = dm["n"] if dm else 0
-        f1 = f"{fm['recall@1']:.2f}" if fm else "  - "
+        f1 = f"{fm.get('hit@1', fm.get('recall@1')):.2f}" if fm else "  - "
+        fC = f"{fm['coverage@5']:.2f}" if fm and fm.get("coverage@5") is not None else "  - "
         fM = f"{fm['MRR']:.2f}" if fm else "  - "
         fn = fm["n"] if fm else 0
-        print(f"{t:22} {d1:>8} {dM:>8} {dn:>6} | {f1:>8} {fM:>8} {fn:>6}")
+        print(f"{t:22} {d1:>8} {dC:>8} {dM:>8} {dn:>6} | {f1:>8} {fC:>8} {fM:>8} {fn:>6}")
 
 
 if __name__ == "__main__":

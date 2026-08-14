@@ -31,6 +31,9 @@ def test_build_per_query_rows_deduplicates_ranked_slugs_and_scores_hits():
     assert retrieval["hit"] is True
     assert retrieval["hit@1"] is False
     assert retrieval["hit@3"] is True
+    assert retrieval["coverage@1"] == 0.0
+    assert retrieval["coverage@3"] == 1.0
+    assert retrieval["all_hit@3"] is True
 
 
 def test_should_hide_per_query_only_for_final_split_without_override():

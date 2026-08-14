@@ -60,7 +60,10 @@ def build_per_query_rows(
             "hit": bool(first_hit_rank),
         }
         for k in ks:
-            retrieval[f"hit@{k}"] = bool(set(ranked[:k]) & set(expected))
+            matched = set(ranked[:k]) & set(expected)
+            retrieval[f"hit@{k}"] = bool(matched)
+            retrieval[f"coverage@{k}"] = round(len(matched) / len(expected), 4) if expected else None
+            retrieval[f"all_hit@{k}"] = bool(expected) and matched == set(expected)
         output.append(
             {
                 "id": row.get("id"),

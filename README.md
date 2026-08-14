@@ -308,7 +308,9 @@ python -m eval.eval_ragas --split final --tag final-v1 --generate-only
 | `GEN_MODEL` / `GEN_BASE_URL` | 生成模型 | deepseek-chat / DeepSeek |
 | `RETRIEVAL_CANDIDATE_K` | rerank 候选池大小 | 8 |
 | `GENERATION_CONTEXT_K` | 最终送入上下文块数 | 5 |
-| `RERANK_RELEVANCE_THRESHOLD` | 站内资料相关性门槛 | 0.30 |
+| `RERANK_RELEVANCE_THRESHOLD` | 普通知识题的站内资料相关性门槛 | 0.15 |
+| `EVIDENCE_RELEVANCE_THRESHOLD` | 普通知识题的逐方面证据门槛 | 0.15 |
+| `QUANTIFIED_EVIDENCE_RELEVANCE_THRESHOLD` | 数量、收入、QPS 等事实的相关性门槛；仍需直接数值证据 | 0.30 |
 | `API_KEY` / `ALLOWED_ORIGINS` / `RATE_LIMIT_PER_MIN` | API 加固 | 关 / * / 10 |
 | `RERANK_BACKEND` | 重排后端（local 为 ONNX） | local |
 | `WARMUP_ON_START` | 启动时预加载 BM25 + reranker | True |

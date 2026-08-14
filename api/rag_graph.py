@@ -15,7 +15,7 @@ from dataclasses import replace
 from functools import lru_cache
 from typing import Iterator, List, Mapping
 
-from api.models import Citation, ConversationTurn, RunTrace, SearchResponse, TraceEvent
+from api.models import Citation, ConversationTurn, EvidenceAspectTrace, RunTrace, SearchResponse, TraceEvent
 from api.retriever import retrieve_with_rerank
 from core.config import get_settings
 from core.conversation import prepare_query
@@ -23,6 +23,7 @@ from core.evidence import EvidenceAssessment, EvidenceStatus, assess_evidence
 from core.intent import Intent, rule_intent, classify_intent
 from core.llm import get_gen_llm
 from core.planning import RetrievalPlan, build_retrieval_plan
+from core.policy import PolicyDecision, evaluate_policy
 from core.remediation import RemedyDecision, choose_remedy
 from core.rerank import rerank
 from core.observability import timed_stage
@@ -173,7 +174,54 @@ def _retrieve_plan(
     # against the original complex question before choosing generation context.
     limit = candidate_k or get_settings().RETRIEVAL_CANDIDATE_K
     with timed_stage("rerank_merged", query=plan.original_query, candidate_k=len(candidates), return_k=limit):
-        return rerank(plan.original_query, candidates, limit), chunks_by_query
+        ranked = rerank(plan.original_query, candidates, limit)
+    coverage_limit = min(limit, get_settings().GENERATION_CONTEXT_K)
+    return _ensure_subquery_coverage(ranked, chunks_by_query, coverage_limit, limit), chunks_by_query
+
+
+def _chunk_key(chunk: DocumentChunk) -> tuple[str, int]:
+    return chunk.slug, chunk.chunk_index
+
+
+def _ensure_subquery_coverage(
+    ranked: List[DocumentChunk],
+    chunks_by_query: Mapping[str, List[DocumentChunk]],
+    coverage_limit: int,
+    total_limit: int,
+) -> List[DocumentChunk]:
+    """Keep one locally best candidate per sub-query in generation context."""
+    head = list(ranked[:coverage_limit])
+    required: list[DocumentChunk] = []
+    seen_required: set[tuple[str, int]] = set()
+    for chunks in chunks_by_query.values():
+        if not chunks:
+            continue
+        candidate = chunks[0]
+        key = _chunk_key(candidate)
+        if key not in seen_required:
+            seen_required.add(key)
+            required.append(candidate)
+
+    protected = {_chunk_key(chunk) for chunk in head if _chunk_key(chunk) in seen_required}
+    for candidate in required:
+        key = _chunk_key(candidate)
+        if key in {_chunk_key(chunk) for chunk in head}:
+            protected.add(key)
+            continue
+        replacement = next(
+            (index for index in range(len(head) - 1, -1, -1) if _chunk_key(head[index]) not in protected),
+            None,
+        )
+        if replacement is None:
+            if len(head) < coverage_limit:
+                head.append(candidate)
+            continue
+        head[replacement] = candidate
+        protected.add(key)
+
+    selected = {_chunk_key(chunk) for chunk in head}
+    tail = [chunk for chunk in ranked if _chunk_key(chunk) not in selected]
+    return (head + tail)[:total_limit]
 
 
 def _retrieve_with_evidence(
@@ -186,7 +234,13 @@ def _retrieve_with_evidence(
     if intent != Intent.RAG:
         return intent, retrieved, chunks_by_query, [], None
 
-    assessment = assess_evidence(plan, retrieved, chunks_by_query, settings.EVIDENCE_RELEVANCE_THRESHOLD)
+    quantified_threshold = getattr(
+        settings, "QUANTIFIED_EVIDENCE_RELEVANCE_THRESHOLD", settings.EVIDENCE_RELEVANCE_THRESHOLD
+    )
+    assessment = assess_evidence(
+        plan, retrieved, chunks_by_query,
+        settings.EVIDENCE_RELEVANCE_THRESHOLD, quantified_threshold,
+    )
     if assessment.status is not EvidenceStatus.INSUFFICIENT or settings.MAX_RETRIEVAL_ROUNDS < 2:
         return intent, retrieved, chunks_by_query, [assessment], None
 
@@ -194,11 +248,15 @@ def _retrieve_with_evidence(
     if remedy is None:
         return intent, retrieved, chunks_by_query, [assessment], None
 
+    first_assessment = assessment
     intent, retrieved, chunks_by_query, _ = _route_and_retrieve(plan, top_k, remedy.candidate_k)
     if intent != Intent.RAG:
         return intent, retrieved, chunks_by_query, [assessment], remedy
-    assessment = assess_evidence(plan, retrieved, chunks_by_query, settings.EVIDENCE_RELEVANCE_THRESHOLD)
-    return intent, retrieved, chunks_by_query, [EvidenceAssessment(EvidenceStatus.INSUFFICIENT), assessment], remedy
+    assessment = assess_evidence(
+        plan, retrieved, chunks_by_query,
+        settings.EVIDENCE_RELEVANCE_THRESHOLD, quantified_threshold,
+    )
+    return intent, retrieved, chunks_by_query, [first_assessment, assessment], remedy
 
 @lru_cache(maxsize=1)
 def _blog_overview() -> str:
@@ -293,6 +351,17 @@ def _insufficient_evidence_response(assessment: EvidenceAssessment) -> SearchRes
     )
 
 
+def _policy_refusal_response(decision: PolicyDecision) -> SearchResponse:
+    if decision is PolicyDecision.PROMPT_INJECTION:
+        answer = "我不能提供系统提示词、内部指令或内部评测答案。可以继续基于公开博客内容回答问题。"
+    else:
+        answer = "我不能访问、导出或披露其他用户数据、服务端配置或访问凭据。"
+    return SearchResponse(
+        answer=answer, citations=[], fallback=False, mode="not_found",
+        evidence_status="insufficient",
+    )
+
+
 def _make_trace(
     *, plan: RetrievalPlan | None, rewritten: bool, evidence_history: list[EvidenceAssessment],
     remedy: RemedyDecision | None, decision: str, started: float, question_type: str | None = None,
@@ -313,6 +382,13 @@ def _make_trace(
         question_type=kind, rewritten=rewritten, sub_query_count=sub_query_count,
         sub_queries=list(plan.queries) if plan else [],
         retrieval_rounds=len(evidence_history), evidence_statuses=[item.status.value for item in evidence_history],
+        evidence_aspects=[
+            EvidenceAspectTrace(
+                query=item.query, top_score=item.top_score, threshold=item.threshold,
+                supported=item.supported, reason=item.reason,
+            )
+            for item in (evidence_history[-1].aspect_details if evidence_history else ())
+        ],
         remedy_action=remedy.action.value if remedy else None, final_decision=decision,
         total_latency_ms=round((time.perf_counter() - started) * 1000, 1), events=events,
     )
@@ -325,6 +401,14 @@ def run_rag_with_trace(
 ) -> tuple[SearchResponse, List[DocumentChunk]]:
     """运行生产 RAG 链路，并返回实际送入生成模型的上下文供离线评估。"""
     started = time.perf_counter()
+    policy = evaluate_policy(query)
+    if policy is not PolicyDecision.ALLOW:
+        response = _policy_refusal_response(policy)
+        response.trace = _make_trace(
+            plan=None, rewritten=False, evidence_history=[], remedy=None,
+            decision="refuse", started=started, question_type="policy",
+        )
+        return response, []
     retrieval_query, rewritten = prepare_query(query, history)
     plan = build_retrieval_plan(retrieval_query)
     intent, retrieved, chunks_by_query, evidence_history, remedy = _retrieve_with_evidence(plan, top_k)
@@ -374,6 +458,19 @@ def stream_rag(query: str, top_k: int = 5, history: List[ConversationTurn] | Non
     """流式：先回传 stage（真实阶段）→ sources（推荐阅读）→ 逐 token 答案。"""
     started = time.perf_counter()
     yield "stage", {"stage": "routing"}
+
+    policy = evaluate_policy(query)
+    if policy is not PolicyDecision.ALLOW:
+        response = _policy_refusal_response(policy)
+        response.trace = _make_trace(
+            plan=None, rewritten=False, evidence_history=[], remedy=None,
+            decision="refuse", started=started, question_type="policy",
+        )
+        yield "sources", {"citations": [], "mode": response.mode}
+        yield "token", {"text": response.answer}
+        yield "trace", response.trace.model_dump()
+        yield "done", response.model_dump()
+        return
 
     retrieval_query, rewritten = prepare_query(query, history)
     if rewritten:

@@ -31,13 +31,22 @@ class TraceEvent(BaseModel):
     data: dict[str, str | int | float | bool | list[str]] = Field(default_factory=dict)
 
 
+class EvidenceAspectTrace(BaseModel):
+    query: str
+    top_score: float
+    threshold: float
+    supported: bool
+    reason: Literal["supported", "low_score", "missing_quantified_evidence"]
+
+
 class RunTrace(BaseModel):
-    question_type: Literal["simple", "complex", "chat", "live"] = "simple"
+    question_type: Literal["simple", "complex", "chat", "live", "policy"] = "simple"
     rewritten: bool = False
     sub_query_count: int = 1
     sub_queries: list[str] = Field(default_factory=list)
     retrieval_rounds: int = 0
     evidence_statuses: list[Literal["sufficient", "partial", "insufficient"]] = Field(default_factory=list)
+    evidence_aspects: list[EvidenceAspectTrace] = Field(default_factory=list)
     remedy_action: str | None = None
     final_decision: Literal["answer", "partial_answer", "refuse", "chat", "out_of_scope", "error"] = "answer"
     total_latency_ms: float = 0.0

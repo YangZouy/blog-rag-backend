@@ -27,10 +27,13 @@ class Settings(BaseSettings):
     # 最终送入生成模型的上下文块数
     GENERATION_CONTEXT_K: int = 5
     # reranker 最高分低于此值时，视为没有足够相关的站内资料。
-    RERANK_RELEVANCE_THRESHOLD: float = 0.30
+    RERANK_RELEVANCE_THRESHOLD: float = 0.15
     # Evidence gate uses the same calibrated reranker scale. A complex question
     # is only fully answerable when each planned sub-query clears this threshold.
-    EVIDENCE_RELEVANCE_THRESHOLD: float = 0.30
+    EVIDENCE_RELEVANCE_THRESHOLD: float = 0.15
+    # Quantified claims need stronger topical confidence in addition to direct
+    # numeric support, so a nearby but unrelated number cannot open the gate.
+    QUANTIFIED_EVIDENCE_RELEVANCE_THRESHOLD: float = 0.30
     # 推荐阅读（citations）的置信度门槛，作用于 _dedupe_citations 的 retrieved 全集。
     # 生成上下文门槛（0.30）允许边缘相关；推荐阅读门槛更严，宁缺毋滥。
     CITATION_MIN_SCORE: float = 0.50
