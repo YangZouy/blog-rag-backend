@@ -249,25 +249,26 @@ curl -k -X POST https://rag.zyydgrbk.top/api/search \
 
 ## 4. 评估
 
-### 检索评估
+### 底层检索回归（retrieval regression）
 
-50 条人工标注 eval 集（concept / term / howto / personal 四类），支持三模式控制变量：
+历史人工标注集实际为 **49 条**（ID 1～50 中从首次提交起就缺少 ID 25；旧文档所称“50 条”是计数错误）。该文件已通过 SHA-256 指纹冻结，独立于后续 Agentic 扩展题集，只用于发现 dense、hybrid/RRF、rerank 的底层检索退化，不评价多轮改写、问题分解、证据补救或回答质量。
 
 ```bash
-python -m eval.eval_recall --mode raw     # 纯向量 baseline
-python -m eval.eval_recall --mode hybrid  # 向量 + BM25 (RRF)
-python -m eval.eval_recall --mode rerank  # hybrid + cross-encoder 重排
+python -m eval.eval_recall --tag baseline                # 依次运行以下三种模式
+python -m eval.eval_recall --mode raw --tag baseline     # 纯向量 baseline
+python -m eval.eval_recall --mode hybrid --tag baseline  # 向量 + BM25 (RRF)
+python -m eval.eval_recall --mode rerank --tag baseline  # hybrid + cross-encoder 重排
 ```
 
-指标：recall@k / MRR / 分离度 Δ / 四类分诊，自动与上次结果 diff。
+指标：Recall@3/5/10/12/50、MRR、分离度和分类诊断。结果记录题集、Faiss 索引和元数据 SHA-256、索引构建时间、embedding/reranker 配置及运行环境，并且只与**同模式**的上一次结果比较；本地无历史结果时使用 `eval/baselines/` 中已提交的基线。完整输出写入 `eval/results/retrieval_regression_*.json`（默认不入 Git）。
 
 **实测数据**（1717 chunk / 87 slug，rerank 模式下取候选池 50）：
 
 | 模式 | R@3 | R@5 | R@10 | MRR |
 |------|-----|-----|------|-----|
-| raw | 0.600 | 0.640 | 0.720 | 0.561 |
-| hybrid | 0.878 | ~0.90 | 1.000 | 0.803 |
-| rerank | 0.980 | ~0.98 | 1.000 | 0.871 |
+| raw | 0.592 | 0.633 | 0.694 | 0.564 |
+| hybrid | 0.755 | 0.878 | 0.980 | 0.718 |
+| rerank | 0.959 | 0.980 | 0.980 | 0.845 |
 
 ### 端到端 RAGAS 评估
 
@@ -279,6 +280,18 @@ python -m eval.eval_ragas --tag baseline           # 完整 50 条
 ```
 
 结果写入 `eval/results/ragas_results_*.json`。
+
+### Agentic 题集分集
+
+  `eval/agentic_eval_queries.json` 是唯一的 Agentic 题库；题目来自 `D:\Blog\source\_posts` 中已发布且已进入当前索引的真实文章，并锁定题库 SHA-256。当前共 80 条，按 56 条开发集 / 24 条最终验证集（70% / 30%）分层冻结。开发集用于调改写、复杂问题门槛、证据阈值和补救候选池；最终验证集在配置冻结前不得查看逐题结果。
+
+```bash
+python -m eval.dataset_splits                 # 校验两份冻结分集
+python -m eval.eval_ragas --split dev --tag tune-01 --generate-only
+python -m eval.eval_ragas --split final --tag final-v1 --generate-only
+```
+
+原始 `eval/eval_queries.json` 的底层检索回归集保持完全独立，不能并入这两个集合。
 
 ---
 

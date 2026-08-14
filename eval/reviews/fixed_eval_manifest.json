@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "purpose": "Fixed Agentic evaluation-set manifest for controlled version comparison.",
+  "status": "pending_review",
+  "blocking_items": ["cx-13: rebuild the deployed index and verify _posts/健身第一课 and _posts/健身第三课 slug hits"],
+  "dataset": {
+    "path": "eval/agentic_eval_queries.json",
+    "record_count": 80,
+    "sha256": "c48ccd53094ba6b083e2ded42f5349183ac4c466cba123e8a1d66490af919c43"
+  },
+  "split_manifest": {
+    "path": "eval/agentic_eval_splits.json",
+    "development_count": 56,
+    "final_count": 24,
+    "sha256": "098e2106e2da082212f23c829cdf8b393f5c49a26fad0d993f0af5415f3665f5"
+  },
+  "review_scope": {
+    "final": "AI-assisted review complete for 23/24; cx-13 pending index rebuild",
+    "high_priority": "AI-assisted review complete; mt-01 fact-boundary corrected; cx-13 pending index rebuild",
+    "single_hop": "not yet reviewed"
+  },
+  "comparison_rule": "Do not use this manifest as a release baseline until status becomes frozen and all blocking_items are empty."
+}

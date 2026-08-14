@@ -17,6 +17,12 @@ METRICS = (
     "latency_p50_sec",
     "latency_p95_sec",
     "average_estimated_token_cost",
+    "pipeline_retrieval.recall@1",
+    "pipeline_retrieval.recall@3",
+    "pipeline_retrieval.recall@5",
+    "pipeline_retrieval.recall@10",
+    "pipeline_retrieval.MRR",
+    "pipeline_retrieval.slug_hit_rate",
 )
 
 
@@ -27,9 +33,15 @@ def load(path: str) -> dict:
 def compare(baseline: dict, candidate: dict) -> list[dict[str, float | str | None]]:
     base = baseline.get("summary", {}).get("agentic", {})
     current = candidate.get("summary", {}).get("agentic", {})
+    base_pipeline = baseline.get("summary", {}).get("pipeline_retrieval", {})
+    current_pipeline = candidate.get("summary", {}).get("pipeline_retrieval", {})
     rows = []
     for name in METRICS:
-        before, after = base.get(name), current.get(name)
+        if name.startswith("pipeline_retrieval."):
+            metric_name = name.split(".", 1)[1]
+            before, after = base_pipeline.get(metric_name), current_pipeline.get(metric_name)
+        else:
+            before, after = base.get(name), current.get(name)
         rows.append({"metric": name, "baseline": before, "agentic": after, "delta": round(after - before, 4) if isinstance(before, (int, float)) and isinstance(after, (int, float)) else None})
     return rows
 

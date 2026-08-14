@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
 
-from eval.eval_ragas import score_agentic
+from eval.eval_ragas import score_agentic, score_pipeline_retrieval
 from eval.compare_agentic_runs import compare
+from eval.dataset_splits import load_agentic_split
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +15,24 @@ def test_agentic_dataset_has_required_behavior_contracts():
     types = {row["type"] for row in rows}
     assert {"multi_turn", "complex", "partial_answer", "no_answer", "live_data", "prompt_injection", "authorization_boundary"} <= types
     assert all("expected_action" in row and "should_refuse" in row for row in rows)
+
+
+def test_all_single_hop_cases_have_human_review_confirmation():
+    rows = json.loads((ROOT / "eval" / "agentic_eval_queries.json").read_text(encoding="utf-8"))["queries"]
+    review = json.loads((ROOT / "eval" / "agentic_single_hop_review.json").read_text(encoding="utf-8"))
+    actual_ids = {row["id"] for row in rows if row["type"] == "single_hop"}
+    assert review["result"]["confirmed"] == len(actual_ids)
+    assert set(review["confirmed_ids"]) == actual_ids
+
+
+def test_agentic_split_is_frozen_disjoint_and_exhaustive():
+    dev, dev_metadata = load_agentic_split("dev")
+    final, final_metadata = load_agentic_split("final")
+    assert len(dev) == 56
+    assert len(final) == 24
+    assert {row["id"] for row in dev}.isdisjoint({row["id"] for row in final})
+    assert dev_metadata["frozen"] is True
+    assert final_metadata["source_sha256"] == dev_metadata["source_sha256"]
 
 
 def test_agentic_summary_scores_trace_contracts():
@@ -39,9 +58,24 @@ def test_agentic_summary_scores_trace_contracts():
     assert result["average_retrieval_rounds"] == 1.5
 
 
+def test_pipeline_retrieval_scores_final_context_rank_and_deduplicates_slugs():
+    rows = [
+        {"expected_slugs": ["relevant"], "context_sources": [{"slug": "wrong"}, {"slug": "relevant"}, {"slug": "relevant"}]},
+        {"expected_slugs": ["missing"], "context_sources": [{"slug": "wrong"}]},
+    ]
+    result = score_pipeline_retrieval(rows)
+    assert result["evaluated_rows"] == 2
+    assert result["recall@1"] == 0.0
+    assert result["recall@3"] == 0.5
+    assert result["MRR"] == 0.25
+    assert result["slug_hit_rate"] == 0.5
+
+
 def test_compare_agentic_runs_reports_numeric_delta():
-    baseline = {"summary": {"agentic": {"expected_action_accuracy": 0.5}}}
-    candidate = {"summary": {"agentic": {"expected_action_accuracy": 0.75}}}
+    baseline = {"summary": {"agentic": {"expected_action_accuracy": 0.5}, "pipeline_retrieval": {"MRR": 0.5}}}
+    candidate = {"summary": {"agentic": {"expected_action_accuracy": 0.75}, "pipeline_retrieval": {"MRR": 0.75}}}
     rows = compare(baseline, candidate)
     row = next(item for item in rows if item["metric"] == "expected_action_accuracy")
     assert row["delta"] == 0.25
+    pipeline_row = next(item for item in rows if item["metric"] == "pipeline_retrieval.MRR")
+    assert pipeline_row["delta"] == 0.25
