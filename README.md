@@ -272,14 +272,24 @@ python -m eval.eval_recall --mode rerank --tag baseline  # hybrid + cross-encode
 
 ### 端到端 RAGAS 评估
 
-用生产链路跑完整生成，RAGAS 打分 Faithfulness + AnswerRelevancy：
+用生产链路跑完整生成。只有题集期望正常回答、带参考答案，且实际产出了
+非 fallback 的 RAG 回答、上下文和 `final_decision=answer` 时，样本才进入
+RAGAS；部分回答、拒答、实时数据和安全边界题不混入回答质量分数。
+
+RAGAS 指标包括 Faithfulness、Answer Relevancy、Context Precision、
+Context Recall 和 Answer Correctness（具体名称随安装的 RAGAS 版本兼容映射）：
 
 ```bash
-python -m eval.eval_ragas --limit 3 --tag smoke    # 冒烟
-python -m eval.eval_ragas --tag baseline           # 完整 50 条
+python -m eval.eval_ragas --split dev --limit 3 --tag smoke
+python -m eval.eval_ragas --split dev --tag baseline
 ```
 
-结果写入 `eval/results/ragas_results_*.json`。
+结果写入 `eval/results/ragas_results_*.json`，并记录各类跳过原因。旧的
+`eval/eval_queries.json` 是 49 条底层检索回归集，没有参考答案，不作为
+RAGAS 回答质量题集。
+
+部分回答、拒答、实时数据和安全边界题使用确定性行为断言，分别检查最终决策、
+引用、缺口披露和固定拒答/无实时工具回复；结果位于同一报告的 `agentic` 汇总中。
 
 ### Agentic 题集分集
 

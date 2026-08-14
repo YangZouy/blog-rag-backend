@@ -41,6 +41,8 @@ AGENTIC_METRICS = [
     "macro_expected_action_accuracy",
     "planning_constraint_violation_rate",
     "refusal_behavior_accuracy",
+    "partial_answer_behavior_accuracy",
+    "out_of_scope_behavior_accuracy",
 ]
 
 

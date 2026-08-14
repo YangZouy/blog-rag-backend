@@ -12,6 +12,9 @@ METRICS = (
     "sub_query_coverage",
     "expected_action_accuracy",
     "no_answer_refusal_accuracy",
+    "refusal_behavior_accuracy",
+    "partial_answer_behavior_accuracy",
+    "out_of_scope_behavior_accuracy",
     "citation_support_rate",
     "citation_coverage_rate",
     "macro_expected_action_accuracy",
@@ -41,8 +44,10 @@ def load(path: str) -> dict:
 def compare(baseline: dict, candidate: dict) -> list[dict[str, float | str | None]]:
     base = baseline.get("summary", {}).get("agentic", {})
     current = candidate.get("summary", {}).get("agentic", {})
-    base_pipeline = baseline.get("summary", {}).get("pipeline_retrieval", {})
-    current_pipeline = candidate.get("summary", {}).get("pipeline_retrieval", {})
+    base_summary = baseline.get("summary", {})
+    current_summary = candidate.get("summary", {})
+    base_pipeline = base_summary.get("pipeline_retrieval") or base_summary.get("post_orchestration_retrieval", {})
+    current_pipeline = current_summary.get("pipeline_retrieval") or current_summary.get("post_orchestration_retrieval", {})
     rows = []
     for name in METRICS:
         if name.startswith("pipeline_retrieval."):
